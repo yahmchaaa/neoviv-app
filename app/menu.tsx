@@ -32,13 +32,13 @@ export default function MenuScreen() {
     <View style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Text style={styles.title}>IV Drip Menu</Text>
+          <Text style={styles.title}>IV Therapy Menu</Text>
           <Text style={styles.subtitle}>Choose your treatment</Text>
         </View>
 
         <View style={styles.dripList}>
           {DRIPS.map((drip) => (
-            <TouchableOpacity key={drip.id} style={styles.dripCard}>
+            <TouchableOpacity key={drip.id} style={styles.dripCard} onPress={() => router.push({ pathname: '/book', params: { drip: drip.name, price: drip.price.toString() } })}>
               <BlurView intensity={15} tint="dark" style={styles.dripCardBlur}>
                 <LinearGradient
                   colors={[TEAL + '20', ELECTRIC_BLUE + '10']}

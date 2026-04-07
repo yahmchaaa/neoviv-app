@@ -177,14 +177,14 @@ export default function HomeScreen() {
               <Text style={styles.sectionSubtitle}>Ready for hydration?</Text>
               <Text style={styles.sectionSubtitle}>Let us help</Text>
 
-              <TouchableOpacity style={styles.bookButton}>
+              <TouchableOpacity style={styles.bookButton} onPress={() => router.push('/book')}>
                 <LinearGradient
                   colors={[TEAL, ELECTRIC_BLUE]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   style={styles.bookButtonGradient}
                 >
-                  <Text style={styles.bookButtonText}>Book a Drip</Text>
+                  <Text style={styles.bookButtonText}>Book a Visit</Text>
                 </LinearGradient>
               </TouchableOpacity>
             </View>
