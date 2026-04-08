@@ -33,6 +33,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const buttonScale = useSharedValue(1);
 
   // Animation values for floating orbs
   const orb1Y = useSharedValue(0);
@@ -136,6 +137,16 @@ export default function LoginScreen() {
       return;
     }
 
+    // Button pulse animation
+    buttonScale.value = withRepeat(
+      withSequence(
+        withTiming(0.95, { duration: 300, useNativeDriver: true }),
+        withTiming(1, { duration: 300, useNativeDriver: true })
+      ),
+      3,
+      false
+    );
+
     setLoading(true);
 
     try {
@@ -162,6 +173,7 @@ export default function LoginScreen() {
       Alert.alert('Error', 'An unexpected error occurred');
     } finally {
       setLoading(false);
+      buttonScale.value = 1;
     }
   };
 
@@ -245,7 +257,9 @@ export default function LoginScreen() {
                   style={styles.gradientButton}
                 >
                   {loading ? (
-                    <ActivityIndicator color="#fff" />
+                    <Animated.Text style={[styles.loadingDrops, { transform: [{ scale: buttonScale }] }]}>
+                      💧💧💧
+                    </Animated.Text>
                   ) : (
                     <Text style={styles.submitButtonText}>
                       {isLogin ? 'Sign In' : 'Create Account'}
@@ -308,13 +322,13 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: TEAL + '30',
+    borderColor: TEAL + '20',
   },
   cardContent: {
     padding: 32,
   },
   cardTitle: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#fff',
     textAlign: 'center',
@@ -336,7 +350,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
     borderWidth: 1,
-    borderColor: TEAL + '30',
+    borderColor: TEAL + '20',
   },
   submitButton: {
     marginTop: 16,
@@ -360,6 +374,10 @@ const styles = StyleSheet.create({
   switchButtonText: {
     color: ELECTRIC_BLUE,
     fontSize: 14,
+  },
+  loadingDrops: {
+    fontSize: 24,
+    letterSpacing: 4,
   },
   // Orb styles
   orb: {
