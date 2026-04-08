@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -6,7 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
-  TextInput,
+  FlatList,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -17,6 +17,10 @@ import Animated, {
   withTiming,
   withSequence,
   Easing,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useAnimatedRef,
+  scrollTo,
 } from 'react-native-reanimated';
 import { router } from 'expo-router';
 
@@ -26,10 +30,10 @@ const ELECTRIC_BLUE = '#00D4FF';
 const BLACK = '#0A0A0A';
 
 const DRIPS = [
-  { id: '1', name: 'Hydration Basics', price: 199, desc: 'Essential fluids & electrolytes', color: TEAL },
-  { id: '2', name: 'Energy Boost', price: 249, desc: 'B-Complex, B12 & amino acids', color: ELECTRIC_BLUE },
-  { id: '3', name: 'Immunity Shield', price: 299, desc: 'Vitamin C, Zinc & Glutathione', color: '#4CAF50' },
-  { id: '4', name: 'NAD+', price: 399, desc: 'Cellular repair & anti-aging', color: '#9C27B0' },
+  { id: '1', name: 'Hydration Basics', price: 199, desc: 'Essential fluids & electrolytes' },
+  { id: '2', name: 'Energy Boost', price: 249, desc: 'B-Complex, B12 & amino acids' },
+  { id: '3', name: 'Immunity Shield', price: 299, desc: 'Vitamin C, Zinc & Glutathione' },
+  { id: '4', name: 'NAD+', price: 399, desc: 'Cellular repair & anti-aging' },
 ];
 
 const NAV_ITEMS = [
@@ -40,7 +44,13 @@ const NAV_ITEMS = [
   { icon: '👤', label: 'Account', active: false, route: '/account' },
 ];
 
+const CARD_WIDTH = width * 0.7;
+const CARD_SPACING = 16;
+
 export default function HomeScreen() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useAnimatedRef<Animated.FlatList>();
+  
   // Orb animations
   const orb1Y = useSharedValue(0);
   const orb1X = useSharedValue(0);
@@ -49,21 +59,22 @@ export default function HomeScreen() {
   const orb3Y = useSharedValue(0);
   const orb3X = useSharedValue(0);
   const gridOpacity = useSharedValue(0.3);
+  const lightBeamOpacity = useSharedValue(0);
 
   useEffect(() => {
     // Floating orbs animations
     orb1Y.value = withRepeat(
       withSequence(
-        withTiming(-30, { duration: 4000, easing: Easing.inOut(Easing.ease) }),
-        withTiming(30, { duration: 4000, easing: Easing.inOut(Easing.ease) })
+        withTiming(-40, { duration: 4000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(40, { duration: 4000, easing: Easing.inOut(Easing.ease) })
       ),
       -1,
       true
     );
     orb1X.value = withRepeat(
       withSequence(
-        withTiming(25, { duration: 5000, easing: Easing.inOut(Easing.ease) }),
-        withTiming(-25, { duration: 5000, easing: Easing.inOut(Easing.ease) })
+        withTiming(30, { duration: 5000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(-30, { duration: 5000, easing: Easing.inOut(Easing.ease) })
       ),
       -1,
       true
@@ -71,16 +82,16 @@ export default function HomeScreen() {
 
     orb2Y.value = withRepeat(
       withSequence(
-        withTiming(25, { duration: 3500, easing: Easing.inOut(Easing.ease) }),
-        withTiming(-25, { duration: 3500, easing: Easing.inOut(Easing.ease) })
+        withTiming(35, { duration: 3500, easing: Easing.inOut(Easing.ease) }),
+        withTiming(-35, { duration: 3500, easing: Easing.inOut(Easing.ease) })
       ),
       -1,
       true
     );
     orb2X.value = withRepeat(
       withSequence(
-        withTiming(-20, { duration: 4500, easing: Easing.inOut(Easing.ease) }),
-        withTiming(20, { duration: 4500, easing: Easing.inOut(Easing.ease) })
+        withTiming(-25, { duration: 4500, easing: Easing.inOut(Easing.ease) }),
+        withTiming(25, { duration: 4500, easing: Easing.inOut(Easing.ease) })
       ),
       -1,
       true
@@ -88,16 +99,16 @@ export default function HomeScreen() {
 
     orb3Y.value = withRepeat(
       withSequence(
-        withTiming(20, { duration: 4500, easing: Easing.inOut(Easing.ease) }),
-        withTiming(-20, { duration: 4500, easing: Easing.inOut(Easing.ease) })
+        withTiming(30, { duration: 5000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(-30, { duration: 5000, easing: Easing.inOut(Easing.ease) })
       ),
       -1,
       true
     );
     orb3X.value = withRepeat(
       withSequence(
-        withTiming(30, { duration: 5500, easing: Easing.inOut(Easing.ease) }),
-        withTiming(-30, { duration: 5500, easing: Easing.inOut(Easing.ease) })
+        withTiming(20, { duration: 6000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(-20, { duration: 6000, easing: Easing.inOut(Easing.ease) })
       ),
       -1,
       true
@@ -107,6 +118,15 @@ export default function HomeScreen() {
       withSequence(
         withTiming(0.5, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
         withTiming(0.2, { duration: 2000, easing: Easing.inOut(Easing.ease) })
+      ),
+      -1,
+      true
+    );
+
+    lightBeamOpacity.value = withRepeat(
+      withSequence(
+        withTiming(0.4, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0, { duration: 3000, easing: Easing.inOut(Easing.ease) })
       ),
       -1,
       true
@@ -126,7 +146,11 @@ export default function HomeScreen() {
   }));
 
   const gridStyle = useAnimatedStyle(() => ({
-    opacity: gridOpacity.value,
+    opacity: gridStyle.value,
+  }));
+
+  const lightBeamStyle = useAnimatedStyle(() => ({
+    opacity: lightBeamOpacity.value,
   }));
 
   const handleNavPress = (route: string) => {
@@ -135,10 +159,62 @@ export default function HomeScreen() {
     }
   };
 
+  const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
+    if (viewableItems.length > 0) {
+      setActiveIndex(viewableItems[0].index);
+    }
+  }).current;
+
+  const viewabilityConfig = useRef({
+    itemVisiblePercentThreshold: 50,
+  }).current;
+
+  const renderDripCard = ({ item, index }: { item: typeof DRIPS[0]; index: number }) => {
+    const isActive = index === activeIndex;
+    
+    return (
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() => {
+          scrollRef.current?.scrollToIndex({ index });
+        }}
+      >
+        <View style={[styles.dripCard, isActive && styles.dripCardActive]}>
+          <BlurView intensity={isActive ? 25 : 15} tint="dark" style={styles.dripCardBlur}>
+            <LinearGradient
+              colors={isActive ? [TEAL + '40', ELECTRIC_BLUE + '20'] : ['#1a1a1a', '#1a1a1a']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.dripGradient}
+            >
+              <View style={styles.dripHeader}>
+                <View style={[styles.dripBadge, isActive && styles.dripBadgeActive]}>
+                  <Text style={[styles.dripPrice, isActive && styles.dripPriceActive]}>
+                    ${item.price}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.dripIconContainer}>
+                <Text style={styles.dripIcon}>💧</Text>
+              </View>
+
+              <Text style={styles.dripName}>{item.name}</Text>
+              <Text style={styles.dripDesc}>{item.desc}</Text>
+            </LinearGradient>
+          </BlurView>
+          {isActive && (
+            <View style={styles.activeGlow} />
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <View style={styles.container}>
       {/* Grid Background */}
-      <Animated.View style={[styles.gridContainer, gridStyle]}>
+      <Animated.View style={[styles.gridContainer, { opacity: 0.3 }]}>
         {[...Array(Math.ceil(width / 60) + 1)].map((_, i) => (
           <View key={`v-${i}`} style={[styles.gridLineVertical, { left: i * 60 }]} />
         ))}
@@ -149,16 +225,35 @@ export default function HomeScreen() {
 
       {/* Floating Orbs */}
       <Animated.View style={[styles.orb, styles.orb1, orb1Style]}>
-        <LinearGradient colors={[TEAL + '40', ELECTRIC_BLUE + '20']} style={styles.orbGradient} />
+        <LinearGradient colors={[TEAL + '50', ELECTRIC_BLUE + '30']} style={styles.orbGradient} />
       </Animated.View>
       <Animated.View style={[styles.orb, styles.orb2, orb2Style]}>
-        <LinearGradient colors={[ELECTRIC_BLUE + '30', TEAL + '20']} style={styles.orbGradient} />
+        <LinearGradient colors={[ELECTRIC_BLUE + '40', TEAL + '20']} style={styles.orbGradient} />
       </Animated.View>
       <Animated.View style={[styles.orb, styles.orb3, orb3Style]}>
-        <LinearGradient colors={[TEAL + '30', ELECTRIC_BLUE + '20']} style={styles.orbGradient} />
+        <LinearGradient colors={[TEAL + '40', ELECTRIC_BLUE + '20']} style={styles.orbGradient} />
       </Animated.View>
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      {/* Light Beam */}
+      <Animated.View style={[styles.lightBeam, lightBeamStyle]}>
+        <LinearGradient
+          colors={['transparent', TEAL + '40', 'transparent']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={StyleSheet.absoluteFill}
+        />
+      </Animated.View>
+
+      {/* Hexagons */}
+      <View style={[styles.hexagon, { top: 100, left: 30 }]} />
+      <View style={[styles.hexagon, { top: 200, right: 40 }]} />
+      <View style={[styles.hexagon, { bottom: 300, left: 50 }]} />
+
+      <ScrollView 
+        style={styles.scrollView} 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 120 }}
+      >
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.welcomeText}>Welcome</Text>
@@ -169,64 +264,90 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* My Drips Section */}
-        <View style={styles.myDripsSection}>
-          <BlurView intensity={20} tint="dark" style={styles.glassCard}>
-            <View style={styles.cardContent}>
-              <Text style={styles.sectionTitle}>My Drips</Text>
-              <Text style={styles.sectionSubtitle}>Ready for hydration?</Text>
-              <Text style={styles.sectionSubtitle}>Let us help</Text>
+        {/* Book a Visit Section */}
+        <View style={styles.bookSection}>
+          <Text style={styles.sectionTitle}>Book a Visit</Text>
+          
+          <View style={styles.bookOptions}>
+            {/* Now Option */}
+            <TouchableOpacity 
+              style={styles.bookOption}
+              onPress={() => router.push('/book')}
+            >
+              <BlurView intensity={20} tint="dark" style={styles.bookOptionBlur}>
+                <View style={styles.bookOptionContent}>
+                  <View style={styles.bookOptionIcon}>
+                    <Text style={styles.bookOptionEmoji}>🚨</Text>
+                  </View>
+                  <Text style={styles.bookOptionTitle}>Now</Text>
+                  <Text style={styles.bookOptionSubtitle}>Clinician arrives{'\n'}in 60-120 min</Text>
+                </View>
+                <View style={styles.tealGlow} />
+              </BlurView>
+            </TouchableOpacity>
 
-              <TouchableOpacity style={styles.bookButton} onPress={() => router.push('/book')}>
-                <LinearGradient
-                  colors={[TEAL, ELECTRIC_BLUE]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.bookButtonGradient}
-                >
-                  <Text style={styles.bookButtonText}>Book a Visit</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            </View>
-          </BlurView>
+            {/* Schedule Option */}
+            <TouchableOpacity 
+              style={styles.bookOption}
+              onPress={() => router.push('/book')}
+            >
+              <BlurView intensity={20} tint="dark" style={styles.bookOptionBlur}>
+                <View style={styles.bookOptionContent}>
+                  <View style={styles.bookOptionIcon}>
+                    <Text style={styles.bookOptionEmoji}>📅</Text>
+                  </View>
+                  <Text style={styles.bookOptionTitle}>Schedule</Text>
+                  <Text style={styles.bookOptionSubtitle}>Pick your{'\n'}time slot</Text>
+                </View>
+                <View style={styles.tealGlow} />
+              </BlurView>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Most Requested Section */}
         <View style={styles.mostRequestedSection}>
-          <Text style={styles.mostRequestedTitle}>Most Requested</Text>
-          <Text style={styles.mostRequestedSubtitle}>Our most booked drips</Text>
+          <Text style={styles.sectionTitle}>Most Requested</Text>
+          
+          <View style={styles.carouselContainer}>
+            <Animated.FlatList
+              ref={scrollRef}
+              data={DRIPS}
+              renderItem={renderDripCard}
+              keyExtractor={(item) => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              snapToInterval={CARD_WIDTH + CARD_SPACING}
+              decelerationRate="fast"
+              contentContainerStyle={styles.carouselContent}
+              onViewableItemsChanged={onViewableItemsChanged}
+              viewabilityConfig={viewabilityConfig}
+              getItemLayout={(_, index) => ({
+                length: CARD_WIDTH + CARD_SPACING,
+                offset: (CARD_WIDTH + CARD_SPACING) * index,
+                index,
+              })}
+            />
+          </View>
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.dripCardsContainer}
-          >
-            {DRIPS.map((drip) => (
-              <TouchableOpacity key={drip.id} style={styles.dripCard}>
-                <BlurView intensity={15} tint="dark" style={styles.dripCardBlur}>
-                  <View style={styles.dripCardContent}>
-                    <View style={[styles.priceBadge, { backgroundColor: drip.color + '30' }]}>
-                      <Text style={[styles.priceText, { color: drip.color }]}>${drip.price}</Text>
-                    </View>
-                    <View style={styles.dripIconContainer}>
-                      <Text style={styles.dripIcon}>💧</Text>
-                    </View>
-                    <Text style={styles.dripDesc}>{drip.desc}</Text>
-                    <Text style={styles.dripName}>{drip.name}</Text>
-                  </View>
-                </BlurView>
-              </TouchableOpacity>
+          {/* Dot Indicators */}
+          <View style={styles.dotIndicators}>
+            {DRIPS.map((_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.dot,
+                  index === activeIndex && styles.dotActive,
+                ]}
+              />
             ))}
-          </ScrollView>
+          </View>
         </View>
-
-        {/* Bottom spacing for nav */}
-        <View style={{ height: 100 }} />
       </ScrollView>
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
-        <BlurView intensity={20} tint="dark" style={styles.bottomNavBlur}>
+        <BlurView intensity={25} tint="dark" style={styles.bottomNavBlur}>
           <View style={styles.navItems}>
             {NAV_ITEMS.map((item, index) => (
               <TouchableOpacity
@@ -241,6 +362,7 @@ export default function HomeScreen() {
                   ]}
                 >
                   <Text style={styles.navIcon}>{item.icon}</Text>
+                  {item.active && <View style={styles.activeGlowDot} />}
                 </View>
                 <Text
                   style={[
@@ -250,7 +372,6 @@ export default function HomeScreen() {
                 >
                   {item.label}
                 </Text>
-                {item.active && <View style={styles.activeGlow} />}
               </TouchableOpacity>
             ))}
           </View>
@@ -290,22 +411,38 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   orb1: {
-    width: 250,
-    height: 250,
-    top: -80,
+    width: 280,
+    height: 280,
+    top: -100,
     right: -80,
   },
   orb2: {
-    width: 200,
-    height: 200,
-    bottom: 200,
-    left: -60,
+    width: 220,
+    height: 220,
+    bottom: 250,
+    left: -70,
   },
   orb3: {
-    width: 180,
-    height: 180,
-    top: height / 2,
+    width: 200,
+    height: 200,
+    top: height * 0.4,
     right: -50,
+  },
+  lightBeam: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: 80,
+    left: '30%',
+  },
+  hexagon: {
+    position: 'absolute',
+    width: 40,
+    height: 40,
+    borderWidth: 2,
+    borderColor: TEAL + '30',
+    borderRadius: 4,
+    transform: [{ rotate: '45deg' }],
   },
   scrollView: {
     flex: 1,
@@ -319,7 +456,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   welcomeText: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: 'bold',
     color: '#fff',
   },
@@ -327,102 +464,48 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   profileIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: TEAL + '30',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: TEAL + '25',
     borderWidth: 2,
     borderColor: TEAL,
     justifyContent: 'center',
     alignItems: 'center',
   },
   profileIconText: {
-    fontSize: 20,
+    fontSize: 22,
   },
-  myDripsSection: {
+  bookSection: {
     paddingHorizontal: 24,
-    marginTop: 16,
-  },
-  glassCard: {
-    borderRadius: 20,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: TEAL + '30',
-  },
-  cardContent: {
-    padding: 24,
+    marginBottom: 32,
   },
   sectionTitle: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 8,
+    marginBottom: 16,
   },
-  sectionSubtitle: {
-    fontSize: 14,
-    color: '#B3B3B3',
-    marginBottom: 4,
+  bookOptions: {
+    flexDirection: 'row',
+    gap: 16,
   },
-  bookButton: {
-    marginTop: 20,
-    borderRadius: 14,
+  bookOption: {
+    flex: 1,
+    borderRadius: 20,
     overflow: 'hidden',
   },
-  bookButtonGradient: {
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  bookButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  mostRequestedSection: {
-    paddingHorizontal: 24,
-    marginTop: 32,
-  },
-  mostRequestedTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 4,
-  },
-  mostRequestedSubtitle: {
-    fontSize: 14,
-    color: '#B3B3B3',
-    marginBottom: 20,
-  },
-  dripCardsContainer: {
-    paddingRight: 24,
-  },
-  dripCard: {
-    width: 160,
-    marginRight: 16,
-    borderRadius: 16,
+  bookOptionBlur: {
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: TEAL + '50',
     overflow: 'hidden',
   },
-  dripCardBlur: {
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: TEAL + '20',
-  },
-  dripCardContent: {
-    padding: 16,
+  bookOptionContent: {
+    padding: 20,
     alignItems: 'center',
   },
-  priceBadge: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  priceText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  dripIconContainer: {
+  bookOptionIcon: {
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -430,22 +513,143 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
-    marginTop: 8,
   },
-  dripIcon: {
+  bookOptionEmoji: {
     fontSize: 28,
   },
-  dripDesc: {
-    fontSize: 11,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  dripName: {
-    fontSize: 14,
+  bookOptionTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#fff',
+    marginBottom: 4,
+  },
+  bookOptionSubtitle: {
+    fontSize: 12,
+    color: '#B3B3B3',
     textAlign: 'center',
+  },
+  tealGlow: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 3,
+    backgroundColor: TEAL,
+    shadowColor: TEAL,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  mostRequestedSection: {
+    paddingHorizontal: 24,
+  },
+  carouselContainer: {
+    marginHorizontal: -24,
+  },
+  carouselContent: {
+    paddingHorizontal: 24,
+  },
+  dripCard: {
+    width: CARD_WIDTH,
+    marginRight: CARD_SPACING,
+    borderRadius: 24,
+    overflow: 'visible',
+  },
+  dripCardActive: {
+    transform: [{ scale: 1.05 }],
+  },
+  dripCardBlur: {
+    borderRadius: 24,
+    borderWidth: 2,
+    borderColor: TEAL + '40',
+    overflow: 'hidden',
+  },
+  dripGradient: {
+    padding: 24,
+    alignItems: 'center',
+    borderRadius: 24,
+  },
+  dripHeader: {
+    alignSelf: 'stretch',
+    alignItems: 'flex-end',
+    marginBottom: 16,
+  },
+  dripBadge: {
+    backgroundColor: '#1a1a1a',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 16,
+  },
+  dripBadgeActive: {
+    backgroundColor: TEAL + '30',
+  },
+  dripPrice: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#888',
+  },
+  dripPriceActive: {
+    color: TEAL,
+  },
+  dripIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: TEAL + '20',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  dripIcon: {
+    fontSize: 36,
+  },
+  dripName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 4,
+  },
+  dripDesc: {
+    fontSize: 13,
+    color: '#B3B3B3',
+    textAlign: 'center',
+  },
+  activeGlow: {
+    position: 'absolute',
+    bottom: -2,
+    left: 0,
+    right: 0,
+    height: 4,
+    backgroundColor: TEAL,
+    borderRadius: 2,
+    shadowColor: TEAL,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    elevation: 10,
+  },
+  dotIndicators: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+    gap: 8,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: TEAL + '30',
+  },
+  dotActive: {
+    backgroundColor: TEAL,
+    width: 24,
+    shadowColor: TEAL,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
+    elevation: 6,
   },
   bottomNav: {
     position: 'absolute',
@@ -453,13 +657,13 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingHorizontal: 16,
-    paddingBottom: 24,
+    paddingBottom: 32,
   },
   bottomNavBlur: {
-    borderRadius: 24,
+    borderRadius: 28,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: TEAL + '20',
+    borderColor: TEAL + '30',
   },
   navItems: {
     flexDirection: 'row',
@@ -472,9 +676,9 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   navIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -482,10 +686,10 @@ const styles = StyleSheet.create({
     backgroundColor: TEAL + '30',
   },
   navIcon: {
-    fontSize: 22,
+    fontSize: 24,
   },
   navLabel: {
-    fontSize: 10,
+    fontSize: 11,
     color: '#666',
     marginTop: 4,
   },
@@ -493,17 +697,17 @@ const styles = StyleSheet.create({
     color: TEAL,
     fontWeight: 'bold',
   },
-  activeGlow: {
+  activeGlowDot: {
     position: 'absolute',
-    bottom: -4,
-    width: 4,
-    height: 4,
-    borderRadius: 2,
+    bottom: 0,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
     backgroundColor: TEAL,
     shadowColor: TEAL,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
-    shadowRadius: 4,
-    elevation: 4,
+    shadowRadius: 6,
+    elevation: 6,
   },
 });
