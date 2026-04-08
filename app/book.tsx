@@ -1,238 +1,459 @@
-import React, { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   TextInput,
-  ScrollView,
-  Alert,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withSequence,
-  withTiming,
+  Pressable,
+  Animated,
   Easing,
-} from 'react-native-reanimated';
-import { router } from 'expo-router';
+  ScrollView,
+  Platform,
+  KeyboardAvoidingView,
+  Modal,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { BlurView } from 'expo-blur';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
-const TEAL = '#00B09B';
-const ELECTRIC_BLUE = '#00D4FF';
-const BLACK = '#0A0A0A';
+const BOOKING_OPTIONS = [
+  {
+    id: 'now',
+    title: 'Now',
+    subtitle: 'Clinician arrives in 60-120 min',
+    icon: '⚡',
+  },
+  {
+    id: 'schedule',
+    title: 'Schedule',
+    subtitle: 'Pick your time slot',
+    icon: '📅',
+  },
+];
 
 export default function BookScreen() {
-  const [bookingType, setBookingType] = useState<'now' | 'schedule'>('now');
-  const [visitLocation, setVisitLocation] = useState('');
-  const [selectedTime, setSelectedTime] = useState<string>('');
-  const [selectedDate, setSelectedDate] = useState<string>('');
+  const router = useRouter();
+  const [selectedOption, setSelectedOption] = useState<'now' | 'schedule'>('now');
+  const [location, setLocation] = useState('');
+  const [consentChecked, setConsentChecked] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showConfirmAnimation, setShowConfirmAnimation] = useState(false);
 
-  // Animation for pulsing indicator
-  const pulseScale = useSharedValue(1);
+  // Animation values
+  const headerSlide = useRef(new Animated.Value(-100)).current;
+  const headerOpacity = useRef(new Animated.Value(0)).current;
+  const cardSlide = useRef(new Animated.Value(80)).current;
+  const cardOpacity = useRef(new Animated.Value(0)).current;
+  const optionsSlide = useRef(new Animated.Value(80)).current;
+  const optionsOpacity = useRef(new Animated.Value(0)).current;
+  const confirmSlide = useRef(new Animated.Value(100)).current;
+  const confirmOpacity = useRef(new Animated.Value(0)).current;
 
-  React.useEffect(() => {
-    pulseScale.value = withRepeat(
-      withSequence(
-        withTiming(1.2, { duration: 800, easing: Easing.inOut(Easing.ease) }),
-        withTiming(1, { duration: 800, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      true
-    );
+  // Logo pop animation
+  const logoScale = useRef(new Animated.Value(0)).current;
+  const logoRotate = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Stagger animations
+    Animated.sequence([
+      Animated.parallel([
+        Animated.timing(headerSlide, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(headerOpacity, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.parallel([
+        Animated.timing(cardSlide, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(cardOpacity, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.parallel([
+        Animated.timing(optionsSlide, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(optionsOpacity, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.parallel([
+        Animated.timing(confirmSlide, {
+          toValue: 0,
+          duration: 500,
+          delay: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(confirmOpacity, {
+          toValue: 1,
+          duration: 500,
+          delay: 200,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start();
   }, []);
 
-  const pulseStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: pulseScale.value }],
-  }));
-
-  const handleBookNow = () => {
-    if (!visitLocation) {
-      Alert.alert('Error', 'Please enter a visit location');
-      return;
-    }
-    // Navigate to confirmation with on-demand booking
-    router.push({
-      pathname: '/confirmation',
-      params: {
-        type: 'now',
-        location: visitLocation,
-        eta: '45-60 min',
-      },
+  const triggerLogoAnimation = () => {
+    setShowConfirmAnimation(true);
+    Animated.sequence([
+      Animated.parallel([
+        Animated.spring(logoScale, {
+          toValue: 1.5,
+          tension: 50,
+          friction: 3,
+          useNativeDriver: true,
+        }),
+        Animated.timing(logoRotate, {
+          toValue: 1,
+          duration: 500,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.timing(logoScale, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setShowConfirmAnimation(false);
+      router.push('/confirmation');
     });
   };
 
-  const handleSchedule = () => {
-    if (!visitLocation || !selectedDate || !selectedTime) {
-      Alert.alert('Error', 'Please enter visit location, date, and time');
+  const handleConfirm = () => {
+    if (!location.trim()) {
       return;
     }
-    // Navigate to confirmation with scheduled booking
-    router.push({
-      pathname: '/confirmation',
-      params: {
-        type: 'schedule',
-        location: visitLocation,
-        date: selectedDate,
-        time: selectedTime,
-      },
+    if (!consentChecked) {
+      return;
+    }
+    triggerLogoAnimation();
+  };
+
+  const onDateChange = (event: any, date?: Date) => {
+    setShowDatePicker(false);
+    if (date) {
+      setSelectedDate(date);
+      setShowTimePicker(true);
+    }
+  };
+
+  const onTimeChange = (event: any, time?: Date) => {
+    setShowTimePicker(false);
+    if (time) {
+      setSelectedDate((prev) => {
+        const newDate = new Date(prev);
+        newDate.setHours(time.getHours());
+        newDate.setMinutes(time.getMinutes());
+        return newDate;
+      });
+    }
+  };
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
     });
   };
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Text style={styles.backText}>←</Text>
-          </TouchableOpacity>
-          <Text style={styles.title}>Book a Visit</Text>
-          <View style={styles.placeholder} />
-        </View>
+      {/* Animated Background */}
+      <View style={styles.background}>
+        <View style={[styles.orb, styles.orb1]} />
+        <View style={[styles.orb, styles.orb2]} />
+        <View style={[styles.orb, styles.orb3]} />
+      </View>
 
-        {/* Booking Type Toggle */}
-        <View style={styles.bookingTypeContainer}>
-          <TouchableOpacity
+      {/* Logo Pop Animation Overlay */}
+      {showConfirmAnimation && (
+        <View style={styles.animationOverlay}>
+          <Animated.View
             style={[
-              styles.bookingTypeButton,
-              bookingType === 'now' && styles.bookingTypeButtonActive,
+              styles.logoPop,
+              {
+                transform: [
+                  { scale: logoScale },
+                  {
+                    rotate: logoRotate.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ['0deg', '360deg'],
+                    }),
+                  },
+                ],
+              },
             ]}
-            onPress={() => setBookingType('now')}
           >
-            {bookingType === 'now' && (
-              <Animated.View style={[styles.activeIndicator, pulseStyle]}>
-                <View style={styles.activeDot} />
-              </Animated.View>
-            )}
-            <Text
-              style={[
-                styles.bookingTypeText,
-                bookingType === 'now' && styles.bookingTypeTextActive,
-              ]}
-            >
-              🚨 Now
-            </Text>
-            <Text style={styles.bookingTypeSubtext}>60-120 min arrival</Text>
-          </TouchableOpacity>
+            <Text style={styles.logoPopText}>💧</Text>
+          </Animated.View>
+        </View>
+      )}
 
-          <TouchableOpacity
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Header */}
+          <Animated.View
             style={[
-              styles.bookingTypeButton,
-              bookingType === 'schedule' && styles.bookingTypeButtonActive,
+              styles.header,
+              {
+                transform: [{ translateX: headerSlide }],
+                opacity: headerOpacity,
+              },
             ]}
-            onPress={() => setBookingType('schedule')}
           >
-            {bookingType === 'schedule' && (
-              <Animated.View style={[styles.activeIndicator, pulseStyle]}>
-                <View style={styles.activeDot} />
-              </Animated.View>
-            )}
-            <Text
-              style={[
-                styles.bookingTypeText,
-                bookingType === 'schedule' && styles.bookingTypeTextActive,
-              ]}
-            >
-              📅 Schedule
-            </Text>
-            <Text style={styles.bookingTypeSubtext}>Pick a time</Text>
-          </TouchableOpacity>
-        </View>
+            <Pressable style={styles.backButton} onPress={() => router.back()}>
+              <Text style={styles.backText}>←</Text>
+            </Pressable>
+            <Text style={styles.headerTitle}>Book a Visit</Text>
+            <View style={styles.placeholder} />
+          </Animated.View>
 
-        {/* Visit Location */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Visit Location</Text>
-          <Text style={styles.sectionSubtitle}>Home, hotel, office, or event venue</Text>
-
-          <BlurView intensity={15} tint="dark" style={styles.inputCard}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputIcon}>📍</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your address"
-                placeholderTextColor="#666"
-                value={visitLocation}
-                onChangeText={setVisitLocation}
-              />
-            </View>
-          </BlurView>
-        </View>
-
-        {/* Schedule Options */}
-        {bookingType === 'schedule' && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Select Date & Time</Text>
-
-            <BlurView intensity={15} tint="dark" style={styles.inputCard}>
-              <View style={styles.scheduleInput}>
-                <View style={styles.dateTimeRow}>
-                  <View style={styles.dateContainer}>
-                    <Text style={styles.inputIcon}>📅</Text>
-                    <TextInput
-                      style={styles.dateInput}
-                      placeholder="MM/DD/YYYY"
-                      placeholderTextColor="#666"
-                      value={selectedDate}
-                      onChangeText={setSelectedDate}
-                    />
-                  </View>
-                  <View style={styles.timeContainer}>
-                    <Text style={styles.inputIcon}>🕐</Text>
-                    <TextInput
-                      style={styles.timeInput}
-                      placeholder="HH:MM"
-                      placeholderTextColor="#666"
-                      value={selectedTime}
-                      onChangeText={setSelectedTime}
-                    />
-                  </View>
+          {/* Selected Drip Card */}
+          <Animated.View
+            style={[
+              styles.selectedDripCard,
+              {
+                transform: [{ translateY: cardSlide }],
+                opacity: cardOpacity,
+              },
+            ]}
+          >
+            <BlurView intensity={20} tint="dark" style={styles.dripCardBlur}>
+              <View style={styles.dripCardContent}>
+                <View style={styles.dripInfo}>
+                  <Text style={styles.dripName}>Energy Boost</Text>
+                  <Text style={styles.dripDescription}>B-Complex, B12 & amino acids</Text>
+                </View>
+                <View style={styles.dripPriceContainer}>
+                  <Text style={styles.dripPrice}>$249</Text>
                 </View>
               </View>
             </BlurView>
-          </View>
-        )}
+          </Animated.View>
 
-        {/* Clinician Info */}
-        <View style={styles.section}>
-          <BlurView intensity={15} tint="dark" style={styles.clinicianCard}>
-            <View style={styles.clinicianContent}>
-              <View style={styles.clinicianIcon}>
-                <Text style={styles.clinicianIconText}>👨‍⚕️</Text>
+          {/* Visit Location */}
+          <Animated.View
+            style={[
+              styles.locationSection,
+              {
+                transform: [{ translateY: optionsSlide }],
+                opacity: optionsOpacity,
+              },
+            ]}
+          >
+            <Text style={styles.sectionLabel}>Visit Location</Text>
+            <View style={styles.locationInputContainer}>
+              <View style={styles.locationIcon}>
+                <Text style={styles.locationPin}>📍</Text>
               </View>
-              <View style={styles.clinicianInfo}>
-                <Text style={styles.clinicianTitle}>Licensed Clinician</Text>
-                <Text style={styles.clinicianSubtitle}>
-                  A certified professional will travel to your location
+              <TextInput
+                style={styles.locationInput}
+                placeholder="Enter your address"
+                placeholderTextColor="#666"
+                value={location}
+                onChangeText={setLocation}
+              />
+            </View>
+          </Animated.View>
+
+          {/* Booking Options */}
+          <Animated.View
+            style={[
+              styles.optionsSection,
+              {
+                transform: [{ translateY: optionsSlide }],
+                opacity: optionsOpacity,
+              },
+            ]}
+          >
+            <Text style={styles.sectionLabel}>When do you need it?</Text>
+            <View style={styles.optionsRow}>
+              {BOOKING_OPTIONS.map((option) => (
+                <Pressable
+                  key={option.id}
+                  style={[
+                    styles.optionCard,
+                    selectedOption === option.id && styles.optionCardSelected,
+                  ]}
+                  onPress={() => setSelectedOption(option.id as 'now' | 'schedule')}
+                >
+                  <Text style={styles.optionIcon}>{option.icon}</Text>
+                  <Text
+                    style={[
+                      styles.optionTitle,
+                      selectedOption === option.id && styles.optionTitleSelected,
+                    ]}
+                  >
+                    {option.title}
+                  </Text>
+                  <Text style={styles.optionSubtitle}>{option.subtitle}</Text>
+                  {selectedOption === option.id && (
+                    <View style={styles.selectedIndicator}>
+                      <Text style={styles.checkmark}>✓</Text>
+                    </View>
+                  )}
+                </Pressable>
+              ))}
+            </View>
+          </Animated.View>
+
+          {/* Schedule Date/Time Display */}
+          {selectedOption === 'schedule' && (
+            <Pressable
+              style={styles.dateTimeDisplay}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <View style={styles.dateTimeContent}>
+                <Text style={styles.dateTimeLabel}>Selected Time</Text>
+                <Text style={styles.dateTimeValue}>
+                  {formatDate(selectedDate)} at {formatTime(selectedDate)}
                 </Text>
               </View>
-            </View>
-          </BlurView>
-        </View>
+              <Text style={styles.editText}>Edit</Text>
+            </Pressable>
+          )}
 
-        {/* Book Button */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.bookButton}
-            onPress={bookingType === 'now' ? handleBookNow : handleSchedule}
+          {/* Consent Checkbox */}
+          <Animated.View
+            style={[
+              styles.consentSection,
+              {
+                transform: [{ translateY: confirmSlide }],
+                opacity: confirmOpacity,
+              },
+            ]}
           >
-            <LinearGradient
-              colors={[TEAL, ELECTRIC_BLUE]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.bookButtonGradient}
+            <Pressable
+              style={styles.checkboxRow}
+              onPress={() => setConsentChecked(!consentChecked)}
             >
-              <Text style={styles.bookButtonText}>
-                {bookingType === 'now' ? 'Confirm On-Demand Visit' : 'Confirm Scheduled Visit'}
+              <View
+                style={[
+                  styles.checkbox,
+                  consentChecked && styles.checkboxChecked,
+                ]}
+              >
+                {consentChecked && <Text style={styles.checkmarkSmall}>✓</Text>}
+              </View>
+              <Text style={styles.consentText}>
+                I agree to the{' '}
+                <Text style={styles.consentLink}>terms and informed consent</Text>
               </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
+            </Pressable>
+          </Animated.View>
+        </ScrollView>
 
-        <View style={{ height: 40 }} />
-      </ScrollView>
+        {/* Confirm Button (Fixed at bottom) */}
+        <Animated.View
+          style={[
+            styles.confirmContainer,
+            {
+              opacity: confirmOpacity,
+              transform: [{ translateY: confirmSlide }],
+            },
+          ]}
+        >
+          <Pressable
+            style={[
+              styles.confirmButton,
+              (!location.trim() || !consentChecked) && styles.confirmButtonDisabled,
+            ]}
+            onPress={handleConfirm}
+            disabled={!location.trim() || !consentChecked}
+          >
+            <View style={styles.confirmButtonGradient}>
+              <Text style={styles.confirmButtonText}>Confirm Visit</Text>
+            </View>
+          </Pressable>
+        </Animated.View>
+      </KeyboardAvoidingView>
+
+      {/* Date Picker Modal */}
+      <Modal visible={showDatePicker} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.pickerContainer}>
+            <View style={styles.pickerHeader}>
+              <Pressable onPress={() => setShowDatePicker(false)}>
+                <Text style={styles.pickerCancel}>Cancel</Text>
+              </Pressable>
+              <Text style={styles.pickerTitle}>Select Date</Text>
+              <Pressable onPress={() => setShowDatePicker(false)}>
+                <Text style={styles.pickerDone}>Done</Text>
+              </Pressable>
+            </View>
+            <DateTimePicker
+              value={selectedDate}
+              mode="date"
+              display="spinner"
+              onChange={onDateChange}
+              minimumDate={new Date()}
+              textColor="#FFFFFF"
+              themeVariant="dark"
+            />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Time Picker Modal */}
+      <Modal visible={showTimePicker} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.pickerContainer}>
+            <View style={styles.pickerHeader}>
+              <Pressable onPress={() => setShowTimePicker(false)}>
+                <Text style={styles.pickerCancel}>Cancel</Text>
+              </Pressable>
+              <Text style={styles.pickerTitle}>Select Time</Text>
+              <Pressable onPress={() => setShowTimePicker(false)}>
+                <Text style={styles.pickerDone}>Done</Text>
+              </Pressable>
+            </View>
+            <DateTimePicker
+              value={selectedDate}
+              mode="time"
+              display="spinner"
+              onChange={onTimeChange}
+              textColor="#FFFFFF"
+              themeVariant="dark"
+            />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -240,200 +461,347 @@ export default function BookScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BLACK,
+    backgroundColor: '#0A0A0A',
   },
-  scrollView: {
+  background: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+  },
+  orb: {
+    position: 'absolute',
+    borderRadius: 999,
+    opacity: 0.15,
+  },
+  orb1: {
+    width: 300,
+    height: 300,
+    backgroundColor: '#00B09B',
+    top: -100,
+    right: -100,
+  },
+  orb2: {
+    width: 200,
+    height: 200,
+    backgroundColor: '#00D4FF',
+    bottom: 300,
+    left: -80,
+  },
+  orb3: {
+    width: 150,
+    height: 150,
+    backgroundColor: '#00B09B',
+    bottom: -50,
+    right: 100,
+  },
+  animationOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 100,
+  },
+  logoPop: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#00B09B',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#00B09B',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 30,
+  },
+  logoPopText: {
+    fontSize: 60,
+  },
+  keyboardView: {
     flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    paddingBottom: 140,
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingTop: 60,
-    paddingBottom: 20,
+    alignItems: 'center',
+    marginBottom: 30,
   },
   backButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: TEAL + '20',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   backText: {
     fontSize: 24,
-    color: TEAL,
+    color: '#FFFFFF',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   placeholder: {
     width: 44,
   },
-  bookingTypeContainer: {
+  selectedDripCard: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    marginBottom: 30,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 176, 155, 0.3)',
+  },
+  dripCardBlur: {
+    padding: 20,
+  },
+  dripCardContent: {
     flexDirection: 'row',
-    paddingHorizontal: 24,
-    marginBottom: 24,
-    gap: 16,
-  },
-  bookingTypeButton: {
-    flex: 1,
-    backgroundColor: '#1a1a1a',
-    borderRadius: 16,
-    padding: 16,
+    justifyContent: 'space-between',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'transparent',
   },
-  bookingTypeButtonActive: {
-    borderColor: TEAL,
-    backgroundColor: TEAL + '15',
+  dripInfo: {
+    flex: 1,
   },
-  activeIndicator: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-  },
-  activeDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: TEAL,
-    shadowColor: TEAL,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  bookingTypeText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#888',
-    marginTop: 8,
-  },
-  bookingTypeTextActive: {
-    color: TEAL,
-  },
-  bookingTypeSubtext: {
-    fontSize: 11,
-    color: '#666',
-    marginTop: 4,
-  },
-  section: {
-    paddingHorizontal: 24,
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
+  dripName: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#FFFFFF',
     marginBottom: 4,
   },
-  sectionSubtitle: {
-    fontSize: 12,
+  dripDescription: {
+    fontSize: 14,
     color: '#888',
+  },
+  dripPriceContainer: {
+    backgroundColor: 'rgba(0, 212, 255, 0.2)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+  dripPrice: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#00D4FF',
+  },
+  locationSection: {
+    marginBottom: 30,
+  },
+  sectionLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
     marginBottom: 12,
   },
-  inputCard: {
-    borderRadius: 16,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: TEAL + '30',
-  },
-  inputContainer: {
+  locationInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 176, 155, 0.3)',
+    paddingHorizontal: 16,
   },
-  inputIcon: {
-    fontSize: 20,
+  locationIcon: {
     marginRight: 12,
   },
-  input: {
+  locationPin: {
+    fontSize: 20,
+  },
+  locationInput: {
     flex: 1,
+    height: 56,
     fontSize: 16,
-    color: '#fff',
+    color: '#FFFFFF',
   },
-  scheduleInput: {
-    padding: 16,
+  optionsSection: {
+    marginBottom: 30,
   },
-  dateTimeRow: {
+  optionsRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 16,
   },
-  dateContainer: {
+  optionCard: {
     flex: 1,
-    flexDirection: 'row',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
   },
-  timeContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+  optionCardSelected: {
+    borderColor: '#00B09B',
+    backgroundColor: 'rgba(0, 176, 155, 0.1)',
   },
-  dateInput: {
-    flex: 1,
-    fontSize: 16,
-    color: '#fff',
+  optionIcon: {
+    fontSize: 32,
+    marginBottom: 8,
   },
-  timeInput: {
-    flex: 1,
-    fontSize: 16,
-    color: '#fff',
+  optionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginBottom: 4,
   },
-  clinicianCard: {
-    borderRadius: 16,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: TEAL + '30',
+  optionTitleSelected: {
+    color: '#00B09B',
   },
-  clinicianContent: {
-    flexDirection: 'row',
-    padding: 16,
-    alignItems: 'center',
+  optionSubtitle: {
+    fontSize: 11,
+    color: '#888',
+    textAlign: 'center',
+    lineHeight: 14,
   },
-  clinicianIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: TEAL + '30',
+  selectedIndicator: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#00B09B',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  clinicianIconText: {
-    fontSize: 24,
+  checkmark: {
+    color: '#0A0A0A',
+    fontSize: 14,
+    fontWeight: '700',
   },
-  clinicianInfo: {
-    marginLeft: 16,
+  dateTimeDisplay: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 176, 155, 0.1)',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#00B09B',
+    marginBottom: 30,
+  },
+  dateTimeContent: {
     flex: 1,
   },
-  clinicianTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  clinicianSubtitle: {
+  dateTimeLabel: {
     fontSize: 12,
+    color: '#00B09B',
+    marginBottom: 4,
+  },
+  dateTimeValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  editText: {
+    fontSize: 14,
+    color: '#00B09B',
+    fontWeight: '600',
+  },
+  consentSection: {
+    marginBottom: 20,
+  },
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#666',
+    marginRight: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxChecked: {
+    borderColor: '#00B09B',
+    backgroundColor: '#00B09B',
+  },
+  checkmarkSmall: {
+    color: '#0A0A0A',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  consentText: {
+    fontSize: 14,
     color: '#888',
-    marginTop: 4,
+    flex: 1,
   },
-  buttonContainer: {
-    paddingHorizontal: 24,
+  consentLink: {
+    color: '#00B09B',
   },
-  bookButton: {
-    borderRadius: 14,
+  confirmContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    paddingTop: 20,
+    backgroundColor: 'rgba(10, 10, 10, 0.95)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  confirmButton: {
+    borderRadius: 16,
     overflow: 'hidden',
+    shadowColor: '#00B09B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  bookButtonGradient: {
+  confirmButtonDisabled: {
+    opacity: 0.5,
+  },
+  confirmButtonGradient: {
+    backgroundColor: '#00B09B',
     paddingVertical: 18,
     alignItems: 'center',
   },
-  bookButtonText: {
-    color: '#fff',
+  confirmButtonText: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '700',
+    color: '#0A0A0A',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'flex-end',
+  },
+  pickerContainer: {
+    backgroundColor: '#1A1A1A',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingBottom: 40,
+  },
+  pickerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  pickerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  pickerCancel: {
+    fontSize: 16,
+    color: '#888',
+  },
+  pickerDone: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#00B09B',
   },
 });
