@@ -75,7 +75,15 @@ function AnimatedCard({ item, index, navigation }: { item: typeof DRIPS[0]; inde
     >
       <Pressable
         style={styles.cardPressable}
-        onPress={() => navigation.push('/book')}
+        onPress={() => navigation.push({
+          pathname: '/book',
+          params: {
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            description: item.description,
+          },
+        })}
       >
         {item.popular && (
           <View style={styles.popularBadge}>

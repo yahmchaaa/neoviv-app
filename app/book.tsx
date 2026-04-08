@@ -12,9 +12,16 @@ import {
   KeyboardAvoidingView,
   Modal,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { BlurView } from 'expo-blur';
 import DateTimePicker from '@react-native-community/datetimepicker';
+
+const LOCATION_TYPES = [
+  { id: 'home', label: 'Home', icon: '🏠' },
+  { id: 'hotel', label: 'Hotel', icon: '🏨' },
+  { id: 'office', label: 'Office', icon: '🏢' },
+  { id: 'event', label: 'Event', icon: '🎉' },
+];
 
 const BOOKING_OPTIONS = [
   {
@@ -33,13 +40,23 @@ const BOOKING_OPTIONS = [
 
 export default function BookScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  
   const [selectedOption, setSelectedOption] = useState<'now' | 'schedule'>('now');
   const [location, setLocation] = useState('');
+  const [locationType, setLocationType] = useState('home');
   const [consentChecked, setConsentChecked] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showConfirmAnimation, setShowConfirmAnimation] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Get drip data from params
+  const dripId = params.id as string || 'energy-boost';
+  const dripName = params.name as string || 'Energy Boost';
+  const dripPrice = parseInt(params.price as string) || 249;
+  const dripDescription = params.description as string || 'B-Complex, B12 & amino acids';
 
   // Animation values
   const headerSlide = useRef(new Animated.Value(-100)).current;
@@ -51,9 +68,10 @@ export default function BookScreen() {
   const confirmSlide = useRef(new Animated.Value(100)).current;
   const confirmOpacity = useRef(new Animated.Value(0)).current;
 
-  // Logo pop animation
+  // Logo animations
   const logoScale = useRef(new Animated.Value(0)).current;
   const logoRotate = useRef(new Animated.Value(0)).current;
+  const logoPulse = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     // Stagger animations
@@ -113,7 +131,29 @@ export default function BookScreen() {
 
   const triggerLogoAnimation = () => {
     setShowConfirmAnimation(true);
-    Animated.sequence([
+    setIsSubmitting(true);
+    
+    // Start with pulse animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(logoPulse, {
+          toValue: 1.2,
+          duration: 500,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(logoPulse, {
+          toValue: 1,
+          duration: 500,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ]),
+      { iterations: 3 }
+    ).start();
+
+    // After pulse, do the main animation
+    setTimeout(() => {
       Animated.parallel([
         Animated.spring(logoScale, {
           toValue: 1.5,
@@ -127,16 +167,27 @@ export default function BookScreen() {
           easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
         }),
-      ]),
-      Animated.timing(logoScale, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      setShowConfirmAnimation(false);
-      router.push('/confirmation');
-    });
+      ]).start(() => {
+        Animated.timing(logoScale, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }).start(() => {
+          setShowConfirmAnimation(false);
+          setIsSubmitting(false);
+          router.push({
+            pathname: '/confirmation',
+            params: {
+              type: selectedOption,
+              location: location,
+              eta: selectedOption === 'now' ? '60-90' : '',
+              date: selectedOption === 'schedule' ? selectedDate.toLocaleDateString() : '',
+              time: selectedOption === 'schedule' ? selectedDate.toLocaleTimeString() : '',
+            },
+          });
+        });
+      });
+    }, 3000); // 3 seconds of pulse animation before main animation
   };
 
   const handleConfirm = () => {
@@ -194,7 +245,7 @@ export default function BookScreen() {
         <View style={[styles.orb, styles.orb3]} />
       </View>
 
-      {/* Logo Pop Animation Overlay */}
+      {/* Logo Animation Overlay (Pulse + Pop) */}
       {showConfirmAnimation && (
         <View style={styles.animationOverlay}>
           <Animated.View
@@ -202,7 +253,7 @@ export default function BookScreen() {
               styles.logoPop,
               {
                 transform: [
-                  { scale: logoScale },
+                  { scale: Animated.multiply(logoScale, logoPulse) },
                   {
                     rotate: logoRotate.interpolate({
                       inputRange: [0, 1],
@@ -213,8 +264,15 @@ export default function BookScreen() {
               },
             ]}
           >
-            <Text style={styles.logoPopText}>💧</Text>
+            {isSubmitting ? (
+              <Text style={styles.logoPopText}>⏳</Text>
+            ) : (
+              <Text style={styles.logoPopText}>💧</Text>
+            )}
           </Animated.View>
+          {isSubmitting && (
+            <Text style={styles.submittingText}>Submitting your booking...</Text>
+          )}
         </View>
       )}
 
@@ -257,11 +315,11 @@ export default function BookScreen() {
             <BlurView intensity={20} tint="dark" style={styles.dripCardBlur}>
               <View style={styles.dripCardContent}>
                 <View style={styles.dripInfo}>
-                  <Text style={styles.dripName}>Energy Boost</Text>
-                  <Text style={styles.dripDescription}>B-Complex, B12 & amino acids</Text>
+                  <Text style={styles.dripName}>{dripName}</Text>
+                  <Text style={styles.dripDescription}>{dripDescription}</Text>
                 </View>
                 <View style={styles.dripPriceContainer}>
-                  <Text style={styles.dripPrice}>$249</Text>
+                  <Text style={styles.dripPrice}>${dripPrice}</Text>
                 </View>
               </View>
             </BlurView>
@@ -278,13 +336,39 @@ export default function BookScreen() {
             ]}
           >
             <Text style={styles.sectionLabel}>Visit Location</Text>
+            
+            {/* Location Type Selector */}
+            <View style={styles.locationTypeRow}>
+              {LOCATION_TYPES.map((type) => (
+                <Pressable
+                  key={type.id}
+                  style={[
+                    styles.locationTypeButton,
+                    locationType === type.id && styles.locationTypeButtonActive,
+                  ]}
+                  onPress={() => setLocationType(type.id)}
+                >
+                  <Text style={styles.locationTypeIcon}>{type.icon}</Text>
+                  <Text
+                    style={[
+                      styles.locationTypeLabel,
+                      locationType === type.id && styles.locationTypeLabelActive,
+                    ]}
+                  >
+                    {type.label}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            {/* Address Input */}
             <View style={styles.locationInputContainer}>
               <View style={styles.locationIcon}>
                 <Text style={styles.locationPin}>📍</Text>
               </View>
               <TextInput
                 style={styles.locationInput}
-                placeholder="Enter your address"
+                placeholder={`Enter your ${locationType} address`}
                 placeholderTextColor="#666"
                 value={location}
                 onChangeText={setLocation}
@@ -323,6 +407,11 @@ export default function BookScreen() {
                     {option.title}
                   </Text>
                   <Text style={styles.optionSubtitle}>{option.subtitle}</Text>
+                  {selectedOption === 'now' && option.id === 'now' && (
+                    <View style={styles.etaBadge}>
+                      <Text style={styles.etaBadgeText}>60-120 min</Text>
+                    </View>
+                  )}
                   {selectedOption === option.id && (
                     <View style={styles.selectedIndicator}>
                       <Text style={styles.checkmark}>✓</Text>
@@ -392,13 +481,15 @@ export default function BookScreen() {
           <Pressable
             style={[
               styles.confirmButton,
-              (!location.trim() || !consentChecked) && styles.confirmButtonDisabled,
+              (!location.trim() || !consentChecked || isSubmitting) && styles.confirmButtonDisabled,
             ]}
             onPress={handleConfirm}
-            disabled={!location.trim() || !consentChecked}
+            disabled={!location.trim() || !consentChecked || isSubmitting}
           >
             <View style={styles.confirmButtonGradient}>
-              <Text style={styles.confirmButtonText}>Confirm Visit</Text>
+              <Text style={styles.confirmButtonText}>
+                {isSubmitting ? 'Submitting...' : 'Confirm Visit'}
+              </Text>
             </View>
           </Pressable>
         </Animated.View>
@@ -515,6 +606,12 @@ const styles = StyleSheet.create({
   logoPopText: {
     fontSize: 60,
   },
+  submittingText: {
+    marginTop: 24,
+    fontSize: 16,
+    color: '#B3B3B3',
+    fontWeight: '500',
+  },
   keyboardView: {
     flex: 1,
   },
@@ -592,10 +689,42 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   sectionLabel: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: '600',
     color: '#FFFFFF',
     marginBottom: 12,
+  },
+  locationTypeRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  locationTypeButton: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  locationTypeButtonActive: {
+    borderColor: '#00B09B',
+    backgroundColor: 'rgba(0, 176, 155, 0.15)',
+  },
+  locationTypeIcon: {
+    fontSize: 20,
+    marginBottom: 4,
+  },
+  locationTypeLabel: {
+    fontSize: 11,
+    color: '#B3B3B3',
+    fontWeight: '500',
+  },
+  locationTypeLabelActive: {
+    color: '#00B09B',
+    fontWeight: '600',
   },
   locationInputContainer: {
     flexDirection: 'row',
@@ -656,6 +785,18 @@ const styles = StyleSheet.create({
     color: '#B3B3B3',
     textAlign: 'center',
     lineHeight: 14,
+  },
+  etaBadge: {
+    backgroundColor: 'rgba(0, 212, 255, 0.2)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  etaBadgeText: {
+    fontSize: 11,
+    color: '#00D4FF',
+    fontWeight: '600',
   },
   selectedIndicator: {
     position: 'absolute',
