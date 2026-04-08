@@ -1,95 +1,290 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useEffect, useRef } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Animated,
+  Pressable,
+  useWindowDimensions,
+} from 'react-native';
+import { useRouter } from 'expo-router';
 import { BlurView } from 'expo-blur';
-import { router } from 'expo-router';
-
-const TEAL = '#00B09B';
-const ELECTRIC_BLUE = '#00D4FF';
-const BLACK = '#0A0A0A';
 
 const DRIPS = [
-  { id: '1', name: 'Hydration Basics', price: 199, desc: 'Essential fluids & electrolytes' },
-  { id: '2', name: 'Energy Boost', price: 249, desc: 'B-Complex, B12 & amino acids' },
-  { id: '3', name: 'Immunity Shield', price: 299, desc: 'Vitamin C, Zinc & Glutathione' },
-  { id: '4', name: 'NAD+', price: 399, desc: 'Cellular repair & anti-aging' },
+  {
+    id: 'hydration-basics',
+    name: 'Hydration Basics',
+    price: 199,
+    description: 'Essential fluids & electrolytes',
+    popular: false,
+  },
+  {
+    id: 'energy-boost',
+    name: 'Energy Boost',
+    price: 249,
+    description: 'B-Complex, B12 & amino acids',
+    popular: true,
+  },
+  {
+    id: 'immunity-shield',
+    name: 'Immunity Shield',
+    price: 299,
+    description: 'Vitamin C, Zinc & Glutathione',
+    popular: false,
+  },
+  {
+    id: 'nad-plus',
+    name: 'NAD+',
+    price: 399,
+    description: 'Cellular repair & anti-aging',
+    popular: false,
+  },
 ];
 
-const NAV_ITEMS = [
-  { icon: '🏠', label: 'Home', route: '/home' },
-  { icon: '💧', label: 'Menu', active: true, route: '/menu' },
-  { icon: '☀️', label: 'Wellness', route: '/wellness' },
-  { icon: '📋', label: 'Orders', route: '/orders' },
-  { icon: '👤', label: 'Account', route: '/account' },
-];
+function AnimatedCard({ item, index, navigation }: { item: typeof DRIPS[0]; index: number; navigation: any }) {
+  const slideAnim = useRef(new Animated.Value(100)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 500,
+        delay: index * 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: 1,
+        duration: 500,
+        delay: index * 150,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
+  return (
+    <Animated.View
+      style={[
+        styles.carouselCard,
+        {
+          transform: [{ translateX: slideAnim }],
+          opacity: opacityAnim,
+        },
+      ]}
+    >
+      <Pressable
+        style={styles.cardPressable}
+        onPress={() => navigation.push('/book')}
+      >
+        {item.popular && (
+          <View style={styles.popularBadge}>
+            <Text style={styles.popularText}>MOST POPULAR</Text>
+          </View>
+        )}
+        <Text style={styles.cardPrice}>${item.price}</Text>
+        <Text style={styles.cardName}>{item.name}</Text>
+        <Text style={styles.cardDescription}>{item.description}</Text>
+        <View style={styles.bookButton}>
+          <Text style={styles.bookButtonText}>Book Now</Text>
+        </View>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+function MenuCard({ item, index }: { item: typeof DRIPS[0]; index: number }) {
+  const slideAnim = useRef(new Animated.Value(80)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 400,
+        delay: 600 + index * 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: 1,
+        duration: 400,
+        delay: 600 + index * 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
+  return (
+    <Animated.View
+      style={[
+        styles.menuCard,
+        {
+          transform: [{ translateY: slideAnim }],
+          opacity: opacityAnim,
+        },
+      ]}
+    >
+      <Pressable style={styles.menuCardPressable} onPress={() => {}}>
+        <View style={styles.menuCardContent}>
+          <View style={styles.menuCardLeft}>
+            <Text style={styles.menuCardName}>{item.name}</Text>
+            <Text style={styles.menuCardDescription}>{item.description}</Text>
+          </View>
+          <View style={styles.menuCardRight}>
+            <Text style={styles.menuCardPrice}>${item.price}</Text>
+            {item.popular && (
+              <View style={styles.popularBadgeSmall}>
+                <Text style={styles.popularTextSmall}>POPULAR</Text>
+              </View>
+            )}
+          </View>
+        </View>
+      </Pressable>
+    </Animated.View>
+  );
+}
 
 export default function MenuScreen() {
-  const handleNavPress = (route: string) => {
-    router.push(route);
-  };
+  const router = useRouter();
+  const { width } = useWindowDimensions();
+  const scrollX = useRef(new Animated.Value(0)).current;
+
+  const headerSlide = useRef(new Animated.Value(-100)).current;
+  const headerOpacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(headerSlide, {
+        toValue: 0,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.timing(headerOpacity, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.title}>IV Therapy Menu</Text>
-          <Text style={styles.subtitle}>Choose your treatment</Text>
-        </View>
-
-        <View style={styles.dripList}>
-          {DRIPS.map((drip) => (
-            <TouchableOpacity key={drip.id} style={styles.dripCard} onPress={() => router.push({ pathname: '/book', params: { drip: drip.name, price: drip.price.toString() } })}>
-              <BlurView intensity={15} tint="dark" style={styles.dripCardBlur}>
-                <LinearGradient
-                  colors={[TEAL + '20', ELECTRIC_BLUE + '10']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.dripGradient}
-                >
-                  <View style={styles.dripIcon}>
-                    <Text style={styles.dripIconText}>💧</Text>
-                  </View>
-                  <View style={styles.dripContent}>
-                    <Text style={styles.dripName}>{drip.name}</Text>
-                    <Text style={styles.dripDesc}>{drip.desc}</Text>
-                  </View>
-                  <View style={styles.priceContainer}>
-                    <Text style={styles.dripPrice}>${drip.price}</Text>
-                  </View>
-                </LinearGradient>
-              </BlurView>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        <View style={{ height: 100 }} />
-      </ScrollView>
-
-      <View style={styles.bottomNav}>
-        <BlurView intensity={20} tint="dark" style={styles.bottomNavBlur}>
-          <View style={styles.navItems}>
-            {NAV_ITEMS.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.navItem}
-                onPress={() => handleNavPress(item.route)}
-              >
-                <View
-                  style={[
-                    styles.navIconContainer,
-                    item.active && styles.navIconContainerActive,
-                  ]}
-                >
-                  <Text style={styles.navIcon}>{item.icon}</Text>
-                </View>
-                <Text style={[styles.navLabel, item.active && styles.navLabelActive]}>
-                  {item.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </BlurView>
+      {/* Animated Background */}
+      <View style={styles.background}>
+        <View style={[styles.orb, styles.orb1]} />
+        <View style={[styles.orb, styles.orb2]} />
+        <View style={[styles.orb, styles.orb3]} />
       </View>
+
+      {/* Header */}
+      <Animated.View
+        style={[
+          styles.header,
+          {
+            transform: [{ translateX: headerSlide }],
+            opacity: headerOpacity,
+          },
+        ]}
+      >
+        <Text style={styles.headerTitle}>IV Drip Menu</Text>
+        <Pressable style={styles.profileButton}>
+          <View style={styles.profileIcon} />
+        </Pressable>
+      </Animated.View>
+
+      {/* Most Requested Carousel */}
+      <View style={styles.carouselSection}>
+        <Text style={styles.sectionTitle}>Most Requested</Text>
+        <Text style={styles.sectionSubtitle}>Our most booked drips</Text>
+        <Animated.ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={width * 0.7 + 20}
+          decelerationRate="fast"
+          contentContainerStyle={styles.carouselContent}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+            { useNativeDriver: false }
+          )}
+          scrollEventThrottle={16}
+        >
+          {DRIPS.map((item, index) => (
+            <AnimatedCard
+              key={item.id}
+              item={item}
+              index={index}
+              navigation={router}
+            />
+          ))}
+        </Animated.ScrollView>
+        {/* Dot Indicators */}
+        <View style={styles.dotContainer}>
+          {DRIPS.map((_, index) => {
+            const inputRange = [
+              (index - 1) * (width * 0.7 + 20),
+              index * (width * 0.7 + 20),
+              (index + 1) * (width * 0.7 + 20),
+            ];
+            const dotWidth = scrollX.interpolate({
+              inputRange,
+              outputRange: [8, 20, 8],
+              extrapolate: 'clamp',
+            });
+            const dotOpacity = scrollX.interpolate({
+              inputRange,
+              outputRange: [0.4, 1, 0.4],
+              extrapolate: 'clamp',
+            });
+            return (
+              <Animated.View
+                key={index}
+                style={[
+                  styles.dot,
+                  {
+                    width: dotWidth,
+                    opacity: dotOpacity,
+                  },
+                ]}
+              />
+            );
+          })}
+        </View>
+      </View>
+
+      {/* All Drips List */}
+      <View style={styles.menuSection}>
+        <Text style={styles.sectionTitle}>All Drips</Text>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.menuList}
+        >
+          {DRIPS.map((item, index) => (
+            <MenuCard key={item.id} item={item} index={index} />
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* Bottom Navigation */}
+      <BlurView intensity={20} tint="dark" style={styles.bottomNav}>
+        <View style={styles.navContent}>
+          <Pressable style={styles.navItem} onPress={() => router.push('/home')}>
+            <View style={styles.navIcon} />
+            <Text style={styles.navText}>Home</Text>
+          </Pressable>
+          <Pressable style={[styles.navItem, styles.navItemActive]}>
+            <View style={[styles.navIcon, styles.navIconActive]} />
+            <Text style={[styles.navText, styles.navTextActive]}>Menu</Text>
+          </Pressable>
+          <Pressable style={styles.navItem} onPress={() => router.push('/orders')}>
+            <View style={styles.navIcon} />
+            <Text style={styles.navText}>Orders</Text>
+          </Pressable>
+          <Pressable style={styles.navItem} onPress={() => router.push('/account')}>
+            <View style={styles.navIcon} />
+            <Text style={styles.navText}>Account</Text>
+          </Pressable>
+        </View>
+      </BlurView>
     </View>
   );
 }
@@ -97,123 +292,262 @@ export default function MenuScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BLACK,
+    backgroundColor: '#0A0A0A',
   },
-  scrollView: {
-    flex: 1,
+  background: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+  },
+  orb: {
+    position: 'absolute',
+    borderRadius: 999,
+    opacity: 0.15,
+  },
+  orb1: {
+    width: 300,
+    height: 300,
+    backgroundColor: '#00B09B',
+    top: -100,
+    right: -100,
+  },
+  orb2: {
+    width: 200,
+    height: 200,
+    backgroundColor: '#00D4FF',
+    bottom: 200,
+    left: -80,
+  },
+  orb3: {
+    width: 150,
+    height: 150,
+    backgroundColor: '#00B09B',
+    bottom: -50,
+    right: 100,
   },
   header: {
-    paddingHorizontal: 24,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 20,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#fff',
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
-  subtitle: {
-    fontSize: 14,
-    color: '#B3B3B3',
-    marginTop: 4,
-  },
-  dripList: {
-    paddingHorizontal: 24,
-  },
-  dripCard: {
-    marginBottom: 16,
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  dripCardBlur: {
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: TEAL + '20',
-  },
-  dripGradient: {
-    flexDirection: 'row',
-    padding: 16,
-    alignItems: 'center',
-  },
-  dripIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 12,
-    backgroundColor: TEAL + '30',
+  profileButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 2,
+    borderColor: '#00B09B',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  dripIconText: {
-    fontSize: 28,
+  profileIcon: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#00B09B',
   },
-  dripContent: {
-    flex: 1,
-    marginLeft: 16,
+  carouselSection: {
+    paddingTop: 20,
   },
-  dripName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    paddingHorizontal: 20,
   },
-  dripDesc: {
-    fontSize: 12,
-    color: '#B3B3B3',
+  sectionSubtitle: {
+    fontSize: 14,
+    color: '#888',
+    paddingHorizontal: 20,
     marginTop: 4,
+    marginBottom: 16,
   },
-  priceContainer: {
-    backgroundColor: TEAL + '30',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+  carouselContent: {
+    paddingHorizontal: 15,
+  },
+  carouselCard: {
+    width: 220,
+    marginHorizontal: 10,
+    borderRadius: 20,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#00B09B',
+    shadowColor: '#00B09B',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  cardPressable: {
+    backgroundColor: 'rgba(10, 10, 10, 0.9)',
+    padding: 20,
+    minHeight: 280,
+  },
+  popularBadge: {
+    backgroundColor: '#00B09B',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 12,
+    alignSelf: 'flex-start',
+    marginBottom: 12,
   },
-  dripPrice: {
+  popularText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#0A0A0A',
+    letterSpacing: 1,
+  },
+  cardPrice: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#00D4FF',
+    marginBottom: 8,
+  },
+  cardName: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: TEAL,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginBottom: 8,
+  },
+  cardDescription: {
+    fontSize: 13,
+    color: '#888',
+    lineHeight: 18,
+    marginBottom: 16,
+  },
+  bookButton: {
+    backgroundColor: '#00B09B',
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 'auto',
+  },
+  bookButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#0A0A0A',
+  },
+  dotContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+    gap: 8,
+  },
+  dot: {
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#00B09B',
+  },
+  menuSection: {
+    flex: 1,
+    paddingTop: 30,
+  },
+  menuList: {
+    paddingHorizontal: 20,
+    paddingBottom: 120,
+  },
+  menuCard: {
+    marginBottom: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 176, 155, 0.3)',
+    overflow: 'hidden',
+  },
+  menuCardPressable: {
+    backgroundColor: 'rgba(20, 20, 20, 0.8)',
+  },
+  menuCardContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+  },
+  menuCardLeft: {
+    flex: 1,
+    marginRight: 12,
+  },
+  menuCardName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  menuCardDescription: {
+    fontSize: 13,
+    color: '#888',
+  },
+  menuCardRight: {
+    alignItems: 'flex-end',
+  },
+  menuCardPrice: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#00D4FF',
+  },
+  popularBadgeSmall: {
+    backgroundColor: 'rgba(0, 176, 155, 0.2)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginTop: 6,
+  },
+  popularTextSmall: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#00B09B',
+    letterSpacing: 0.5,
   },
   bottomNav: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 16,
-    paddingBottom: 24,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    paddingBottom: 30,
+    paddingTop: 10,
   },
-  bottomNavBlur: {
-    borderRadius: 24,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: TEAL + '20',
-  },
-  navItems: {
+  navContent: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingHorizontal: 20,
   },
   navItem: {
     alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
   },
-  navIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  navIconContainerActive: {
-    backgroundColor: TEAL + '30',
+  navItemActive: {
+    transform: [{ scale: 1.05 }],
   },
   navIcon: {
-    fontSize: 22,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#444',
+    marginBottom: 4,
   },
-  navLabel: {
-    fontSize: 10,
-    color: '#666',
-    marginTop: 4,
+  navIconActive: {
+    backgroundColor: '#00B09B',
+    shadowColor: '#00B09B',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 8,
   },
-  navLabelActive: {
-    color: TEAL,
-    fontWeight: 'bold',
+  navText: {
+    fontSize: 11,
+    color: '#888',
+  },
+  navTextActive: {
+    color: '#00B09B',
+    fontWeight: '600',
   },
 });
