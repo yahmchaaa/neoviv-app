@@ -12,15 +12,14 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withRepeat,
   withTiming,
   withSequence,
-  withDelay,
   Easing,
-  interpolate,
 } from 'react-native-reanimated';
 import { router } from 'expo-router';
 import { signIn, signUp } from '../src/services/auth';
@@ -121,6 +120,16 @@ export default function LoginScreen() {
     ],
   }));
 
+  const checkNotificationPermissionAndNavigate = async () => {
+    const needsPermission = await AsyncStorage.getItem('needsNotificationPermission');
+    if (needsPermission === 'true') {
+      await AsyncStorage.removeItem('needsNotificationPermission');
+      router.replace('/notification-permission');
+    } else {
+      router.replace('/home');
+    }
+  };
+
   const handleSubmit = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'Please enter both email and password');
@@ -135,7 +144,8 @@ export default function LoginScreen() {
         if (error) {
           Alert.alert('Login Failed', error);
         } else {
-          router.replace('/home');
+          // Check if user needs to see notification permission screen
+          await checkNotificationPermissionAndNavigate();
         }
       } else {
         const { user, error } = await signUp(email, password);
@@ -143,6 +153,8 @@ export default function LoginScreen() {
           Alert.alert('Sign Up Failed', error);
         } else {
           Alert.alert('Success', 'Account created! Please check your email to confirm.');
+          // Set flag to show notification permission screen after signup
+          await AsyncStorage.setItem('needsNotificationPermission', 'true');
           setIsLogin(true);
         }
       }
