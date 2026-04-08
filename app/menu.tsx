@@ -275,6 +275,10 @@ export default function MenuScreen() {
             <View style={[styles.navIcon, styles.navIconActive]} />
             <Text style={[styles.navText, styles.navTextActive]}>Menu</Text>
           </Pressable>
+          <Pressable style={styles.navItem} onPress={() => router.push('/wellness')}>
+            <View style={styles.navIcon} />
+            <Text style={styles.navText}>Wellness</Text>
+          </Pressable>
           <Pressable style={styles.navItem} onPress={() => router.push('/orders')}>
             <View style={styles.navIcon} />
             <Text style={styles.navText}>Orders</Text>
@@ -333,7 +337,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: '700',
     color: '#FFFFFF',
   },
@@ -356,14 +360,14 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '600',
     color: '#FFFFFF',
     paddingHorizontal: 20,
   },
   sectionSubtitle: {
     fontSize: 14,
-    color: '#888',
+    color: '#B3B3B3',
     paddingHorizontal: 20,
     marginTop: 4,
     marginBottom: 16,
@@ -385,7 +389,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   cardPressable: {
-    backgroundColor: 'rgba(10, 10, 10, 0.9)',
+    backgroundColor: 'rgba(10, 10, 10, 0.7)',
     padding: 20,
     minHeight: 280,
   },
@@ -417,7 +421,7 @@ const styles = StyleSheet.create({
   },
   cardDescription: {
     fontSize: 13,
-    color: '#888',
+    color: '#B3B3B3',
     lineHeight: 18,
     marginBottom: 16,
   },
@@ -457,11 +461,11 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(0, 176, 155, 0.3)',
+    borderColor: 'rgba(0, 176, 155, 0.2)',
     overflow: 'hidden',
   },
   menuCardPressable: {
-    backgroundColor: 'rgba(20, 20, 20, 0.8)',
+    backgroundColor: 'rgba(20, 20, 20, 0.7)',
   },
   menuCardContent: {
     flexDirection: 'row',
@@ -481,7 +485,7 @@ const styles = StyleSheet.create({
   },
   menuCardDescription: {
     fontSize: 13,
-    color: '#888',
+    color: '#B3B3B3',
   },
   menuCardRight: {
     alignItems: 'flex-end',
@@ -544,7 +548,7 @@ const styles = StyleSheet.create({
   },
   navText: {
     fontSize: 11,
-    color: '#888',
+    color: '#B3B3B3',
   },
   navTextActive: {
     color: '#00B09B',

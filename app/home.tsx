@@ -174,7 +174,7 @@ export default function HomeScreen() {
     
     return (
       <TouchableOpacity
-        activeOpacity={0.9}
+        activeOpacity={0.7}
         onPress={() => {
           scrollRef.current?.scrollToIndex({ index });
         }}
@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   welcomeText: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#fff',
   },
@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   sectionTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#fff',
     marginBottom: 16,
@@ -498,7 +498,7 @@ const styles = StyleSheet.create({
   bookOptionBlur: {
     borderRadius: 20,
     borderWidth: 2,
-    borderColor: TEAL + '50',
+    borderColor: TEAL + '20',
     overflow: 'hidden',
   },
   bookOptionContent: {
@@ -537,7 +537,7 @@ const styles = StyleSheet.create({
     backgroundColor: TEAL,
     shadowColor: TEAL,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 8,
   },
@@ -562,7 +562,7 @@ const styles = StyleSheet.create({
   dripCardBlur: {
     borderRadius: 24,
     borderWidth: 2,
-    borderColor: TEAL + '40',
+    borderColor: TEAL + '20',
     overflow: 'hidden',
   },
   dripGradient: {
@@ -587,7 +587,7 @@ const styles = StyleSheet.create({
   dripPrice: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#888',
+    color: '#B3B3B3',
   },
   dripPriceActive: {
     color: TEAL,
@@ -663,7 +663,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: TEAL + '30',
+    borderColor: TEAL + '20',
   },
   navItems: {
     flexDirection: 'row',
@@ -690,7 +690,7 @@ const styles = StyleSheet.create({
   },
   navLabel: {
     fontSize: 11,
-    color: '#666',
+    color: '#B3B3B3',
     marginTop: 4,
   },
   navLabelActive: {

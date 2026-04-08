@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   title: {
-    fontSize: 32,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#fff',
   },
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: TEAL + '30',
+    borderColor: TEAL + '20',
   },
   profileContent: {
     flexDirection: 'row',
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   },
   navLabel: {
     fontSize: 10,
-    color: '#666',
+    color: '#B3B3B3',
     marginTop: 4,
   },
   navLabelActive: {

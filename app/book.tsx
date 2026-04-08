@@ -554,7 +554,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginBottom: 30,
     borderWidth: 1,
-    borderColor: 'rgba(0, 176, 155, 0.3)',
+    borderColor: 'rgba(0, 176, 155, 0.2)',
   },
   dripCardBlur: {
     padding: 20,
@@ -575,7 +575,7 @@ const styles = StyleSheet.create({
   },
   dripDescription: {
     fontSize: 14,
-    color: '#888',
+    color: '#B3B3B3',
   },
   dripPriceContainer: {
     backgroundColor: 'rgba(0, 212, 255, 0.2)',
@@ -603,7 +603,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(0, 176, 155, 0.3)',
+    borderColor: 'rgba(0, 176, 155, 0.2)',
     paddingHorizontal: 16,
   },
   locationIcon: {
@@ -653,7 +653,7 @@ const styles = StyleSheet.create({
   },
   optionSubtitle: {
     fontSize: 11,
-    color: '#888',
+    color: '#B3B3B3',
     textAlign: 'center',
     lineHeight: 14,
   },
@@ -730,7 +730,7 @@ const styles = StyleSheet.create({
   },
   consentText: {
     fontSize: 14,
-    color: '#888',
+    color: '#B3B3B3',
     flex: 1,
   },
   consentLink: {
@@ -797,7 +797,7 @@ const styles = StyleSheet.create({
   },
   pickerCancel: {
     fontSize: 16,
-    color: '#888',
+    color: '#B3B3B3',
   },
   pickerDone: {
     fontSize: 16,

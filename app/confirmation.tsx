@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: TEAL + '50',
+    borderColor: TEAL + '20',
   },
   trackingContent: {
     padding: 16,
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
   },
   pointLabel: {
     fontSize: 12,
-    color: '#888',
+    color: '#B3B3B3',
   },
   pointAddress: {
     fontSize: 14,
@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: TEAL + '30',
+    borderColor: TEAL + '20',
   },
   etaGradient: {
     padding: 20,
@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
   },
   etaLabel: {
     fontSize: 14,
-    color: '#888',
+    color: '#B3B3B3',
     marginBottom: 8,
   },
   etaTime: {
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
   },
   etaSubtext: {
     fontSize: 12,
-    color: '#888',
+    color: '#B3B3B3',
     marginTop: 8,
   },
   clinicianSection: {
@@ -396,7 +396,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: TEAL + '30',
+    borderColor: TEAL + '20',
   },
   clinicianContent: {
     flexDirection: 'row',
@@ -425,7 +425,7 @@ const styles = StyleSheet.create({
   },
   clinicianLicense: {
     fontSize: 12,
-    color: '#888',
+    color: '#B3B3B3',
     marginTop: 2,
   },
   ratingContainer: {
@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
   },
   ratingCount: {
     fontSize: 12,
-    color: '#888',
+    color: '#B3B3B3',
     marginLeft: 4,
   },
   messageButton: {
@@ -470,7 +470,7 @@ const styles = StyleSheet.create({
   cancelButtonBlur: {
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#FF6B6B50',
+    borderColor: '#FF6B6B20',
     paddingVertical: 16,
     alignItems: 'center',
   },
