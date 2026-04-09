@@ -70,17 +70,20 @@ export async function updatePersonalInfo(data: PersonalInfo): Promise<{ success:
       return { success: false, error: 'Not authenticated' };
     }
 
+    // Use upsert to create the user record if it doesn't exist (handles race condition with Supabase triggers)
     const { error } = await supabase
       .from('users')
-      .update({
+      .upsert({
+        id: user.id,
+        email: user.email,
         full_name: data.fullName,
         date_of_birth: data.dateOfBirth,
         phone: data.phone,
         emergency_contact_name: data.emergencyContactName,
         emergency_contact_phone: data.emergencyContactPhone,
+        account_status: 'active',
         updated_at: new Date().toISOString(),
-      })
-      .eq('id', user.id);
+      }, { onConflict: 'id' });
 
     if (error) {
       return { success: false, error: error.message };
@@ -227,15 +230,15 @@ export async function saveMedicalHistory(data: MedicalHistoryInfo): Promise<{ su
       current_medications: data.currentMedications,
     };
 
-    // Store health_screening as JSONB in users table
+    // Store health_screening as JSONB in users table (use upsert to handle race condition)
     const { error: userError } = await supabase
       .from('users')
-      .update({
+      .upsert({
+        id: user.id,
         health_screening: medicalData,
         account_status: requiresClinicalReview(data) ? 'pending_review' : 'active',
         updated_at: new Date().toISOString(),
-      })
-      .eq('id', user.id);
+      }, { onConflict: 'id' });
 
     if (userError) {
       return { success: false, error: userError.message };
@@ -261,16 +264,16 @@ export async function saveConsents(data: ConsentInfo): Promise<{ success: boolea
     const allSigned = data.identityVerification && data.hipaaPrivacy && data.informedConsent && data.informationSharing;
     const timestamp = new Date().toISOString();
 
-    // Update users table with HIPAA consent info
+    // Update users table with HIPAA consent info (use upsert to handle race condition)
     const { error: userError } = await supabase
       .from('users')
-      .update({
+      .upsert({
+        id: user.id,
         hipaa_consent_signed: allSigned,
         hipaa_consent_timestamp: allSigned ? timestamp : null,
         hipaa_signature_url: data.digitalSignatureData, // Store base64 signature
         updated_at: timestamp,
-      })
-      .eq('id', user.id);
+      }, { onConflict: 'id' });
 
     if (userError) {
       return { success: false, error: userError.message };
