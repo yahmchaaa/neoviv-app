@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase } from '../lib/supabase';
 import { router } from 'expo-router';
 
 // Types for onboarding
@@ -52,13 +52,8 @@ export interface ConsentInfo {
   signatureUserAgent?: string;
 }
 
-// High-risk conditions that require clinical review before booking
-const HIGH_RISK_CONDITIONS = [
-  'cardiacDisease',
-  'pregnancy',
-  'cancerOrChemotherapy',
-  'bloodThinners',
-];
+// High-risk conditions that require clinical review
+const HIGH_RISK_CONDITIONS = ['cardiacDisease', 'pregnancy', 'cancerOrChemotherapy', 'bloodThinners'];
 
 // Check if any high-risk condition is present
 export function requiresClinicalReview(medicalHistory: MedicalHistoryInfo): boolean {
@@ -67,8 +62,8 @@ export function requiresClinicalReview(medicalHistory: MedicalHistoryInfo): bool
   );
 }
 
-// Update user profile
-export async function updateUserProfile(data: Partial<PersonalInfo>): Promise<{ success: boolean; error?: string }> {
+// Update user profile with personal info (Step 3)
+export async function updatePersonalInfo(data: PersonalInfo): Promise<{ success: boolean; error?: string }> {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -76,7 +71,7 @@ export async function updateUserProfile(data: Partial<PersonalInfo>): Promise<{ 
     }
 
     const { error } = await supabase
-      .from('user_profiles')
+      .from('users')
       .update({
         full_name: data.fullName,
         date_of_birth: data.dateOfBirth,
@@ -92,7 +87,7 @@ export async function updateUserProfile(data: Partial<PersonalInfo>): Promise<{ 
     }
 
     // Create audit log
-    await createAuditLog(user.id, 'UPDATE', 'user_profiles', user.id, null, data);
+    await createAuditLog(user.id, 'UPDATE_PERSONAL_INFO', 'users', user.id, null, data);
 
     return { success: true };
   } catch (err) {
@@ -100,31 +95,7 @@ export async function updateUserProfile(data: Partial<PersonalInfo>): Promise<{ 
   }
 }
 
-// Get user profile
-export async function getUserProfile() {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return { data: null, error: 'Not authenticated' };
-    }
-
-    const { data, error } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-
-    if (error) {
-      return { data: null, error: error.message };
-    }
-
-    return { data, error: null };
-  } catch (err) {
-    return { data: null, error: 'An unexpected error occurred' };
-  }
-}
-
-// Add or update address
+// Save address (Step 4)
 export async function saveAddress(address: AddressInfo): Promise<{ success: boolean; error?: string; addressId?: string }> {
   try {
     const { data: { user } } = await supabase.auth.getUser();
@@ -230,7 +201,7 @@ export async function deleteAddress(addressId: string): Promise<{ success: boole
   }
 }
 
-// Save medical history
+// Save medical history (Step 5)
 export async function saveMedicalHistory(data: MedicalHistoryInfo): Promise<{ success: boolean; error?: string; requiresReview?: boolean }> {
   try {
     const { data: { user } } = await supabase.auth.getUser();
@@ -239,7 +210,6 @@ export async function saveMedicalHistory(data: MedicalHistoryInfo): Promise<{ su
     }
 
     const medicalData = {
-      user_id: user.id,
       medication_allergies: data.medicationAllergies,
       medication_allergies_details: data.medicationAllergiesDetails,
       pregnancy: data.pregnancy,
@@ -255,70 +225,32 @@ export async function saveMedicalHistory(data: MedicalHistoryInfo): Promise<{ su
       blood_thinners: data.bloodThinners,
       implanted_line: data.implantedLine,
       current_medications: data.currentMedications,
-      clinical_review_required: requiresClinicalReview(data),
     };
 
-    // Check if medical history exists
-    const { data: existing } = await supabase
-      .from('medical_history')
-      .select('id')
-      .eq('user_id', user.id)
-      .single();
+    // Store health_screening as JSONB in users table
+    const { error: userError } = await supabase
+      .from('users')
+      .update({
+        health_screening: medicalData,
+        account_status: requiresClinicalReview(data) ? 'pending_review' : 'active',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', user.id);
 
-    let result;
-    if (existing) {
-      result = await supabase
-        .from('medical_history')
-        .update({ ...medicalData, updated_at: new Date().toISOString() })
-        .eq('user_id', user.id)
-        .select()
-        .single();
-    } else {
-      result = await supabase
-        .from('medical_history')
-        .insert(medicalData)
-        .select()
-        .single();
-    }
-
-    if (result.error) {
-      return { success: false, error: result.error.message };
+    if (userError) {
+      return { success: false, error: userError.message };
     }
 
     // Create audit log
-    await createAuditLog(user.id, existing ? 'UPDATE' : 'INSERT', 'medical_history', result.data.id, null, medicalData);
+    await createAuditLog(user.id, 'UPDATE_MEDICAL_HISTORY', 'users', user.id, null, medicalData);
 
-    return { success: true, requiresReview: medicalData.clinical_review_required };
+    return { success: true, requiresReview: requiresClinicalReview(data) };
   } catch (err) {
     return { success: false, error: 'An unexpected error occurred' };
   }
 }
 
-// Get medical history
-export async function getMedicalHistory() {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return { data: null, error: 'Not authenticated' };
-    }
-
-    const { data, error } = await supabase
-      .from('medical_history')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-
-    if (error && error.code !== 'PGRST116') {
-      return { data: null, error: error.message };
-    }
-
-    return { data, error: null };
-  } catch (err) {
-    return { data: null, error: 'An unexpected error occurred' };
-  }
-}
-
-// Save consents
+// Save HIPAA consent (Step 6)
 export async function saveConsents(data: ConsentInfo): Promise<{ success: boolean; error?: string }> {
   try {
     const { data: { user } } = await supabase.auth.getUser();
@@ -327,52 +259,42 @@ export async function saveConsents(data: ConsentInfo): Promise<{ success: boolea
     }
 
     const allSigned = data.identityVerification && data.hipaaPrivacy && data.informedConsent && data.informationSharing;
+    const timestamp = new Date().toISOString();
 
-    const consentData = {
-      user_id: user.id,
-      identity_verification: data.identityVerification,
-      identity_verification_signed_at: data.identityVerification ? new Date().toISOString() : null,
-      hipaa_privacy: data.hipaaPrivacy,
-      hipaa_privacy_signed_at: data.hipaaPrivacy ? new Date().toISOString() : null,
-      informed_consent: data.informedConsent,
-      informed_consent_signed_at: data.informedConsent ? new Date().toISOString() : null,
-      information_sharing: data.informationSharing,
-      information_sharing_signed_at: data.informationSharing ? new Date().toISOString() : null,
-      digital_signature_data: data.digitalSignatureData,
-      signature_ip_address: data.signatureIpAddress,
-      signature_user_agent: data.signatureUserAgent,
-      all_consents_signed: allSigned,
-    };
+    // Update users table with HIPAA consent info
+    const { error: userError } = await supabase
+      .from('users')
+      .update({
+        hipaa_consent_signed: allSigned,
+        hipaa_consent_timestamp: allSigned ? timestamp : null,
+        hipaa_signature_url: data.digitalSignatureData, // Store base64 signature
+        updated_at: timestamp,
+      })
+      .eq('id', user.id);
 
-    // Check if consents exist
-    const { data: existing } = await supabase
-      .from('user_consents')
-      .select('id')
-      .eq('user_id', user.id)
-      .single();
-
-    let result;
-    if (existing) {
-      result = await supabase
-        .from('user_consents')
-        .update({ ...consentData, updated_at: new Date().toISOString() })
-        .eq('user_id', user.id)
-        .select()
-        .single();
-    } else {
-      result = await supabase
-        .from('user_consents')
-        .insert(consentData)
-        .select()
-        .single();
+    if (userError) {
+      return { success: false, error: userError.message };
     }
 
-    if (result.error) {
-      return { success: false, error: result.error.message };
-    }
-
-    // Create audit log
-    await createAuditLog(user.id, existing ? 'UPDATE' : 'INSERT', 'user_consents', result.data.id, null, consentData);
+    // Create audit log with IP and user agent
+    await createAuditLog(
+      user.id,
+      'HIPAA_CONSENT',
+      'users',
+      user.id,
+      null,
+      {
+        consents: {
+          identityVerification: data.identityVerification,
+          hipaaPrivacy: data.hipaaPrivacy,
+          informedConsent: data.informedConsent,
+          informationSharing: data.informationSharing,
+        },
+        signatureTimestamp: timestamp,
+      },
+      data.signatureIpAddress,
+      data.signatureUserAgent
+    );
 
     return { success: true };
   } catch (err) {
@@ -380,46 +302,50 @@ export async function saveConsents(data: ConsentInfo): Promise<{ success: boolea
   }
 }
 
-// Get consents
-export async function getConsents() {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return { data: null, error: 'Not authenticated' };
-    }
-
-    const { data, error } = await supabase
-      .from('user_consents')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-
-    if (error && error.code !== 'PGRST116') {
-      return { data: null, error: error.message };
-    }
-
-    return { data, error: null };
-  } catch (err) {
-    return { data: null, error: 'An unexpected error occurred' };
-  }
-}
-
-// Update onboarding step
-export async function updateOnboardingStep(step: number): Promise<{ success: boolean; error?: string }> {
+// Save push token (Step 7)
+export async function savePushToken(pushToken: string, deviceType: string = 'ios'): Promise<{ success: boolean; error?: string }> {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return { success: false, error: 'Not authenticated' };
     }
 
-    const { error } = await supabase
-      .from('user_profiles')
-      .update({ onboarding_step: step, updated_at: new Date().toISOString() })
-      .eq('id', user.id);
+    // Check if token already exists
+    const { data: existingToken } = await supabase
+      .from('user_push_tokens')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('push_token', pushToken)
+      .single();
 
-    if (error) {
-      return { success: false, error: error.message };
+    if (existingToken) {
+      // Token already exists, just update it
+      const { error } = await supabase
+        .from('user_push_tokens')
+        .update({ is_active: true, updated_at: new Date().toISOString() })
+        .eq('id', existingToken.id);
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+    } else {
+      // Insert new token
+      const { error } = await supabase
+        .from('user_push_tokens')
+        .insert({
+          user_id: user.id,
+          push_token: pushToken,
+          device_type: deviceType,
+          is_active: true,
+        });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
     }
+
+    // Create audit log
+    await createAuditLog(user.id, 'PUSH_TOKEN_REGISTERED', 'user_push_tokens', null, null, { pushToken: pushToken.substring(0, 20) + '...' });
 
     return { success: true };
   } catch (err) {
@@ -435,21 +361,36 @@ export async function completeOnboarding(): Promise<{ success: boolean; error?: 
       return { success: false, error: 'Not authenticated' };
     }
 
-    const { error } = await supabase
-      .from('user_profiles')
-      .update({ onboarding_completed: true, onboarding_step: 7, updated_at: new Date().toISOString() })
-      .eq('id', user.id);
-
-    if (error) {
-      return { success: false, error: error.message };
-    }
-
     // Create audit log
-    await createAuditLog(user.id, 'ONBOARDING_COMPLETE', 'user_profiles', user.id, null, { completed_at: new Date().toISOString() });
+    await createAuditLog(user.id, 'ONBOARDING_COMPLETE', 'users', user.id, null, { completed_at: new Date().toISOString() });
 
     return { success: true };
   } catch (err) {
     return { success: false, error: 'An unexpected error occurred' };
+  }
+}
+
+// Get user profile
+export async function getUserProfile() {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { data: null, error: 'Not authenticated' };
+    }
+
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (error) {
+      return { data: null, error: error.message };
+    }
+
+    return { data, error: null };
+  } catch (err) {
+    return { data: null, error: 'An unexpected error occurred' };
   }
 }
 
@@ -458,9 +399,11 @@ async function createAuditLog(
   userId: string,
   action: string,
   tableName: string,
-  recordId: string,
+  recordId: string | null,
   oldData: any,
-  newData: any
+  newData: any,
+  ipAddress?: string,
+  userAgent?: string
 ) {
   try {
     await supabase.rpc('create_audit_log', {
@@ -470,6 +413,8 @@ async function createAuditLog(
       p_record_id: recordId,
       p_old_data: oldData,
       p_new_data: newData,
+      p_ip_address: ipAddress,
+      p_user_agent: userAgent,
     });
   } catch (err) {
     // Silently fail audit logging
@@ -479,28 +424,27 @@ async function createAuditLog(
 
 // Navigate to next onboarding step
 export function navigateToNextStep(currentStep: number) {
-  const nextStep = currentStep + 1;
-  switch (nextStep) {
+  switch (currentStep) {
     case 1:
-      router.replace('/onboarding/create-account');
-      break;
-    case 2:
       router.replace('/onboarding/verify-email');
       break;
-    case 3:
+    case 2:
       router.replace('/onboarding/personal-info');
       break;
-    case 4:
+    case 3:
       router.replace('/onboarding/address-management');
       break;
-    case 5:
+    case 4:
       router.replace('/onboarding/medical-history');
       break;
-    case 6:
+    case 5:
       router.replace('/onboarding/hipaa-consent');
       break;
-    case 7:
+    case 6:
       router.replace('/onboarding/notification-permission');
+      break;
+    case 7:
+      router.replace('/home');
       break;
     default:
       router.replace('/home');

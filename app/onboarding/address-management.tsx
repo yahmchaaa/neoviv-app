@@ -253,10 +253,7 @@ export default function AddressManagementScreen() {
         <Text style={styles.progressText}>Step 4 of 7</Text>
       </View>
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardView}>
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           <View style={styles.content}>
             {/* Header */}
@@ -268,9 +265,9 @@ export default function AddressManagementScreen() {
             {/* Address List */}
             <BlurView intensity={20} tint="dark" style={styles.glassCard}>
               <View style={styles.cardContent}>
-                <Text style={styles.cardTitle}>Address Management</Text>
+                <Text style={styles.cardTitle}>Service Address</Text>
                 <Text style={styles.subtitle}>
-                  Add your service locations. Your primary address will be used for bookings.
+                  Add your service location. This is where we'll send your clinician.
                 </Text>
 
                 {/* Saved Addresses */}
@@ -311,7 +308,7 @@ export default function AddressManagementScreen() {
                   </TouchableOpacity>
                 ) : (
                   <View style={styles.addForm}>
-                    <Text style={styles.formTitle}>Add New Location</Text>
+                    <Text style={styles.formTitle}>Add Service Address</Text>
 
                     {/* Location Type Selector */}
                     <Text style={styles.inputLabel}>Location Type</Text>
@@ -338,11 +335,12 @@ export default function AddressManagementScreen() {
                       ))}
                     </View>
 
+                    {/* Address with Google Maps Autocomplete placeholder */}
                     <View style={styles.inputContainer}>
                       <Text style={styles.inputLabel}>Street Address</Text>
                       <TextInput
                         style={styles.input}
-                        placeholder="123 Main Street"
+                        placeholder="Start typing your address..."
                         placeholderTextColor="#666"
                         value={addressLine1}
                         onChangeText={setAddressLine1}
@@ -398,19 +396,12 @@ export default function AddressManagementScreen() {
                     </View>
 
                     <View style={styles.formButtons}>
-                      <TouchableOpacity
-                        style={styles.cancelButton}
-                        onPress={() => setShowAddForm(false)}
-                      >
+                      <TouchableOpacity style={styles.cancelButton} onPress={() => setShowAddForm(false)}>
                         <Text style={styles.cancelButtonText}>Cancel</Text>
                       </TouchableOpacity>
 
                       <Animated.View style={buttonStyle}>
-                        <TouchableOpacity
-                          style={styles.saveButton}
-                          onPress={handleSaveAddress}
-                          disabled={saving}
-                        >
+                        <TouchableOpacity style={styles.saveButton} onPress={handleSaveAddress} disabled={saving}>
                           <LinearGradient
                             colors={[TEAL, ELECTRIC_BLUE]}
                             start={{ x: 0, y: 0 }}
@@ -429,10 +420,7 @@ export default function AddressManagementScreen() {
 
                 {/* Continue Button */}
                 <Animated.View style={[buttonStyle, { marginTop: 24 }]}>
-                  <TouchableOpacity
-                    style={styles.submitButton}
-                    onPress={handleContinue}
-                  >
+                  <TouchableOpacity style={styles.submitButton} onPress={handleContinue}>
                     <LinearGradient
                       colors={[TEAL, ELECTRIC_BLUE]}
                       start={{ x: 0, y: 0 }}

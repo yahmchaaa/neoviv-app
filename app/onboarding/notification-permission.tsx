@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import Animated, {
@@ -11,8 +11,8 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { router } from 'expo-router';
-import { requestNotificationPermissions } from '../../src/services/notifications';
-import { completeOnboarding } from '../../src/services/onboarding';
+import * as Notifications from 'expo-notifications';
+import { savePushToken, completeOnboarding } from '../../src/services/onboarding';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TEAL = '#00B09B';
@@ -54,23 +54,60 @@ export default function NotificationPermissionScreen() {
   }, []);
 
   const bellStyle = useAnimatedStyle(() => ({
-    transform: [
-      { scale: bellScale.value },
-      { rotate: `${bellRotate.value}deg` },
-    ],
+    transform: [{ scale: bellScale.value }, { rotate: `${bellRotate.value}deg` }],
   }));
 
   const handleEnable = async () => {
-    await requestNotificationPermissions();
-    await AsyncStorage.setItem('notificationPermissionShown', 'true');
-    await completeOnboarding();
-    router.replace('/home');
+    try {
+      // Request notification permissions
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+
+      if (finalStatus !== 'granted') {
+        // Permission denied, but still allow onboarding to complete
+        await AsyncStorage.setItem('notificationPermissionShown', 'true');
+        await completeOnboarding();
+        router.replace('/home');
+        return;
+      }
+
+      // Get push token
+      const { data: tokenData } = await Notifications.getExpoPushTokenAsync({
+        projectId: 'your-project-id', // Replace with actual project ID
+      });
+
+      if (tokenData?.token) {
+        // Save push token to Supabase
+        await savePushToken(tokenData.token, Platform.OS);
+      }
+
+      // Mark notification permission as shown and complete onboarding
+      await AsyncStorage.setItem('notificationPermissionShown', 'true');
+      await completeOnboarding();
+      router.replace('/home');
+    } catch (error) {
+      console.error('Error enabling notifications:', error);
+      // Still complete onboarding even if there's an error
+      await AsyncStorage.setItem('notificationPermissionShown', 'true');
+      await completeOnboarding();
+      router.replace('/home');
+    }
   };
 
   const handleSkip = async () => {
-    await AsyncStorage.setItem('notificationPermissionShown', 'true');
-    await completeOnboarding();
-    router.replace('/home');
+    try {
+      await AsyncStorage.setItem('notificationPermissionShown', 'true');
+      await completeOnboarding();
+      router.replace('/home');
+    } catch (error) {
+      console.error('Error skipping notifications:', error);
+      router.replace('/home');
+    }
   };
 
   return (

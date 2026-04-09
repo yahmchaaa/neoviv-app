@@ -9,6 +9,7 @@ import {
   Platform,
   ScrollView,
   Alert,
+  Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -21,7 +22,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { router } from 'expo-router';
-import { updateUserProfile } from '../../src/services/onboarding';
+import { updatePersonalInfo } from '../../src/services/onboarding';
 
 const TEAL = '#00B09B';
 const ELECTRIC_BLUE = '#00D4FF';
@@ -34,6 +35,10 @@ export default function PersonalInfoScreen() {
   const [emergencyContactName, setEmergencyContactName] = useState('');
   const [emergencyContactPhone, setEmergencyContactPhone] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(1);
+  const [selectedDay, setSelectedDay] = useState(1);
+  const [selectedYear, setSelectedYear] = useState(2000);
   const buttonScale = useSharedValue(1);
 
   // Animation values for floating orbs
@@ -116,6 +121,16 @@ export default function PersonalInfoScreen() {
     transform: [{ scale: buttonScale.value }],
   }));
 
+  const handleDatePress = () => {
+    setShowDatePicker(true);
+  };
+
+  const handleDateConfirm = () => {
+    const formatted = `${selectedMonth.toString().padStart(2, '0')}/${selectedDay.toString().padStart(2, '0')}/${selectedYear}`;
+    setDateOfBirth(formatted);
+    setShowDatePicker(false);
+  };
+
   const handleContinue = async () => {
     // Validation
     if (!fullName || !dateOfBirth || !phone || !emergencyContactName || !emergencyContactPhone) {
@@ -135,7 +150,7 @@ export default function PersonalInfoScreen() {
     setLoading(true);
 
     try {
-      const { success, error } = await updateUserProfile({
+      const { success, error } = await updatePersonalInfo({
         fullName,
         dateOfBirth,
         phone,
@@ -156,6 +171,10 @@ export default function PersonalInfoScreen() {
       buttonScale.value = 1;
     }
   };
+
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const days = Array.from({ length: 31 }, (_, i) => i + 1);
+  const years = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - 18 - i);
 
   return (
     <View style={styles.container}>
@@ -178,10 +197,7 @@ export default function PersonalInfoScreen() {
         <Text style={styles.progressText}>Step 3 of 7</Text>
       </View>
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardView}>
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           <View style={styles.content}>
             {/* Header */}
@@ -198,10 +214,7 @@ export default function PersonalInfoScreen() {
                   Please provide your personal details and emergency contact information
                 </Text>
 
-                <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionTitle}>Your Information</Text>
-                </View>
-
+                {/* Full Name */}
                 <View style={styles.inputContainer}>
                   <Text style={styles.inputLabel}>Full Name</Text>
                   <TextInput
@@ -214,18 +227,17 @@ export default function PersonalInfoScreen() {
                   />
                 </View>
 
+                {/* Date of Birth with Picker */}
                 <View style={styles.inputContainer}>
                   <Text style={styles.inputLabel}>Date of Birth</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="MM/DD/YYYY"
-                    placeholderTextColor="#666"
-                    value={dateOfBirth}
-                    onChangeText={setDateOfBirth}
-                    keyboardType="numbers-and-punctuation"
-                  />
+                  <TouchableOpacity style={styles.dateInput} onPress={handleDatePress}>
+                    <Text style={[styles.dateInputText, !dateOfBirth && styles.dateInputPlaceholder]}>
+                      {dateOfBirth || 'Select your date of birth'}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
 
+                {/* Phone Number */}
                 <View style={styles.inputContainer}>
                   <Text style={styles.inputLabel}>Phone Number</Text>
                   <TextInput
@@ -238,10 +250,7 @@ export default function PersonalInfoScreen() {
                   />
                 </View>
 
-                <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionTitle}>Emergency Contact</Text>
-                </View>
-
+                {/* Emergency Contact Name */}
                 <View style={styles.inputContainer}>
                   <Text style={styles.inputLabel}>Emergency Contact Name</Text>
                   <TextInput
@@ -254,6 +263,7 @@ export default function PersonalInfoScreen() {
                   />
                 </View>
 
+                {/* Emergency Contact Phone */}
                 <View style={styles.inputContainer}>
                   <Text style={styles.inputLabel}>Emergency Contact Phone</Text>
                   <TextInput
@@ -267,11 +277,7 @@ export default function PersonalInfoScreen() {
                 </View>
 
                 <Animated.View style={buttonStyle}>
-                  <TouchableOpacity
-                    style={styles.submitButton}
-                    onPress={handleContinue}
-                    disabled={loading}
-                  >
+                  <TouchableOpacity style={styles.submitButton} onPress={handleContinue} disabled={loading}>
                     <LinearGradient
                       colors={[TEAL, ELECTRIC_BLUE]}
                       start={{ x: 0, y: 0 }}
@@ -289,6 +295,106 @@ export default function PersonalInfoScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Date Picker Modal */}
+      <Modal visible={showDatePicker} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Select Date of Birth</Text>
+            
+            <View style={styles.pickerContainer}>
+              {/* Month Picker */}
+              <View style={styles.pickerColumn}>
+                <Text style={styles.pickerLabel}>Month</Text>
+                <ScrollView style={styles.pickerScroll}>
+                  {months.map((month, index) => (
+                    <TouchableOpacity
+                      key={month}
+                      style={[
+                        styles.pickerItem,
+                        selectedMonth === index + 1 && styles.pickerItemSelected,
+                      ]}
+                      onPress={() => setSelectedMonth(index + 1)}
+                    >
+                      <Text
+                        style={[
+                          styles.pickerItemText,
+                          selectedMonth === index + 1 && styles.pickerItemTextSelected,
+                        ]}
+                      >
+                        {month}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+
+              {/* Day Picker */}
+              <View style={styles.pickerColumn}>
+                <Text style={styles.pickerLabel}>Day</Text>
+                <ScrollView style={styles.pickerScroll}>
+                  {days.map((day) => (
+                    <TouchableOpacity
+                      key={day}
+                      style={[
+                        styles.pickerItem,
+                        selectedDay === day && styles.pickerItemSelected,
+                      ]}
+                      onPress={() => setSelectedDay(day)}
+                    >
+                      <Text
+                        style={[
+                          styles.pickerItemText,
+                          selectedDay === day && styles.pickerItemTextSelected,
+                        ]}
+                      >
+                        {day}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+
+              {/* Year Picker */}
+              <View style={styles.pickerColumn}>
+                <Text style={styles.pickerLabel}>Year</Text>
+                <ScrollView style={styles.pickerScroll}>
+                  {years.map((year) => (
+                    <TouchableOpacity
+                      key={year}
+                      style={[
+                        styles.pickerItem,
+                        selectedYear === year && styles.pickerItemSelected,
+                      ]}
+                      onPress={() => setSelectedYear(year)}
+                    >
+                      <Text
+                        style={[
+                          styles.pickerItemText,
+                          selectedYear === year && styles.pickerItemTextSelected,
+                        ]}
+                      >
+                        {year}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            </View>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={styles.modalCancelButton} onPress={() => setShowDatePicker(false)}>
+                <Text style={styles.modalCancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalConfirmButton} onPress={handleDateConfirm}>
+                <LinearGradient colors={[TEAL, ELECTRIC_BLUE]} style={styles.modalConfirmButtonGradient}>
+                  <Text style={styles.modalConfirmButtonText}>Confirm</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -372,18 +478,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     lineHeight: 18,
   },
-  sectionHeader: {
-    marginTop: 16,
-    marginBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: TEAL + '20',
-    paddingBottom: 8,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: TEAL,
-  },
   inputContainer: {
     marginBottom: 16,
   },
@@ -401,6 +495,20 @@ const styles = StyleSheet.create({
     color: '#fff',
     borderWidth: 1,
     borderColor: TEAL + '20',
+  },
+  dateInput: {
+    backgroundColor: '#1a1a1a',
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: TEAL + '20',
+  },
+  dateInputText: {
+    fontSize: 16,
+    color: '#fff',
+  },
+  dateInputPlaceholder: {
+    color: '#666',
   },
   submitButton: {
     marginTop: 24,
@@ -446,5 +554,94 @@ const styles = StyleSheet.create({
     top: '40%',
     right: -40,
     opacity: 0.3,
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#1a1a1a',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    maxHeight: '60%',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  pickerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  pickerColumn: {
+    flex: 1,
+    marginHorizontal: 8,
+  },
+  pickerLabel: {
+    fontSize: 12,
+    color: TEAL,
+    textAlign: 'center',
+    marginBottom: 8,
+    fontWeight: '600',
+  },
+  pickerScroll: {
+    height: 200,
+  },
+  pickerItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    marginBottom: 4,
+  },
+  pickerItemSelected: {
+    backgroundColor: TEAL + '30',
+  },
+  pickerItemText: {
+    fontSize: 16,
+    color: '#888',
+    textAlign: 'center',
+  },
+  pickerItemTextSelected: {
+    color: TEAL,
+    fontWeight: '600',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  modalCancelButton: {
+    flex: 1,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginRight: 8,
+    borderRadius: 12,
+    backgroundColor: '#0a0a0a',
+  },
+  modalCancelButtonText: {
+    color: '#888',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  modalConfirmButton: {
+    flex: 1,
+    marginLeft: 8,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  modalConfirmButtonGradient: {
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  modalConfirmButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

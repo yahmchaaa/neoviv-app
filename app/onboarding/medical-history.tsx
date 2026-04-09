@@ -21,38 +21,40 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { router } from 'expo-router';
-import { saveMedicalHistory, requiresClinicalReview } from '../../src/services/onboarding';
+import { saveMedicalHistory } from '../../src/services/onboarding';
 
 const TEAL = '#00B09B';
 const ELECTRIC_BLUE = '#00D4FF';
 const BLACK = '#0A0A0A';
 
-// High-risk conditions that require clinical review
-const HIGH_RISK_CONDITIONS = ['cardiacDisease', 'pregnancy', 'cancerOrChemotherapy', 'bloodThinners'];
-
+// 14 screening items from NEOVIV RN intake form
 const SCREENING_ITEMS = [
-  { key: 'medicationAllergies', label: 'Medication Allergies', desc: 'Any known allergies to medications' },
-  { key: 'pregnancy', label: 'Pregnancy', desc: 'Currently pregnant or suspect pregnancy' },
-  { key: 'cardiacDisease', label: 'Cardiac Disease', desc: 'Heart disease, heart failure, or cardiac conditions', warning: true },
-  { key: 'kidneyDisease', label: 'Kidney Disease', desc: 'Kidney disease or reduced kidney function' },
-  { key: 'liverDisease', label: 'Liver Disease', desc: 'Liver disease or reduced liver function' },
-  { key: 'diabetes', label: 'Diabetes', desc: 'Type 1 or Type 2 diabetes' },
-  { key: 'asthma', label: 'Asthma', desc: 'Asthma or reactive airway disease' },
-  { key: 'seizureHistory', label: 'Seizure History', desc: 'History of seizures or epilepsy' },
-  { key: 'activeInfection', label: 'Active Infection', desc: 'Currently have an active infection' },
-  { key: 'cancerOrChemotherapy', label: 'Cancer or Chemotherapy', desc: 'Current cancer or undergoing chemotherapy', warning: true },
-  { key: 'recentSurgery', label: 'Recent Surgery', desc: 'Surgery within the past 4 weeks' },
-  { key: 'bloodThinners', label: 'Blood Thinners', desc: 'Taking blood thinning medications', warning: true },
-  { key: 'implantedLine', label: 'Implanted Line', desc: 'Central line, PICC, or implanted port' },
+  { key: 'medicationAllergies', label: 'Medication Allergies', desc: 'Any known drug allergies or adverse reactions to medications' },
+  { key: 'pregnancy', label: 'Pregnancy', desc: 'Are you currently pregnant or suspect you may be pregnant?', warning: true },
+  { key: 'cardiacDisease', label: 'Cardiac Disease', desc: 'Heart disease, heart failure, irregular heartbeat, or other cardiac conditions', warning: true },
+  { key: 'kidneyDisease', label: 'Kidney Disease', desc: 'Kidney disease, kidney stones, or reduced kidney function' },
+  { key: 'liverDisease', label: 'Liver Disease', desc: 'Liver disease, hepatitis, or reduced liver function' },
+  { key: 'diabetes', label: 'Diabetes', desc: 'Type 1 or Type 2 diabetes, or elevated blood sugar' },
+  { key: 'asthma', label: 'Asthma', desc: 'Asthma, reactive airway disease, or chronic lung conditions' },
+  { key: 'seizureHistory', label: 'Seizure History', desc: 'History of seizures, epilepsy, or seizure-like episodes' },
+  { key: 'activeInfection', label: 'Active Infection', desc: 'Currently have an active bacterial, viral, or fungal infection' },
+  { key: 'cancerOrChemotherapy', label: 'Cancer or Chemotherapy', desc: 'Current cancer diagnosis or undergoing chemotherapy/radiation', warning: true },
+  { key: 'recentSurgery', label: 'Recent Surgery', desc: 'Surgical procedure within the past 4 weeks' },
+  { key: 'bloodThinners', label: 'Blood Thinners', desc: 'Taking blood thinning medications (e.g., Warfarin, Eliquis, Plavix)', warning: true },
+  { key: 'implantedLine', label: 'Implanted Line', desc: 'Central line, PICC line, port, or other implanted medical device' },
+  { key: 'currentMedications', label: 'Current Medications', desc: 'Taking any prescription or over-the-counter medications', isTextInput: true },
 ];
 
+// High-risk conditions that trigger hard stop
+const HIGH_RISK_CONDITIONS = ['cardiacDisease', 'pregnancy', 'cancerOrChemotherapy', 'bloodThinners'];
+
 export default function MedicalHistoryScreen() {
-  const [responses, setResponses] = useState<Record<string, boolean>>({});
+  const [responses, setResponses] = useState<Record<string, boolean | string>>({});
   const [currentMedications, setCurrentMedications] = useState('');
-  const [medicationDetails, setMedicationDetails] = useState('');
   const [loading, setLoading] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
   const [warningMessage, setWarningMessage] = useState('');
+  const [isHighRisk, setIsHighRisk] = useState(false);
   const buttonScale = useSharedValue(1);
 
   // Animation values
@@ -135,46 +137,21 @@ export default function MedicalHistoryScreen() {
     transform: [{ scale: buttonScale.value }],
   }));
 
-  const toggleResponse = (key: string, currentValue: boolean) => {
+  const toggleResponse = (key: string, currentValue: boolean | string | undefined) => {
+    const newValue = !currentValue;
     setResponses((prev) => ({
       ...prev,
-      [key]: !currentValue,
+      [key]: newValue,
     }));
   };
 
   const handleContinue = async () => {
-    // Check for high-risk conditions first
+    // Check for high-risk conditions
     const hasHighRisk = HIGH_RISK_CONDITIONS.some(
       (condition) => responses[condition] === true
     );
 
-    if (hasHighRisk) {
-      // Show hard stop modal
-      setWarningMessage(
-        'For your safety, please contact our clinical team before booking at support@neoviv.com'
-      );
-      setShowWarning(true);
-      return;
-    }
-
-    // Check if clinical review is recommended
-    const medicalData = {
-      medicationAllergies: responses.medicationAllergies || false,
-      medicationAllergiesDetails: medicationDetails,
-      pregnancy: responses.pregnancy || false,
-      cardiacDisease: responses.cardiacDisease || false,
-      kidneyDisease: responses.kidneyDisease || false,
-      liverDisease: responses.liverDisease || false,
-      diabetes: responses.diabetes || false,
-      asthma: responses.asthma || false,
-      seizureHistory: responses.seizureHistory || false,
-      activeInfection: responses.activeInfection || false,
-      cancerOrChemotherapy: responses.cancerOrChemotherapy || false,
-      recentSurgery: responses.recentSurgery || false,
-      bloodThinners: responses.bloodThinners || false,
-      implantedLine: responses.implantedLine || false,
-      currentMedications: currentMedications,
-    };
+    setIsHighRisk(hasHighRisk);
 
     buttonScale.value = withRepeat(
       withSequence(
@@ -188,19 +165,43 @@ export default function MedicalHistoryScreen() {
     setLoading(true);
 
     try {
+      const medicalData = {
+        medicationAllergies: responses.medicationAllergies === true,
+        medicationAllergiesDetails: responses.medicationAllergies === true ? '' : undefined,
+        pregnancy: responses.pregnancy === true,
+        cardiacDisease: responses.cardiacDisease === true,
+        kidneyDisease: responses.kidneyDisease === true,
+        liverDisease: responses.liverDisease === true,
+        diabetes: responses.diabetes === true,
+        asthma: responses.asthma === true,
+        seizureHistory: responses.seizureHistory === true,
+        activeInfection: responses.activeInfection === true,
+        cancerOrChemotherapy: responses.cancerOrChemotherapy === true,
+        recentSurgery: responses.recentSurgery === true,
+        bloodThinners: responses.bloodThinners === true,
+        implantedLine: responses.implantedLine === true,
+        currentMedications: currentMedications,
+      };
+
       const { success, error, requiresReview } = await saveMedicalHistory(medicalData);
 
       if (error) {
         Alert.alert('Error', error);
+        return;
+      }
+
+      // Show warning for high-risk conditions
+      if (hasHighRisk) {
+        setWarningMessage(
+          'Our clinical team will review your health history before confirming your first visit. You may still complete signup.'
+        );
+        setShowWarning(true);
+      } else if (requiresReview) {
+        setWarningMessage(
+          'Our clinical team will review your health history before confirming your first visit.'
+        );
+        setShowWarning(true);
       } else {
-        // If clinical review is needed, show warning but allow continuing
-        if (requiresReview) {
-          setWarningMessage(
-            'Our clinical team will review your health history before confirming your first visit.'
-          );
-          setShowWarning(true);
-          return;
-        }
         // Navigate to HIPAA Consent (Step 6)
         router.replace('/onboarding/hipaa-consent');
       }
@@ -239,10 +240,7 @@ export default function MedicalHistoryScreen() {
         <Text style={styles.progressText}>Step 5 of 7</Text>
       </View>
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardView}>
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           <View style={styles.content}>
             {/* Header */}
@@ -254,104 +252,81 @@ export default function MedicalHistoryScreen() {
             {/* Medical History Card */}
             <BlurView intensity={20} tint="dark" style={styles.glassCard}>
               <View style={styles.cardContent}>
-                <Text style={styles.cardTitle}>Medical History & Safety Screening</Text>
+                <Text style={styles.cardTitle}>Health Screening</Text>
                 <Text style={styles.subtitle}>
-                  Please answer the following health questions. This helps us ensure your safety during treatment.
+                  Please answer the following health questions. Your responses help us ensure your safety during treatment.
                 </Text>
 
                 {/* Screening Items */}
-                {SCREENING_ITEMS.map((item) => (
-                  <View key={item.key} style={styles.screeningItem}>
-                    <View style={styles.screeningInfo}>
-                      <View style={styles.screeningHeader}>
-                        <Text style={styles.screeningLabel}>{item.label}</Text>
-                        {item.warning && <Text style={styles.warningBadge}>⚠️ High Risk</Text>}
-                      </View>
-                      <Text style={styles.screeningDesc}>{item.desc}</Text>
-                    </View>
-                    <View style={styles.toggleContainer}>
-                      <TouchableOpacity
-                        style={[
-                          styles.toggleButton,
-                          styles.toggleNo,
-                          responses[item.key] === false && styles.toggleActive,
-                        ]}
-                        onPress={() => toggleResponse(item.key, responses[item.key] || false)}
-                      >
-                        <Text
-                          style={[
-                            styles.toggleText,
-                            styles.toggleTextNo,
-                            responses[item.key] === false && styles.toggleTextActive,
-                          ]}
-                        >
-                          No
-                        </Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[
-                          styles.toggleButton,
-                          styles.toggleYes,
-                          responses[item.key] === true && styles.toggleActiveYes,
-                        ]}
-                        onPress={() => toggleResponse(item.key, responses[item.key] || false)}
-                      >
-                        <Text
-                          style={[
-                            styles.toggleText,
-                            styles.toggleTextYes,
-                            responses[item.key] === true && styles.toggleTextActive,
-                          ]}
-                        >
-                          Yes
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                ))}
-
-                {/* Medication Allergies Details */}
-                {responses.medicationAllergies && (
-                  <View style={styles.detailsContainer}>
-                    <Text style={styles.detailsLabel}>Please list medication allergies:</Text>
-                    <View style={styles.textAreaContainer}>
-                      <View style={styles.textArea}>
-                        <View style={styles.textAreaInput}>
-                          <View style={styles.inputWrapper}>
-                            <View
-                              style={[
-                                styles.inputBase,
-                                { minHeight: 60, paddingVertical: 12 },
-                              ]}
-                            >
-                              <Text style={styles.inputText}>{medicationDetails || ' '}</Text>
-                              <View
-                                style={[
-                                  styles.actualInput,
-                                  { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0 },
-                                ]}
-                              >
-                                {/* This is a placeholder - in real app would use TextInput multiline */}
-                              </View>
-                            </View>
+                {SCREENING_ITEMS.map((item) => {
+                  if (item.isTextInput) {
+                    return (
+                      <View key={item.key} style={styles.textInputItem}>
+                        <View style={styles.screeningInfo}>
+                          <Text style={styles.screeningLabel}>{item.label}</Text>
+                          <Text style={styles.screeningDesc}>{item.desc}</Text>
+                        </View>
+                        <View style={styles.textInputContainer}>
+                          <View style={styles.textArea}>
+                            <Text style={styles.textAreaPlaceholder}>
+                              {currentMedications || 'List your current medications...'}
+                            </Text>
                           </View>
                         </View>
                       </View>
-                    </View>
-                  </View>
-                )}
+                    );
+                  }
 
-                {/* Current Medications */}
-                <View style={styles.medicationsContainer}>
-                  <Text style={styles.medicationsLabel}>Current Medications (optional):</Text>
-                  <View style={styles.inputContainer}>
-                    <View style={styles.inputWrapper}>
-                      <View style={[styles.inputBase, { minHeight: 60, paddingVertical: 12 }]}>
-                        <Text style={styles.inputText}>{currentMedications || ' '}</Text>
+                  return (
+                    <View key={item.key} style={styles.screeningItem}>
+                      <View style={styles.screeningInfo}>
+                        <View style={styles.screeningHeader}>
+                          <Text style={styles.screeningLabel}>{item.label}</Text>
+                          {item.warning && <Text style={styles.warningBadge}>⚠️ High Risk</Text>}
+                        </View>
+                        <Text style={styles.screeningDesc}>{item.desc}</Text>
+                      </View>
+                      <View style={styles.toggleContainer}>
+                        <TouchableOpacity
+                          style={[
+                            styles.toggleButton,
+                            styles.toggleNo,
+                            responses[item.key] === false && styles.toggleActive,
+                          ]}
+                          onPress={() => toggleResponse(item.key, responses[item.key])}
+                        >
+                          <Text
+                            style={[
+                              styles.toggleText,
+                              styles.toggleTextNo,
+                              responses[item.key] === false && styles.toggleTextActive,
+                            ]}
+                          >
+                            No
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[
+                            styles.toggleButton,
+                            styles.toggleYes,
+                            responses[item.key] === true && styles.toggleActiveYes,
+                          ]}
+                          onPress={() => toggleResponse(item.key, responses[item.key])}
+                        >
+                          <Text
+                            style={[
+                              styles.toggleText,
+                              styles.toggleTextYes,
+                              responses[item.key] === true && styles.toggleTextActive,
+                            ]}
+                          >
+                            Yes
+                          </Text>
+                        </TouchableOpacity>
                       </View>
                     </View>
-                  </View>
-                </View>
+                  );
+                })}
 
                 {/* Continue Button */}
                 <Animated.View style={[buttonStyle, { marginTop: 24 }]}>
@@ -378,10 +353,12 @@ export default function MedicalHistoryScreen() {
       <Modal visible={showWarning} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <View style={styles.warningIcon}>
+            <View style={[styles.warningIcon, isHighRisk && styles.warningIconHighRisk]}>
               <Text style={styles.warningIconText}>⚠️</Text>
             </View>
-            <Text style={styles.warningTitle}>Clinical Review Required</Text>
+            <Text style={styles.warningTitle}>
+              {isHighRisk ? 'Clinical Review Required' : 'Health History Submitted'}
+            </Text>
             <Text style={styles.warningText}>{warningMessage}</Text>
             <TouchableOpacity style={styles.warningButton} onPress={closeWarningAndContinue}>
               <LinearGradient
@@ -481,21 +458,21 @@ const styles = StyleSheet.create({
   screeningItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: TEAL + '10',
   },
   screeningInfo: {
     flex: 1,
-    marginRight: 16,
+    marginRight: 12,
   },
   screeningHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   screeningLabel: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
     color: '#fff',
   },
@@ -506,15 +483,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   screeningDesc: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#888',
-    lineHeight: 16,
+    lineHeight: 14,
   },
   toggleContainer: {
     flexDirection: 'row',
   },
   toggleButton: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 8,
     marginLeft: 4,
@@ -537,7 +514,7 @@ const styles = StyleSheet.create({
     borderColor: TEAL,
   },
   toggleText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
     color: '#888',
   },
@@ -546,54 +523,26 @@ const styles = StyleSheet.create({
   toggleTextActive: {
     color: '#fff',
   },
-  detailsContainer: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: TEAL + '10',
+  textInputItem: {
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: TEAL + '10',
   },
-  detailsLabel: {
-    fontSize: 13,
-    color: '#B3B3B3',
-    marginBottom: 8,
-  },
-  textAreaContainer: {
-    marginTop: 8,
+  textInputContainer: {
+    marginTop: 12,
   },
   textArea: {
     backgroundColor: '#1a1a1a',
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  textAreaInput: {
-    padding: 4,
-  },
-  inputWrapper: {
-    flex: 1,
-  },
-  inputBase: {
-    backgroundColor: '#1a1a1a',
     borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    padding: 12,
     borderWidth: 1,
     borderColor: TEAL + '20',
+    minHeight: 60,
   },
-  inputText: {
-    fontSize: 15,
-    color: '#fff',
-  },
-  medicationsContainer: {
-    marginTop: 24,
-  },
-  medicationsLabel: {
+  textAreaPlaceholder: {
     fontSize: 14,
-    color: TEAL,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  inputContainer: {
-    marginTop: 4,
+    color: '#666',
+    fontStyle: 'italic',
   },
   submitButton: {
     borderRadius: 12,
@@ -665,6 +614,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 24,
+  },
+  warningIconHighRisk: {
+    backgroundColor: '#FF6B6B' + '20',
   },
   warningIconText: {
     fontSize: 40,

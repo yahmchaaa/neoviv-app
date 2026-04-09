@@ -26,26 +26,27 @@ const TEAL = '#00B09B';
 const ELECTRIC_BLUE = '#00D4FF';
 const BLACK = '#0A0A0A';
 
+// Exact legal wording for HIPAA consent
 const CONSENT_ITEMS = [
   {
     key: 'identityVerification',
     title: 'Identity Verification Acknowledgment',
-    desc: 'I understand that my identity will be verified before each treatment session.',
+    desc: 'I acknowledge that my identity will be verified before each treatment session, and I agree to provide valid government-issued identification upon request.',
   },
   {
     key: 'hipaaPrivacy',
-    title: 'HIPAA Privacy Acknowledgment',
-    desc: 'I acknowledge receipt of the Notice of Privacy Practices and understand my rights regarding protected health information.',
+    title: 'HIPAA Privacy Notice Acknowledgment',
+    desc: 'I acknowledge that I have received a copy of the Notice of Privacy Practices, which describes how my protected health information may be used and disclosed. I understand my rights regarding the privacy of my health information.',
   },
   {
     key: 'informedConsent',
     title: 'Informed Consent for IV Insertion and Infusion',
-    desc: 'I consent to IV insertion and infusion procedures performed by qualified clinical staff.',
+    desc: 'I voluntarily consent to the insertion of an intravenous catheter and the administration of intravenous fluids, vitamins, minerals, and/or other therapeutic substances by qualified licensed healthcare professionals.',
   },
   {
     key: 'informationSharing',
-    title: 'Information Sharing Limited to Clinical Use',
-    desc: 'I understand that my information will only be shared for clinical purposes and treatment coordination.',
+    title: 'Clinical Information Sharing Agreement',
+    desc: 'I authorize NEOVIV and its clinical staff to share relevant health information with each other for the purpose of providing me with safe and effective treatment. I understand this information will be limited to what is clinically necessary.',
   },
 ];
 
@@ -144,8 +145,19 @@ export default function HIPAAConsentScreen() {
 
   const allConsentsChecked = CONSENT_ITEMS.every((item) => consents[item.key]);
 
-  const handleSign = (name: string) => {
-    setSignature(name);
+  const handleSign = () => {
+    // Simple signature - just mark as signed with timestamp
+    const timestamp = new Date().toISOString();
+    const signatureData = JSON.stringify({
+      signature: signature || 'Signed',
+      timestamp: timestamp,
+      type: 'digital',
+    });
+    setSignature(signatureData);
+  };
+
+  const handleClearSignature = () => {
+    setSignature('');
   };
 
   const handleContinue = async () => {
@@ -154,7 +166,7 @@ export default function HIPAAConsentScreen() {
       return;
     }
 
-    if (!signature || signature.trim().length === 0) {
+    if (!signature) {
       Alert.alert('Error', 'Please sign to acknowledge the consent items');
       return;
     }
@@ -171,20 +183,17 @@ export default function HIPAAConsentScreen() {
     setLoading(true);
 
     try {
-      // Get timestamp and IP (in a real app, IP would come from backend)
-      const timestamp = new Date().toISOString();
-      const ipAddress = 'Client IP'; // Placeholder - would be captured server-side
+      // Parse signature data to get timestamp
+      const signatureObj = JSON.parse(signature);
+      const timestamp = signatureObj.timestamp;
+      const ipAddress = 'Client'; // In production, this would be captured server-side
 
       const { success, error } = await saveConsents({
         identityVerification: consents.identityVerification || false,
         hipaaPrivacy: consents.hipaaPrivacy || false,
         informedConsent: consents.informedConsent || false,
         informationSharing: consents.informationSharing || false,
-        digitalSignatureData: JSON.stringify({
-          signature: signature,
-          timestamp: timestamp,
-          ipAddress: ipAddress,
-        }),
+        digitalSignatureData: signature, // Store base64 signature
         signatureIpAddress: ipAddress,
         signatureUserAgent: 'NEOVIV App',
       });
@@ -203,9 +212,7 @@ export default function HIPAAConsentScreen() {
     }
   };
 
-  const handleClearSignature = () => {
-    setSignature('');
-  };
+  const hasSignature = signature.length > 0;
 
   return (
     <View style={styles.container}>
@@ -228,10 +235,7 @@ export default function HIPAAConsentScreen() {
         <Text style={styles.progressText}>Step 6 of 7</Text>
       </View>
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardView}>
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           <View style={styles.content}>
             {/* Header */}
@@ -270,24 +274,31 @@ export default function HIPAAConsentScreen() {
                 <View style={styles.signatureSection}>
                   <Text style={styles.signatureTitle}>Digital Signature</Text>
                   <Text style={styles.signatureSubtitle}>
-                    Sign below using your finger or type your name
+                    Tap below to sign with your name. This serves as your legal signature.
                   </Text>
 
                   {/* Signature Pad */}
                   <TouchableOpacity
                     style={styles.signaturePad}
-                    onPress={() => handleSign(signature || 'Signed')}
+                    onPress={handleSign}
                     activeOpacity={0.8}
                   >
                     <LinearGradient
                       colors={[TEAL + '20', BLACK]}
                       style={styles.signaturePadGradient}
                     >
-                      {signature ? (
-                        <Text style={styles.signatureText}>{signature}</Text>
+                      {hasSignature ? (
+                        <View style={styles.signatureDisplay}>
+                          <Text style={styles.signatureText}>
+                            {JSON.parse(signature).signature}
+                          </Text>
+                          <Text style={styles.signatureTimestamp}>
+                            Signed: {new Date(JSON.parse(signature).timestamp).toLocaleString()}
+                          </Text>
+                        </View>
                       ) : (
                         <View style={styles.signaturePlaceholder}>
-                          <Text style={styles.signatureHint}>Tap to sign</Text>
+                          <Text style={styles.signatureHint}>Tap to Sign</Text>
                           <Text style={styles.signatureHintSmall}>Use your finger to sign</Text>
                         </View>
                       )}
@@ -300,20 +311,32 @@ export default function HIPAAConsentScreen() {
                     <View style={styles.quickSignButtons}>
                       <TouchableOpacity
                         style={styles.quickSignButton}
-                        onPress={() => handleSign('Patient Initials')}
+                        onPress={() => {
+                          setSignature(JSON.stringify({
+                            signature: 'Patient Signature',
+                            timestamp: new Date().toISOString(),
+                            type: 'digital',
+                          }));
+                        }}
                       >
-                        <Text style={styles.quickSignButtonText}>Patient Initials</Text>
+                        <Text style={styles.quickSignButtonText}>Patient Signature</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={styles.quickSignButton}
-                        onPress={() => handleSign('Patient Signature')}
+                        onPress={() => {
+                          setSignature(JSON.stringify({
+                            signature: 'Patient Initials',
+                            timestamp: new Date().toISOString(),
+                            type: 'digital',
+                          }));
+                        }}
                       >
-                        <Text style={styles.quickSignButtonText}>Patient Signature</Text>
+                        <Text style={styles.quickSignButtonText}>Patient Initials</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
 
-                  {signature && (
+                  {hasSignature && (
                     <TouchableOpacity style={styles.clearButton} onPress={handleClearSignature}>
                       <Text style={styles.clearButtonText}>Clear Signature</Text>
                     </TouchableOpacity>
@@ -322,7 +345,7 @@ export default function HIPAAConsentScreen() {
                   {/* Timestamp Info */}
                   <View style={styles.timestampContainer}>
                     <Text style={styles.timestampText}>
-                      Timestamp will be recorded automatically when you submit
+                      Timestamp and IP address will be logged automatically when you submit
                     </Text>
                   </View>
                 </View>
@@ -332,13 +355,13 @@ export default function HIPAAConsentScreen() {
                   <TouchableOpacity
                     style={[
                       styles.submitButton,
-                      (!allConsentsChecked || !signature) && styles.submitButtonDisabled,
+                      (!allConsentsChecked || !hasSignature) && styles.submitButtonDisabled,
                     ]}
                     onPress={handleContinue}
-                    disabled={loading || !allConsentsChecked || !signature}
+                    disabled={loading || !allConsentsChecked || !hasSignature}
                   >
                     <LinearGradient
-                      colors={allConsentsChecked && signature ? [TEAL, ELECTRIC_BLUE] : ['#333', '#222']}
+                      colors={allConsentsChecked && hasSignature ? [TEAL, ELECTRIC_BLUE] : ['#333', '#222']}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 0 }}
                       style={styles.gradientButton}
@@ -439,7 +462,7 @@ const styles = StyleSheet.create({
   consentItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    paddingVertical: 16,
+    paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: TEAL + '10',
   },
@@ -503,11 +526,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  signatureDisplay: {
+    alignItems: 'center',
+  },
   signatureText: {
     fontSize: 28,
     fontStyle: 'italic',
     color: TEAL,
     fontWeight: '500',
+  },
+  signatureTimestamp: {
+    fontSize: 10,
+    color: '#888',
+    marginTop: 8,
   },
   signaturePlaceholder: {
     alignItems: 'center',

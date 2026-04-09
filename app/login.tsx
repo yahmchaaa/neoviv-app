@@ -42,7 +42,6 @@ export default function CreateAccountScreen() {
   const orb3X = useSharedValue(0);
 
   React.useEffect(() => {
-    // Floating animation for orbs
     orb1Y.value = withRepeat(
       withSequence(
         withTiming(-30, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
@@ -99,24 +98,15 @@ export default function CreateAccountScreen() {
   }, []);
 
   const orb1Style = useAnimatedStyle(() => ({
-    transform: [
-      { translateY: orb1Y.value },
-      { translateX: orb1X.value },
-    ],
+    transform: [{ translateY: orb1Y.value }, { translateX: orb1X.value }],
   }));
 
   const orb2Style = useAnimatedStyle(() => ({
-    transform: [
-      { translateY: orb2Y.value },
-      { translateX: orb2X.value },
-    ],
+    transform: [{ translateY: orb2Y.value }, { translateX: orb2X.value }],
   }));
 
   const orb3Style = useAnimatedStyle(() => ({
-    transform: [
-      { translateY: orb3Y.value },
-      { translateX: orb3X.value },
-    ],
+    transform: [{ translateY: orb3Y.value }, { translateX: orb3X.value }],
   }));
 
   const buttonStyle = useAnimatedStyle(() => ({
@@ -140,7 +130,6 @@ export default function CreateAccountScreen() {
       return;
     }
 
-    // Button pulse animation
     buttonScale.value = withRepeat(
       withSequence(
         withTiming(0.95, { duration: 300, useNativeDriver: true }),
@@ -173,30 +162,16 @@ export default function CreateAccountScreen() {
     <View style={styles.container}>
       {/* Animated Background Orbs */}
       <Animated.View style={[styles.orb, styles.orb1, orb1Style]}>
-        <LinearGradient
-          colors={[TEAL + '40', ELECTRIC_BLUE + '20']}
-          style={styles.orbGradient}
-        />
+        <LinearGradient colors={[TEAL + '40', ELECTRIC_BLUE + '20']} style={styles.orbGradient} />
       </Animated.View>
-
       <Animated.View style={[styles.orb, styles.orb2, orb2Style]}>
-        <LinearGradient
-          colors={[ELECTRIC_BLUE + '30', TEAL + '20']}
-          style={styles.orbGradient}
-        />
+        <LinearGradient colors={[ELECTRIC_BLUE + '30', TEAL + '20']} style={styles.orbGradient} />
       </Animated.View>
-
       <Animated.View style={[styles.orb, styles.orb3, orb3Style]}>
-        <LinearGradient
-          colors={[TEAL + '30', ELECTRIC_BLUE + '20']}
-          style={styles.orbGradient}
-        />
+        <LinearGradient colors={[TEAL + '30', ELECTRIC_BLUE + '20']} style={styles.orbGradient} />
       </Animated.View>
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardView}>
         <View style={styles.content}>
           {/* Logo and Tagline */}
           <View style={styles.header}>
@@ -248,11 +223,7 @@ export default function CreateAccountScreen() {
               </View>
 
               <Animated.View style={buttonStyle}>
-                <TouchableOpacity
-                  style={styles.submitButton}
-                  onPress={handleSignUp}
-                  disabled={loading}
-                >
+                <TouchableOpacity style={styles.submitButton} onPress={handleSignUp} disabled={loading}>
                   <LinearGradient
                     colors={[TEAL, ELECTRIC_BLUE]}
                     start={{ x: 0, y: 0 }}
@@ -266,13 +237,8 @@ export default function CreateAccountScreen() {
                 </TouchableOpacity>
               </Animated.View>
 
-              <TouchableOpacity
-                style={styles.switchButton}
-                onPress={() => router.push('/signin')}
-              >
-                <Text style={styles.switchButtonText}>
-                  Already have an account? Sign In
-                </Text>
+              <TouchableOpacity style={styles.logInButton} onPress={() => router.push('/signin')}>
+                <Text style={styles.logInButtonText}>Log In</Text>
               </TouchableOpacity>
             </View>
           </BlurView>
@@ -363,15 +329,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  switchButton: {
+  logInButton: {
     marginTop: 24,
     alignItems: 'center',
   },
-  switchButtonText: {
+  logInButtonText: {
     color: ELECTRIC_BLUE,
     fontSize: 14,
+    fontWeight: '600',
   },
-  // Orb styles
   orb: {
     position: 'absolute',
     borderRadius: 999,

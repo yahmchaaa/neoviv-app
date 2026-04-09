@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -27,9 +27,10 @@ const ELECTRIC_BLUE = '#00D4FF';
 const BLACK = '#0A0A0A';
 
 export default function VerifyEmailScreen() {
-  const [otp, setOtp] = useState('');
+  const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
+  const inputRefs = useRef<(TextInput | null)[]>([]);
   const buttonScale = useSharedValue(1);
 
   // Animation values for floating orbs
@@ -112,9 +113,36 @@ export default function VerifyEmailScreen() {
     transform: [{ scale: buttonScale.value }],
   }));
 
-  const handleVerify = async () => {
-    if (otp.length !== 6) {
-      Alert.alert('Error', 'Please enter the 6-digit code');
+  const handleOtpChange = (value: string, index: number) => {
+    const newOtpValues = [...otpValues];
+    newOtpValues[index] = value;
+    setOtpValues(newOtpValues);
+
+    // Auto-focus next input
+    if (value.length === 1 && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+
+    // Auto-submit when all filled
+    if (value.length === 1 && index === 5) {
+      const otp = newOtpValues.join('');
+      if (newOtpValues.every(v => v.length === 1)) {
+        handleVerify(otp);
+      }
+    }
+  };
+
+  const handleKeyPress = (e: any, index: number) => {
+    if (e.nativeEvent.key === 'Backspace' && otpValues[index] === '' && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleVerify = async (otp?: string) => {
+    const code = otp || otpValues.join('');
+    
+    if (code.length !== 6) {
+      Alert.alert('Error', 'Please enter the complete 6-digit code');
       return;
     }
 
@@ -130,7 +158,7 @@ export default function VerifyEmailScreen() {
     setLoading(true);
 
     try {
-      const { success, error } = await verifyOTP(otp);
+      const { success, error } = await verifyOTP(code);
       
       if (error) {
         Alert.alert('Verification Failed', error);
@@ -154,6 +182,8 @@ export default function VerifyEmailScreen() {
         Alert.alert('Error', error);
       } else {
         Alert.alert('Success', 'A new verification code has been sent to your email');
+        setOtpValues(['', '', '', '', '', '']);
+        inputRefs.current[0]?.focus();
       }
     } catch (err) {
       Alert.alert('Error', 'An unexpected error occurred');
@@ -183,10 +213,7 @@ export default function VerifyEmailScreen() {
         <Text style={styles.progressText}>Step 2 of 7</Text>
       </View>
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardView}>
         <View style={styles.content}>
           {/* Logo */}
           <View style={styles.header}>
@@ -197,31 +224,35 @@ export default function VerifyEmailScreen() {
           {/* Frosted Glass Card */}
           <BlurView intensity={20} tint="dark" style={styles.glassCard}>
             <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Verify Email</Text>
+              <Text style={styles.cardTitle}>Email Verification</Text>
               <Text style={styles.subtitle}>
                 Enter the 6-digit code sent to your email address
               </Text>
 
+              {/* 6 Individual OTP Input Boxes */}
               <View style={styles.otpContainer}>
-                <TextInput
-                  style={styles.otpInput}
-                  placeholder="000000"
-                  placeholderTextColor="#666"
-                  value={otp}
-                  onChangeText={setOtp}
-                  keyboardType="number-pad"
-                  maxLength={6}
-                  textAlign="center"
-                  letterSpacing={20}
-                />
+                {[0, 1, 2, 3, 4, 5].map((index) => (
+                  <TextInput
+                    key={index}
+                    ref={(ref) => (inputRefs.current[index] = ref)}
+                    style={[
+                      styles.otpInput,
+                      otpValues[index] && styles.otpInputFilled,
+                    ]}
+                    placeholder="•"
+                    placeholderTextColor={TEAL + '60'}
+                    value={otpValues[index]}
+                    onChangeText={(value) => handleOtpChange(value.slice(-1), index)}
+                    onKeyPress={(e) => handleKeyPress(e, index)}
+                    keyboardType="number-pad"
+                    maxLength={1}
+                    textAlign="center"
+                  />
+                ))}
               </View>
 
               <Animated.View style={buttonStyle}>
-                <TouchableOpacity
-                  style={styles.submitButton}
-                  onPress={handleVerify}
-                  disabled={loading}
-                >
+                <TouchableOpacity style={styles.submitButton} onPress={() => handleVerify()} disabled={loading}>
                   <LinearGradient
                     colors={[TEAL, ELECTRIC_BLUE]}
                     start={{ x: 0, y: 0 }}
@@ -229,17 +260,13 @@ export default function VerifyEmailScreen() {
                     style={styles.gradientButton}
                   >
                     <Text style={styles.submitButtonText}>
-                      {loading ? 'Verifying...' : 'Verify Code'}
+                      {loading ? 'Verifying...' : 'Verify'}
                     </Text>
                   </LinearGradient>
                 </TouchableOpacity>
               </Animated.View>
 
-              <TouchableOpacity
-                style={styles.resendButton}
-                onPress={handleResend}
-                disabled={resending}
-              >
+              <TouchableOpacity style={styles.resendButton} onPress={handleResend} disabled={resending}>
                 <Text style={styles.resendButtonText}>
                   {resending ? 'Sending...' : "Didn't receive the code? Resend"}
                 </Text>
@@ -330,17 +357,24 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   otpContainer: {
-    marginBottom: 24,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 32,
   },
   otpInput: {
+    width: 48,
+    height: 56,
     backgroundColor: '#1a1a1a',
     borderRadius: 12,
-    padding: 20,
-    fontSize: 24,
-    color: '#fff',
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: TEAL + '30',
+    fontSize: 24,
     fontWeight: 'bold',
+    color: '#fff',
+  },
+  otpInputFilled: {
+    borderColor: TEAL,
+    backgroundColor: TEAL + '20',
   },
   submitButton: {
     borderRadius: 12,
