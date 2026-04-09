@@ -118,7 +118,7 @@ export default function NotificationPermissionScreen() {
           <LinearGradient colors={[TEAL + '40', ELECTRIC_BLUE + '20']} style={styles.orbGradient} />
         </Animated.View>
         <Animated.View style={[styles.orb, styles.orb2]}>
-          <LinearGradient colors={[ELECTRIC_BLUE + '30', TEAL + '20']} style={styles.orbGradient} />
+          <LinearGradient colors={[ELECTRIC_BLUE + '30', TEAL + '33']} style={styles.orbGradient} />
         </Animated.View>
         <Animated.View style={[styles.orb, styles.orb3]}>
           <LinearGradient colors={[TEAL + '30', ELECTRIC_BLUE + '20']} style={styles.orbGradient} />
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: TEAL + '20',
+    borderColor: TEAL + '33',
   },
   notificationContent: {
     flexDirection: 'row',
@@ -337,3 +337,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+

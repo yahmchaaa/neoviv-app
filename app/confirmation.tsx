@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: TEAL + '20',
+    backgroundColor: TEAL + '33',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: TEAL + '20',
+    borderColor: TEAL + '33',
   },
   trackingContent: {
     padding: 16,
@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: TEAL + '20',
+    borderColor: TEAL + '33',
   },
   etaGradient: {
     padding: 20,
@@ -396,7 +396,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: TEAL + '20',
+    borderColor: TEAL + '33',
   },
   clinicianContent: {
     flexDirection: 'row',
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: TEAL + '20',
+    backgroundColor: TEAL + '33',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -446,7 +446,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: TEAL + '20',
+    backgroundColor: TEAL + '33',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -495,3 +495,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+

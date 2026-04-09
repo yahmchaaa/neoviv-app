@@ -222,7 +222,7 @@ export default function HIPAAConsentScreen() {
         <LinearGradient colors={[TEAL + '40', ELECTRIC_BLUE + '20']} style={styles.orbGradient} />
       </Animated.View>
       <Animated.View style={[styles.orb, styles.orb2, orb2Style]}>
-        <LinearGradient colors={[ELECTRIC_BLUE + '30', TEAL + '20']} style={styles.orbGradient} />
+        <LinearGradient colors={[ELECTRIC_BLUE + '30', TEAL + '33']} style={styles.orbGradient} />
       </Animated.View>
       <Animated.View style={[styles.orb, styles.orb3, orb3Style]}>
         <LinearGradient colors={[TEAL + '30', ELECTRIC_BLUE + '20']} style={styles.orbGradient} />
@@ -285,7 +285,7 @@ export default function HIPAAConsentScreen() {
                     activeOpacity={0.8}
                   >
                     <LinearGradient
-                      colors={[TEAL + '20', BLACK]}
+                      colors={[TEAL + '33', BLACK]}
                       style={styles.signaturePadGradient}
                     >
                       {hasSignature ? (
@@ -442,7 +442,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: TEAL + '20',
+    borderColor: TEAL + '33',
   },
   cardContent: {
     padding: 24,
@@ -569,7 +569,7 @@ const styles = StyleSheet.create({
   },
   quickSignButton: {
     flex: 1,
-    backgroundColor: TEAL + '20',
+    backgroundColor: TEAL + '33',
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 8,
@@ -651,3 +651,4 @@ const styles = StyleSheet.create({
     opacity: 0.3,
   },
 });
+

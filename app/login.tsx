@@ -166,7 +166,7 @@ export default function CreateAccountScreen() {
         <LinearGradient colors={[TEAL + '40', ELECTRIC_BLUE + '20']} style={styles.orbGradient} />
       </Animated.View>
       <Animated.View style={[styles.orb, styles.orb2, orb2Style]}>
-        <LinearGradient colors={[ELECTRIC_BLUE + '30', TEAL + '20']} style={styles.orbGradient} />
+        <LinearGradient colors={[ELECTRIC_BLUE + '30', TEAL + '33']} style={styles.orbGradient} />
       </Animated.View>
       <Animated.View style={[styles.orb, styles.orb3, orb3Style]}>
         <LinearGradient colors={[TEAL + '30', ELECTRIC_BLUE + '20']} style={styles.orbGradient} />
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: TEAL + '20',
+    borderColor: TEAL + '33',
   },
   cardContent: {
     padding: 32,
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
     borderWidth: 1,
-    borderColor: TEAL + '20',
+    borderColor: TEAL + '33',
   },
   submitButton: {
     marginTop: 16,
@@ -371,3 +371,4 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
 });
+

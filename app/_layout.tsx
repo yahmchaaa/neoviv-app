@@ -23,3 +23,4 @@ const styles = StyleSheet.create({
     backgroundColor: '#0A0A0A',
   },
 });
+

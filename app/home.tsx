@@ -228,7 +228,7 @@ export default function HomeScreen() {
         <LinearGradient colors={[TEAL + '50', ELECTRIC_BLUE + '30']} style={styles.orbGradient} />
       </Animated.View>
       <Animated.View style={[styles.orb, styles.orb2, orb2Style]}>
-        <LinearGradient colors={[ELECTRIC_BLUE + '40', TEAL + '20']} style={styles.orbGradient} />
+        <LinearGradient colors={[ELECTRIC_BLUE + '40', TEAL + '33']} style={styles.orbGradient} />
       </Animated.View>
       <Animated.View style={[styles.orb, styles.orb3, orb3Style]}>
         <LinearGradient colors={[TEAL + '40', ELECTRIC_BLUE + '20']} style={styles.orbGradient} />
@@ -498,7 +498,7 @@ const styles = StyleSheet.create({
   bookOptionBlur: {
     borderRadius: 20,
     borderWidth: 2,
-    borderColor: TEAL + '20',
+    borderColor: TEAL + '33',
     overflow: 'hidden',
   },
   bookOptionContent: {
@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: TEAL + '20',
+    backgroundColor: TEAL + '33',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
@@ -562,7 +562,7 @@ const styles = StyleSheet.create({
   dripCardBlur: {
     borderRadius: 24,
     borderWidth: 2,
-    borderColor: TEAL + '20',
+    borderColor: TEAL + '33',
     overflow: 'hidden',
   },
   dripGradient: {
@@ -596,7 +596,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: TEAL + '20',
+    backgroundColor: TEAL + '33',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
@@ -663,7 +663,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: TEAL + '20',
+    borderColor: TEAL + '33',
   },
   navItems: {
     flexDirection: 'row',
@@ -711,3 +711,4 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
 });
+

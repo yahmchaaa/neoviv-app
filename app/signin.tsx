@@ -180,7 +180,7 @@ export default function SignInScreen() {
 
       <Animated.View style={[styles.orb, styles.orb2, orb2Style]}>
         <LinearGradient
-          colors={[ELECTRIC_BLUE + '30', TEAL + '20']}
+          colors={[ELECTRIC_BLUE + '30', TEAL + '33']}
           style={styles.orbGradient}
         />
       </Animated.View>
@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: TEAL + '20',
+    borderColor: TEAL + '33',
   },
   cardContent: {
     padding: 32,
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
     borderWidth: 1,
-    borderColor: TEAL + '20',
+    borderColor: TEAL + '33',
   },
   submitButton: {
     marginTop: 16,
@@ -391,3 +391,4 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
 });
+
