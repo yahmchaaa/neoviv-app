@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import LoadingModal from '../../src/components/LoadingModal';
 import {
   View,
   Text,
@@ -260,11 +261,12 @@ export default function VerifyEmailScreen() {
                     style={styles.gradientButton}
                   >
                     <Text style={styles.submitButtonText}>
-                      {loading ? 'Verifying...' : 'Verify'}
+                      Verify
                     </Text>
                   </LinearGradient>
                 </TouchableOpacity>
               </Animated.View>
+              <LoadingModal visible={loading} message="Verifying..." />
 
               <TouchableOpacity style={styles.resendButton} onPress={handleResend} disabled={resending}>
                 <Text style={styles.resendButtonText}>

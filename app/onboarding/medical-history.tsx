@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import LoadingModal from '../../src/components/LoadingModal';
 import {
   View,
   Text,
@@ -338,11 +339,12 @@ export default function MedicalHistoryScreen() {
                       style={styles.gradientButton}
                     >
                       <Text style={styles.submitButtonText}>
-                        {loading ? 'Saving...' : 'Continue'}
+                        Continue
                       </Text>
                     </LinearGradient>
                   </TouchableOpacity>
                 </Animated.View>
+                <LoadingModal visible={loading} message="Saving..." />
               </View>
             </BlurView>
           </View>

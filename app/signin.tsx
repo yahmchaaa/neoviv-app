@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import LoadingModal from '../src/components/LoadingModal';
 import {
   View,
   Text,
@@ -246,11 +247,12 @@ export default function SignInScreen() {
                     style={styles.gradientButton}
                   >
                     <Text style={styles.submitButtonText}>
-                      {loading ? 'Signing In...' : 'Sign In'}
+                      Sign In
                     </Text>
                   </LinearGradient>
                 </TouchableOpacity>
               </Animated.View>
+              <LoadingModal visible={loading} message="Signing In..." />
 
               <TouchableOpacity
                 style={styles.switchButton}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import LoadingModal from '../../src/components/LoadingModal';
 import {
   View,
   Text,
@@ -367,11 +368,12 @@ export default function HIPAAConsentScreen() {
                       style={styles.gradientButton}
                     >
                       <Text style={styles.submitButtonText}>
-                        {loading ? 'Submitting...' : 'Continue'}
+                        Continue
                       </Text>
                     </LinearGradient>
                   </TouchableOpacity>
                 </Animated.View>
+                <LoadingModal visible={loading} message="Submitting..." />
               </View>
             </BlurView>
           </View>

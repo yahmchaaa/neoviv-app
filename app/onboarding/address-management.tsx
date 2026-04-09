@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import LoadingModal from '../../src/components/LoadingModal';
 import {
   View,
   Text,
@@ -409,7 +410,7 @@ export default function AddressManagementScreen() {
                             style={styles.saveButtonGradient}
                           >
                             <Text style={styles.saveButtonText}>
-                              {saving ? 'Saving...' : 'Save Location'}
+                              Save Location
                             </Text>
                           </LinearGradient>
                         </TouchableOpacity>
@@ -431,6 +432,7 @@ export default function AddressManagementScreen() {
                     </LinearGradient>
                   </TouchableOpacity>
                 </Animated.View>
+                <LoadingModal visible={saving} message="Saving..." />
               </View>
             </BlurView>
           </View>

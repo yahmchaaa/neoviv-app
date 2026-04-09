@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import LoadingModal from '../src/components/LoadingModal';
 import {
   View,
   Text,
@@ -231,11 +232,12 @@ export default function CreateAccountScreen() {
                     style={styles.gradientButton}
                   >
                     <Text style={styles.submitButtonText}>
-                      {loading ? 'Creating Account...' : 'Sign Up'}
+                      Sign Up
                     </Text>
                   </LinearGradient>
                 </TouchableOpacity>
               </Animated.View>
+              <LoadingModal visible={loading} message="Creating Account..." />
 
               <TouchableOpacity style={styles.logInButton} onPress={() => router.push('/signin')}>
                 <Text style={styles.logInButtonText}>Log In</Text>
