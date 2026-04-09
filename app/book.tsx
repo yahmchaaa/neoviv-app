@@ -15,6 +15,7 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { BlurView } from 'expo-blur';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import LoadingAnimation from '../components/LoadingAnimation';
 
 const LOCATION_TYPES = [
   { id: 'home', label: 'Home', icon: '🏠' },
@@ -264,15 +265,7 @@ export default function BookScreen() {
               },
             ]}
           >
-            {isSubmitting ? (
-              <Text style={styles.logoPopText}>⏳</Text>
-            ) : (
-              <Text style={styles.logoPopText}>💧</Text>
-            )}
-          </Animated.View>
-          {isSubmitting && (
-            <Text style={styles.submittingText}>Submitting your booking...</Text>
-          )}
+            <LoadingAnimation />
         </View>
       )}
 
