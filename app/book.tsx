@@ -52,11 +52,11 @@ export default function BookScreen() {
   const [showConfirmAnimation, setShowConfirmAnimation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Get drip data from params
+  // Get drop data from params
   const dripId = params.id as string || 'energy-boost';
-  const dripName = params.name as string || 'Energy Boost';
+  const dripName = params.name as string || 'Reset';
   const dripPrice = parseInt(params.price as string) || 249;
-  const dripDescription = params.description as string || 'B-Complex, B12 & amino acids';
+  const dripDescription = params.description as string || 'Recharge with B-vitamins & amino acids';
 
   // Animation values
   const headerSlide = useRef(new Animated.Value(-100)).current;
@@ -302,7 +302,7 @@ export default function BookScreen() {
             <View style={styles.placeholder} />
           </Animated.View>
 
-          {/* Selected Drip Card */}
+          {/* Selected Drop Card */}
           <Animated.View
             style={[
               styles.selectedDripCard,

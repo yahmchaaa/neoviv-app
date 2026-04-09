@@ -129,7 +129,7 @@ function AnimatedCard({ item, index, navigation }: { item: typeof DRIPS[0]; inde
         <Text style={styles.cardName}>{item.name}</Text>
         <Text style={styles.cardDescription}>{item.description}</Text>
         <View style={styles.bookButton}>
-          <Text style={styles.bookButtonText}>Book Now</Text>
+          <Text style={styles.bookButtonText}>Book a Drop</Text>
         </View>
       </Pressable>
     </Animated.View>
@@ -229,7 +229,7 @@ export default function MenuScreen() {
           },
         ]}
       >
-        <Text style={styles.headerTitle}>IV Drip Menu</Text>
+        <Text style={styles.headerTitle}>IV Drop Menu</Text>
         <Pressable style={styles.profileButton}>
           <View style={styles.profileIcon} />
         </Pressable>
@@ -238,7 +238,7 @@ export default function MenuScreen() {
       {/* Most Requested Carousel */}
       <View style={styles.carouselSection}>
         <Text style={styles.sectionTitle}>Most Requested</Text>
-        <Text style={styles.sectionSubtitle}>Our most booked drips</Text>
+        <Text style={styles.sectionSubtitle}>Our most booked drops</Text>
         <Animated.ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -294,9 +294,9 @@ export default function MenuScreen() {
         </View>
       </View>
 
-      {/* All Drips List */}
+      {/* All Drops List */}
       <View style={styles.menuSection}>
-        <Text style={styles.sectionTitle}>All Drips</Text>
+        <Text style={styles.sectionTitle}>All Drops</Text>
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.menuList}
