@@ -23,7 +23,7 @@ const CURRENT_STATUS = 'en_route'; // This would come from the API in real app
 const MOCK_ORDERS = [
   {
     id: 'ORD-001',
-    dripName: 'Energy Boost',
+    dripName: 'Reset',
     dripPrice: 249,
     clinicianName: 'Dr. Sarah Mitchell',
     eta: 25,
@@ -245,7 +245,7 @@ export default function OrdersScreen() {
           <PastOrderCard
             order={{
               id: 'ORD-000',
-              dripName: 'NAD+',
+              dripName: 'NAD+ Restore',
               dripPrice: 399,
               date: 'Mar 10, 2026',
               status: 'completed',

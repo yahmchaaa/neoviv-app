@@ -30,10 +30,10 @@ const ELECTRIC_BLUE = '#00D4FF';
 const BLACK = '#0A0A0A';
 
 const DRIPS = [
-  { id: '1', name: 'Hydration Basics', price: 199, desc: 'Essential fluids & electrolytes' },
-  { id: '2', name: 'Energy Boost', price: 249, desc: 'B-Complex, B12 & amino acids' },
-  { id: '3', name: 'Immunity Shield', price: 299, desc: 'Vitamin C, Zinc & Glutathione' },
-  { id: '4', name: 'NAD+', price: 399, desc: 'Cellular repair & anti-aging' },
+  { id: '1', name: 'Restore', price: 199, desc: 'Essential hydration & wellness reset' },
+  { id: '2', name: 'Reset', price: 249, desc: 'Recharge with B-vitamins & amino acids' },
+  { id: '3', name: 'Recover+', price: 299, desc: 'Advanced recovery with NAD+ & glutathione' },
+  { id: '4', name: 'NAD+ Restore', price: 399, desc: 'Cellular repair & anti-aging powerhouse' },
 ];
 
 const NAV_ITEMS = [
