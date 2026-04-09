@@ -14,7 +14,11 @@
       "backgroundColor": "#0A0A0A"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.super100.neovivapp",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -33,6 +37,12 @@
     ],
     "experiments": {
       "stableLayout": "floating-navigation"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3ee16cfe-8ae6-4bee-92f4-d3bc70274c09"
+      }
     }
   }
 }

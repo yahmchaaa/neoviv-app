@@ -20,17 +20,16 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { router } from 'expo-router';
-import { signUp } from '../src/services/auth';
+import { verifyOTP, resendOTP } from '../../src/services/auth';
 
 const TEAL = '#00B09B';
 const ELECTRIC_BLUE = '#00D4FF';
 const BLACK = '#0A0A0A';
 
-export default function CreateAccountScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+export default function VerifyEmailScreen() {
+  const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
   const buttonScale = useSharedValue(1);
 
   // Animation values for floating orbs
@@ -42,7 +41,6 @@ export default function CreateAccountScreen() {
   const orb3X = useSharedValue(0);
 
   React.useEffect(() => {
-    // Floating animation for orbs
     orb1Y.value = withRepeat(
       withSequence(
         withTiming(-30, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
@@ -99,48 +97,27 @@ export default function CreateAccountScreen() {
   }, []);
 
   const orb1Style = useAnimatedStyle(() => ({
-    transform: [
-      { translateY: orb1Y.value },
-      { translateX: orb1X.value },
-    ],
+    transform: [{ translateY: orb1Y.value }, { translateX: orb1X.value }],
   }));
 
   const orb2Style = useAnimatedStyle(() => ({
-    transform: [
-      { translateY: orb2Y.value },
-      { translateX: orb2X.value },
-    ],
+    transform: [{ translateY: orb2Y.value }, { translateX: orb2X.value }],
   }));
 
   const orb3Style = useAnimatedStyle(() => ({
-    transform: [
-      { translateY: orb3Y.value },
-      { translateX: orb3X.value },
-    ],
+    transform: [{ translateY: orb3Y.value }, { translateX: orb3X.value }],
   }));
 
   const buttonStyle = useAnimatedStyle(() => ({
     transform: [{ scale: buttonScale.value }],
   }));
 
-  const handleSignUp = async () => {
-    // Validation
-    if (!email || !password || !confirmPassword) {
-      Alert.alert('Error', 'Please fill in all fields');
+  const handleVerify = async () => {
+    if (otp.length !== 6) {
+      Alert.alert('Error', 'Please enter the 6-digit code');
       return;
     }
 
-    if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
-      return;
-    }
-
-    if (password.length < 8) {
-      Alert.alert('Error', 'Password must be at least 8 characters');
-      return;
-    }
-
-    // Button pulse animation
     buttonScale.value = withRepeat(
       withSequence(
         withTiming(0.95, { duration: 300, useNativeDriver: true }),
@@ -153,13 +130,13 @@ export default function CreateAccountScreen() {
     setLoading(true);
 
     try {
-      const { error } = await signUp(email, password);
+      const { success, error } = await verifyOTP(otp);
       
       if (error) {
-        Alert.alert('Sign Up Failed', error);
+        Alert.alert('Verification Failed', error);
       } else {
-        // Navigate to email verification (Step 2)
-        router.replace('/onboarding/verify-email');
+        // Navigate to Personal Information (Step 3)
+        router.replace('/onboarding/personal-info');
       }
     } catch (err) {
       Alert.alert('Error', 'An unexpected error occurred');
@@ -169,36 +146,49 @@ export default function CreateAccountScreen() {
     }
   };
 
+  const handleResend = async () => {
+    setResending(true);
+    try {
+      const { success, error } = await resendOTP();
+      if (error) {
+        Alert.alert('Error', error);
+      } else {
+        Alert.alert('Success', 'A new verification code has been sent to your email');
+      }
+    } catch (err) {
+      Alert.alert('Error', 'An unexpected error occurred');
+    } finally {
+      setResending(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Animated Background Orbs */}
       <Animated.View style={[styles.orb, styles.orb1, orb1Style]}>
-        <LinearGradient
-          colors={[TEAL + '40', ELECTRIC_BLUE + '20']}
-          style={styles.orbGradient}
-        />
+        <LinearGradient colors={[TEAL + '40', ELECTRIC_BLUE + '20']} style={styles.orbGradient} />
       </Animated.View>
-
       <Animated.View style={[styles.orb, styles.orb2, orb2Style]}>
-        <LinearGradient
-          colors={[ELECTRIC_BLUE + '30', TEAL + '20']}
-          style={styles.orbGradient}
-        />
+        <LinearGradient colors={[ELECTRIC_BLUE + '30', TEAL + '20']} style={styles.orbGradient} />
+      </Animated.View>
+      <Animated.View style={[styles.orb, styles.orb3, orb3Style]}>
+        <LinearGradient colors={[TEAL + '30', ELECTRIC_BLUE + '20']} style={styles.orbGradient} />
       </Animated.View>
 
-      <Animated.View style={[styles.orb, styles.orb3, orb3Style]}>
-        <LinearGradient
-          colors={[TEAL + '30', ELECTRIC_BLUE + '20']}
-          style={styles.orbGradient}
-        />
-      </Animated.View>
+      {/* Progress Bar */}
+      <View style={styles.progressContainer}>
+        <View style={styles.progressBar}>
+          <View style={[styles.progressFill, { width: '28.5%' }]} />
+        </View>
+        <Text style={styles.progressText}>Step 2 of 7</Text>
+      </View>
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
         <View style={styles.content}>
-          {/* Logo and Tagline */}
+          {/* Logo */}
           <View style={styles.header}>
             <Text style={styles.logo}>NEOVIV</Text>
             <Text style={styles.tagline}>drops of life</Text>
@@ -207,50 +197,29 @@ export default function CreateAccountScreen() {
           {/* Frosted Glass Card */}
           <BlurView intensity={20} tint="dark" style={styles.glassCard}>
             <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Create Account</Text>
+              <Text style={styles.cardTitle}>Verify Email</Text>
+              <Text style={styles.subtitle}>
+                Enter the 6-digit code sent to your email address
+              </Text>
 
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Email</Text>
+              <View style={styles.otpContainer}>
                 <TextInput
-                  style={styles.input}
-                  placeholder="Enter your email"
+                  style={styles.otpInput}
+                  placeholder="000000"
                   placeholderTextColor="#666"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Password</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Create a password"
-                  placeholderTextColor="#666"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Confirm Password</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Confirm your password"
-                  placeholderTextColor="#666"
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  secureTextEntry
+                  value={otp}
+                  onChangeText={setOtp}
+                  keyboardType="number-pad"
+                  maxLength={6}
+                  textAlign="center"
+                  letterSpacing={20}
                 />
               </View>
 
               <Animated.View style={buttonStyle}>
                 <TouchableOpacity
                   style={styles.submitButton}
-                  onPress={handleSignUp}
+                  onPress={handleVerify}
                   disabled={loading}
                 >
                   <LinearGradient
@@ -260,18 +229,19 @@ export default function CreateAccountScreen() {
                     style={styles.gradientButton}
                   >
                     <Text style={styles.submitButtonText}>
-                      {loading ? 'Creating Account...' : 'Sign Up'}
+                      {loading ? 'Verifying...' : 'Verify Code'}
                     </Text>
                   </LinearGradient>
                 </TouchableOpacity>
               </Animated.View>
 
               <TouchableOpacity
-                style={styles.switchButton}
-                onPress={() => router.push('/signin')}
+                style={styles.resendButton}
+                onPress={handleResend}
+                disabled={resending}
               >
-                <Text style={styles.switchButtonText}>
-                  Already have an account? Sign In
+                <Text style={styles.resendButtonText}>
+                  {resending ? 'Sending...' : "Didn't receive the code? Resend"}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -286,6 +256,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: BLACK,
+  },
+  progressContainer: {
+    paddingHorizontal: 24,
+    paddingTop: 60,
+    paddingBottom: 20,
+  },
+  progressBar: {
+    height: 4,
+    backgroundColor: '#1a1a1a',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: TEAL,
+    borderRadius: 2,
+  },
+  progressText: {
+    color: '#888',
+    fontSize: 12,
+    marginTop: 8,
+    textAlign: 'center',
   },
   keyboardView: {
     flex: 1,
@@ -328,28 +320,29 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
     textAlign: 'center',
-    marginBottom: 32,
+    marginBottom: 12,
   },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  inputLabel: {
+  subtitle: {
     fontSize: 14,
-    color: TEAL,
-    marginBottom: 8,
-    fontWeight: '600',
+    color: '#B3B3B3',
+    textAlign: 'center',
+    marginBottom: 32,
+    lineHeight: 20,
   },
-  input: {
+  otpContainer: {
+    marginBottom: 24,
+  },
+  otpInput: {
     backgroundColor: '#1a1a1a',
     borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
+    padding: 20,
+    fontSize: 24,
     color: '#fff',
     borderWidth: 1,
-    borderColor: TEAL + '20',
+    borderColor: TEAL + '30',
+    fontWeight: 'bold',
   },
   submitButton: {
-    marginTop: 16,
     borderRadius: 12,
     overflow: 'hidden',
   },
@@ -363,15 +356,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  switchButton: {
+  resendButton: {
     marginTop: 24,
     alignItems: 'center',
   },
-  switchButtonText: {
+  resendButtonText: {
     color: ELECTRIC_BLUE,
     fontSize: 14,
   },
-  // Orb styles
   orb: {
     position: 'absolute',
     borderRadius: 999,

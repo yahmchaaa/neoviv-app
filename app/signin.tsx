@@ -20,16 +20,16 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { router } from 'expo-router';
-import { signUp } from '../src/services/auth';
+import { signIn } from '../src/services/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TEAL = '#00B09B';
 const ELECTRIC_BLUE = '#00D4FF';
 const BLACK = '#0A0A0A';
 
-export default function CreateAccountScreen() {
+export default function SignInScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const buttonScale = useSharedValue(1);
 
@@ -123,20 +123,19 @@ export default function CreateAccountScreen() {
     transform: [{ scale: buttonScale.value }],
   }));
 
-  const handleSignUp = async () => {
-    // Validation
-    if (!email || !password || !confirmPassword) {
-      Alert.alert('Error', 'Please fill in all fields');
-      return;
+  const checkNotificationPermissionAndNavigate = async () => {
+    const needsPermission = await AsyncStorage.getItem('needsNotificationPermission');
+    if (needsPermission === 'true') {
+      await AsyncStorage.removeItem('needsNotificationPermission');
+      router.replace('/onboarding/notification-permission');
+    } else {
+      router.replace('/home');
     }
+  };
 
-    if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
-      return;
-    }
-
-    if (password.length < 8) {
-      Alert.alert('Error', 'Password must be at least 8 characters');
+  const handleSignIn = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter both email and password');
       return;
     }
 
@@ -153,13 +152,12 @@ export default function CreateAccountScreen() {
     setLoading(true);
 
     try {
-      const { error } = await signUp(email, password);
-      
+      const { user, error } = await signIn(email, password);
       if (error) {
-        Alert.alert('Sign Up Failed', error);
+        Alert.alert('Login Failed', error);
       } else {
-        // Navigate to email verification (Step 2)
-        router.replace('/onboarding/verify-email');
+        // Check if user needs to see notification permission screen
+        await checkNotificationPermissionAndNavigate();
       }
     } catch (err) {
       Alert.alert('Error', 'An unexpected error occurred');
@@ -207,7 +205,7 @@ export default function CreateAccountScreen() {
           {/* Frosted Glass Card */}
           <BlurView intensity={20} tint="dark" style={styles.glassCard}>
             <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Create Account</Text>
+              <Text style={styles.cardTitle}>Welcome Back</Text>
 
               <View style={styles.inputContainer}>
                 <Text style={styles.inputLabel}>Email</Text>
@@ -227,7 +225,7 @@ export default function CreateAccountScreen() {
                 <Text style={styles.inputLabel}>Password</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Create a password"
+                  placeholder="Enter your password"
                   placeholderTextColor="#666"
                   value={password}
                   onChangeText={setPassword}
@@ -235,22 +233,10 @@ export default function CreateAccountScreen() {
                 />
               </View>
 
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Confirm Password</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Confirm your password"
-                  placeholderTextColor="#666"
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  secureTextEntry
-                />
-              </View>
-
               <Animated.View style={buttonStyle}>
                 <TouchableOpacity
                   style={styles.submitButton}
-                  onPress={handleSignUp}
+                  onPress={handleSignIn}
                   disabled={loading}
                 >
                   <LinearGradient
@@ -260,7 +246,7 @@ export default function CreateAccountScreen() {
                     style={styles.gradientButton}
                   >
                     <Text style={styles.submitButtonText}>
-                      {loading ? 'Creating Account...' : 'Sign Up'}
+                      {loading ? 'Signing In...' : 'Sign In'}
                     </Text>
                   </LinearGradient>
                 </TouchableOpacity>
@@ -268,10 +254,10 @@ export default function CreateAccountScreen() {
 
               <TouchableOpacity
                 style={styles.switchButton}
-                onPress={() => router.push('/signin')}
+                onPress={() => router.push('/login')}
               >
                 <Text style={styles.switchButtonText}>
-                  Already have an account? Sign In
+                  Don't have an account? Sign Up
                 </Text>
               </TouchableOpacity>
             </View>
