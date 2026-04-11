@@ -35,9 +35,6 @@
     "plugins": [
       "expo-router"
     ],
-    "experiments": {
-      "stableLayout": "floating-navigation"
-    },
     "extra": {
       "router": {},
       "eas": {
