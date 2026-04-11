@@ -18,7 +18,6 @@ import Animated, {
   withSequence,
   Easing,
   useAnimatedScrollHandler,
-  useAnimatedStyle,
   useAnimatedRef,
   scrollTo,
 } from 'react-native-reanimated';
@@ -146,7 +145,7 @@ export default function HomeScreen() {
   }));
 
   const gridStyle = useAnimatedStyle(() => ({
-    opacity: gridStyle.value,
+    opacity: gridOpacity.value,
   }));
 
   const lightBeamStyle = useAnimatedStyle(() => ({

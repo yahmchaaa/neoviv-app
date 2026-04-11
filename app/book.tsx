@@ -15,7 +15,7 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { BlurView } from 'expo-blur';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import LoadingAnimation from '../components/LoadingAnimation';
+import LoadingAnimation from '../src/components/LoadingAnimation';
 
 const LOCATION_TYPES = [
   { id: 'home', label: 'Home', icon: '🏠' },
@@ -266,6 +266,7 @@ export default function BookScreen() {
             ]}
           >
             <LoadingAnimation />
+          </Animated.View>
         </View>
       )}
 
