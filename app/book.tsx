@@ -12,12 +12,9 @@ import {
   Modal,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { BlurView } from 'expo-blur';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { COLORS, SHADOWS, RADII, SPACING } from '../src/theme';
 
-const TEAL = '#00B09B';
-const ELECTRIC_BLUE = '#00D4FF';
-const BLACK = '#0A0A0A';
 const CLINIC_ADDRESS = '1950 SW 27 Ave, Miami, FL 33145';
 
 const BOOKING_OPTIONS = [
@@ -26,14 +23,12 @@ const BOOKING_OPTIONS = [
     title: 'Visit Our Clinic',
     subtitle: '1950 SW 27 Ave, Miami, FL 33145',
     icon: '🏥',
-    description: 'Come to our Miami office',
   },
   {
     id: 'concierge',
     title: 'Concierge',
     subtitle: 'We come to you',
     icon: '🚐',
-    description: 'We deliver to your location',
   },
 ];
 
@@ -50,17 +45,14 @@ export default function BookScreen() {
   const [conciergeAddress, setConciergeAddress] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
   const [step, setStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Animations
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
       toValue: 1,
-      duration: 400,
+      duration: 300,
       useNativeDriver: true,
     }).start();
   }, []);
@@ -69,7 +61,6 @@ export default function BookScreen() {
     if (step === 1) {
       setStep(2);
     } else {
-      // Navigate to HIPAA consent
       router.push({
         pathname: '/hipaa-consent',
         params: {
@@ -88,20 +79,7 @@ export default function BookScreen() {
 
   const onDateChange = (event: any, date?: Date) => {
     setShowDatePicker(false);
-    if (date) {
-      setSelectedDate(date);
-      setShowTimePicker(true);
-    }
-  };
-
-  const onTimeChange = (event: any, time?: Date) => {
-    setShowTimePicker(false);
-    if (time) {
-      const newDate = new Date(selectedDate);
-      newDate.setHours(time.getHours());
-      newDate.setMinutes(time.getMinutes());
-      setSelectedDate(newDate);
-    }
+    if (date) setSelectedDate(date);
   };
 
   const formatDate = (date: Date) => {
@@ -126,10 +104,6 @@ export default function BookScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Background Elements */}
-      <View style={styles.orb1} />
-      <View style={styles.orb2} />
-
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
@@ -174,7 +148,7 @@ export default function BookScreen() {
                     <TextInput
                       style={styles.input}
                       placeholder='Enter your full name'
-                      placeholderTextColor='#666'
+                      placeholderTextColor={COLORS.muted}
                       value={fullName}
                       onChangeText={setFullName}
                       autoCapitalize='words'
@@ -186,7 +160,7 @@ export default function BookScreen() {
                     <TextInput
                       style={styles.input}
                       placeholder='(555) 555-5555'
-                      placeholderTextColor='#666'
+                      placeholderTextColor={COLORS.muted}
                       value={phone}
                       onChangeText={setPhone}
                       keyboardType='phone-pad'
@@ -198,7 +172,7 @@ export default function BookScreen() {
                     <TextInput
                       style={styles.input}
                       placeholder='you@example.com'
-                      placeholderTextColor='#666'
+                      placeholderTextColor={COLORS.muted}
                       value={email}
                       onChangeText={setEmail}
                       keyboardType='email-address'
@@ -228,7 +202,7 @@ export default function BookScreen() {
                   </Pressable>
                 </View>
 
-                {/* SMS Confirmation Notice */}
+                {/* SMS Notice */}
                 <View style={styles.smsNotice}>
                   <Text style={styles.smsIcon}>💬</Text>
                   <Text style={styles.smsText}>
@@ -267,7 +241,7 @@ export default function BookScreen() {
                   </View>
                 </View>
 
-                {/* Address Input (for Concierge) */}
+                {/* Address Input (Concierge) */}
                 {selectedOption === 'concierge' && (
                   <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Your Location</Text>
@@ -275,7 +249,7 @@ export default function BookScreen() {
                       <TextInput
                         style={styles.input}
                         placeholder='Enter your address'
-                        placeholderTextColor='#666'
+                        placeholderTextColor={COLORS.muted}
                         value={conciergeAddress}
                         onChangeText={setConciergeAddress}
                       />
@@ -286,7 +260,7 @@ export default function BookScreen() {
                   </View>
                 )}
 
-                {/* Clinic Address Display (for Clinic) */}
+                {/* Clinic Address Display */}
                 {selectedOption === 'clinic' && (
                   <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Our Miami Clinic</Text>
@@ -297,9 +271,6 @@ export default function BookScreen() {
                         <Text style={styles.clinicAddress}>{CLINIC_ADDRESS}</Text>
                       </View>
                     </Pressable>
-                    <Text style={styles.fieldHint}>
-                      Walk-in or we can arrange concierge pickup
-                    </Text>
                   </View>
                 )}
 
@@ -310,7 +281,7 @@ export default function BookScreen() {
                     <TextInput
                       style={[styles.input, styles.textArea]}
                       placeholder='Any allergies, preferences, or special requests...'
-                      placeholderTextColor='#666'
+                      placeholderTextColor={COLORS.muted}
                       value={specialNotes}
                       onChangeText={setSpecialNotes}
                       multiline
@@ -326,16 +297,13 @@ export default function BookScreen() {
                     <TextInput
                       style={[styles.input, styles.textArea]}
                       placeholder='Current medications, medical conditions, or concerns...'
-                      placeholderTextColor='#666'
+                      placeholderTextColor={COLORS.muted}
                       value={medicalInfo}
                       onChangeText={setMedicalInfo}
                       multiline
                       numberOfLines={3}
                     />
                   </View>
-                  <Text style={styles.fieldHint}>
-                    This information helps your nurse provide better care
-                  </Text>
                 </View>
               </>
             )}
@@ -377,13 +345,10 @@ export default function BookScreen() {
               value={selectedDate}
               mode='datetime'
               display='spinner'
-              onChange={(event, date) => {
-                setShowDatePicker(false);
-                if (date) setSelectedDate(date);
-              }}
+              onChange={onDateChange}
               minimumDate={new Date()}
-              textColor='#FFFFFF'
-              themeVariant='dark'
+              textColor={COLORS.heading}
+              themeVariant='light'
             />
           </View>
         </View>
@@ -395,27 +360,7 @@ export default function BookScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BLACK,
-  },
-  orb1: {
-    position: 'absolute',
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: TEAL,
-    opacity: 0.1,
-    top: -100,
-    right: -100,
-  },
-  orb2: {
-    position: 'absolute',
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: ELECTRIC_BLUE,
-    opacity: 0.08,
-    bottom: 200,
-    left: -80,
+    backgroundColor: COLORS.background,
   },
   keyboardView: {
     flex: 1,
@@ -424,37 +369,40 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: SPACING.lg,
     paddingBottom: 120,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 60,
-    paddingBottom: 20,
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.tealBorder,
   },
   backButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: COLORS.tealLight,
     justifyContent: 'center',
     alignItems: 'center',
   },
   backText: {
     fontSize: 24,
-    color: '#FFFFFF',
+    color: COLORS.teal,
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    fontWeight: '700',
+    color: COLORS.heading,
   },
   headerSubtitle: {
     fontSize: 12,
-    color: TEAL,
+    color: COLORS.teal,
     marginTop: 2,
   },
   placeholder: {
@@ -465,56 +413,58 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 60,
-    marginBottom: 30,
+    marginBottom: SPACING.xl,
+    paddingTop: SPACING.lg,
+    backgroundColor: COLORS.white,
   },
   progressStep: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: COLORS.tealLight,
     justifyContent: 'center',
     alignItems: 'center',
   },
   progressStepActive: {
-    backgroundColor: TEAL,
+    backgroundColor: COLORS.teal,
   },
   progressStepText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: COLORS.teal,
   },
   progressLine: {
     flex: 1,
     height: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: COLORS.tealBorder,
     marginHorizontal: 12,
   },
   section: {
-    marginBottom: 28,
+    marginBottom: SPACING.xl,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginBottom: 16,
+    fontWeight: '700',
+    color: COLORS.heading,
+    marginBottom: SPACING.md,
   },
   inputGroup: {
-    marginBottom: 16,
+    marginBottom: SPACING.md,
   },
   inputLabel: {
     fontSize: 14,
-    color: '#B3B3B3',
-    marginBottom: 8,
+    color: COLORS.muted,
+    marginBottom: SPACING.sm,
   },
   input: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 12,
+    backgroundColor: COLORS.white,
+    borderRadius: RADII.md,
     borderWidth: 1,
-    borderColor: 'rgba(0, 176, 155, 0.2)',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    borderColor: COLORS.tealBorder,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md,
     fontSize: 16,
-    color: '#FFFFFF',
+    color: COLORS.body,
   },
   textArea: {
     height: 80,
@@ -523,20 +473,20 @@ const styles = StyleSheet.create({
   dateTimeButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 176, 155, 0.1)',
-    borderRadius: 16,
-    padding: 16,
+    backgroundColor: COLORS.white,
+    borderRadius: RADII.lg,
+    padding: SPACING.md,
     borderWidth: 1,
-    borderColor: TEAL,
+    borderColor: COLORS.teal,
   },
   dateTimeIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(0, 176, 155, 0.2)',
+    backgroundColor: COLORS.tealLight,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: SPACING.md,
   },
   dateTimeEmoji: {
     fontSize: 24,
@@ -546,26 +496,26 @@ const styles = StyleSheet.create({
   },
   dateTimeLabel: {
     fontSize: 12,
-    color: TEAL,
+    color: COLORS.teal,
     marginBottom: 4,
   },
   dateTimeValue: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#FFFFFF',
+    color: COLORS.heading,
   },
   editText: {
     fontSize: 14,
-    color: TEAL,
+    color: COLORS.teal,
     fontWeight: '600',
   },
   smsNotice: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 212, 255, 0.1)',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 28,
+    backgroundColor: COLORS.tealLight,
+    borderRadius: RADII.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.lg,
   },
   smsIcon: {
     fontSize: 20,
@@ -574,28 +524,28 @@ const styles = StyleSheet.create({
   smsText: {
     flex: 1,
     fontSize: 13,
-    color: '#B3B3B3',
+    color: COLORS.body,
     lineHeight: 18,
   },
   visitOptions: {
-    gap: 12,
+    gap: SPACING.md,
   },
   visitOption: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 16,
-    padding: 20,
+    backgroundColor: COLORS.white,
+    borderRadius: RADII.lg,
+    padding: SPACING.lg,
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: COLORS.tealBorder,
+    ...SHADOWS.card,
   },
   visitOptionSelected: {
-    borderColor: TEAL,
-    backgroundColor: 'rgba(0, 176, 155, 0.1)',
+    borderColor: COLORS.teal,
   },
   visitOptionIcon: {
     fontSize: 32,
-    marginRight: 16,
+    marginRight: SPACING.md,
   },
   visitOptionContent: {
     flex: 1,
@@ -603,38 +553,39 @@ const styles = StyleSheet.create({
   visitOptionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: COLORS.heading,
     marginBottom: 4,
   },
   visitOptionSubtitle: {
     fontSize: 13,
-    color: '#B3B3B3',
+    color: COLORS.muted,
   },
   selectedBadge: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: TEAL,
+    backgroundColor: COLORS.teal,
     justifyContent: 'center',
     alignItems: 'center',
   },
   selectedBadgeText: {
-    color: BLACK,
+    color: COLORS.white,
     fontSize: 16,
     fontWeight: '700',
   },
   clinicCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 16,
-    padding: 20,
+    backgroundColor: COLORS.white,
+    borderRadius: RADII.lg,
+    padding: SPACING.lg,
     borderWidth: 1,
-    borderColor: 'rgba(0, 176, 155, 0.2)',
+    borderColor: COLORS.tealBorder,
+    ...SHADOWS.card,
   },
   clinicIcon: {
     fontSize: 32,
-    marginRight: 16,
+    marginRight: SPACING.md,
   },
   clinicContent: {
     flex: 1,
@@ -642,37 +593,38 @@ const styles = StyleSheet.create({
   clinicName: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: COLORS.heading,
     marginBottom: 4,
   },
   clinicAddress: {
     fontSize: 14,
-    color: '#B3B3B3',
+    color: COLORS.muted,
   },
   fieldHint: {
     fontSize: 12,
-    color: '#666',
-    marginTop: 8,
+    color: COLORS.muted,
+    marginTop: SPACING.sm,
   },
   buttonContainer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 24,
+    paddingHorizontal: SPACING.lg,
     paddingBottom: 40,
-    paddingTop: 20,
-    backgroundColor: 'rgba(10, 10, 10, 0.95)',
+    paddingTop: SPACING.md,
+    backgroundColor: COLORS.white,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    borderTopColor: COLORS.tealBorder,
   },
   continueButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: TEAL,
-    borderRadius: 16,
+    backgroundColor: COLORS.teal,
+    borderRadius: RADII.lg,
     paddingVertical: 18,
+    ...SHADOWS.button,
   },
   continueButtonDisabled: {
     opacity: 0.4,
@@ -680,21 +632,21 @@ const styles = StyleSheet.create({
   continueButtonText: {
     fontSize: 18,
     fontWeight: '700',
-    color: BLACK,
+    color: COLORS.white,
   },
   continueArrow: {
     fontSize: 18,
     fontWeight: '700',
-    color: BLACK,
+    color: COLORS.white,
     marginLeft: 8,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
   },
   pickerContainer: {
-    backgroundColor: '#1A1A1A',
+    backgroundColor: COLORS.white,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingBottom: 40,
@@ -703,23 +655,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: COLORS.tealBorder,
   },
   pickerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: COLORS.heading,
   },
   pickerCancel: {
     fontSize: 16,
-    color: '#B3B3B3',
+    color: COLORS.muted,
   },
   pickerDone: {
     fontSize: 16,
     fontWeight: '600',
-    color: TEAL,
+    color: COLORS.teal,
   },
 });

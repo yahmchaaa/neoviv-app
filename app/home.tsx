@@ -8,59 +8,36 @@ import {
   Dimensions,
   FlatList,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withTiming,
-  withSequence,
-  Easing,
-  useAnimatedScrollHandler,
-  useAnimatedRef,
-  scrollTo,
-} from 'react-native-reanimated';
 import { router } from 'expo-router';
+import { COLORS, SHADOWS, RADII, SPACING } from '../src/theme';
 
-const { width, height } = Dimensions.get('window');
-const TEAL = '#00B09B';
-const ELECTRIC_BLUE = '#00D4FF';
-const BLACK = '#0A0A0A';
-
-// All 12 drips from neoviv.life (as of April 2026)
+// All 12 drips from neoviv.life
 const DRIPS = [
-  { id: '1', name: "Myers' Cocktail", price: 0, duration: '45–60 min', tagline: 'The classic revival', badge: null },
-  { id: '2', name: 'Immunity Boost', price: 0, duration: '45 min', tagline: 'Fortress mode', badge: null },
-  { id: '3', name: 'Hydration', price: 0, duration: '30–45 min', tagline: 'Pure cellular refresh', badge: null },
-  { id: '4', name: 'Energy & Vitality', price: 0, duration: '45 min', tagline: 'Power up', badge: null },
-  { id: '5', name: 'NAD+', price: 0, duration: '2–4 hrs', tagline: 'Cellular longevity', badge: 'Elite+' },
-  { id: '6', name: 'Glutathione', price: 0, duration: '30 min', tagline: 'Master antioxidant', badge: null },
-  { id: '7', name: 'Beauty Glow', price: 0, duration: '45 min', tagline: 'Radiance from within', badge: null },
-  { id: '8', name: 'Recovery', price: 0, duration: '45–60 min', tagline: 'Bounce back faster', badge: null },
-  { id: '9', name: 'Hangover Relief', price: 0, duration: '45 min', tagline: 'Back to life — fast', badge: null },
-  { id: '10', name: 'Weight Loss', price: 0, duration: '45 min', tagline: 'Ignite your metabolism', badge: null },
-  { id: '11', name: 'Anti-Aging', price: 0, duration: '60–90 min', tagline: 'Turn back the clock', badge: 'Elite+' },
-  { id: '12', name: 'Migraine Relief', price: 0, duration: '30–45 min', tagline: 'Relief in 20 minutes', badge: null },
+  { id: '1', name: "Myers' Cocktail", duration: '45–60 min', tagline: 'The classic revival', badge: null },
+  { id: '2', name: 'Immunity Boost', duration: '45 min', tagline: 'Fortress mode', badge: null },
+  { id: '3', name: 'Hydration', duration: '30–45 min', tagline: 'Pure cellular refresh', badge: null },
+  { id: '4', name: 'Energy & Vitality', duration: '45 min', tagline: 'Power up', badge: null },
+  { id: '5', name: 'NAD+', duration: '2–4 hrs', tagline: 'Cellular longevity', badge: 'Elite+' },
+  { id: '6', name: 'Glutathione', duration: '30 min', tagline: 'Master antioxidant', badge: null },
+  { id: '7', name: 'Beauty Glow', duration: '45 min', tagline: 'Radiance from within', badge: null },
+  { id: '8', name: 'Recovery', duration: '45–60 min', tagline: 'Bounce back faster', badge: null },
+  { id: '9', name: 'Hangover Relief', duration: '45 min', tagline: 'Back to life — fast', badge: null },
+  { id: '10', name: 'Weight Loss', duration: '45 min', tagline: 'Ignite your metabolism', badge: null },
+  { id: '11', name: 'Anti-Aging', duration: '60–90 min', tagline: 'Turn back the clock', badge: 'Elite+' },
+  { id: '12', name: 'Migraine Relief', duration: '30–45 min', tagline: 'Relief in 20 minutes', badge: null },
 ];
 
-// Website stats for display
+// Website stats
 const WEBSITE_STATS = {
   members: '500+',
   sameDay: 'Same-Day Service',
   nurses: 'Licensed Nurses',
 };
 
-// Membership tiers
-const MEMBERSHIP_TIERS = {
-  essential: { name: 'Essential', price: 399, points: 100, benefits: ['10% off all IV services', 'Dedicated licensed nurse', 'Secure in-app messaging', 'Monthly wellness check-in', 'Member-only add-on pricing'] },
-  elite: { name: 'Elite', price: 799, points: 500, benefits: ['3 IV sessions included/month', '20% off all services', '50% off NAD+ once/month', 'Priority same-day booking', 'Personal health consultant', 'VIP concierge line'] },
-};
-
 // Core messaging
 const TAGLINE = 'Heal Smarter. LiveElevated.';
 const HERO_COPY = 'Premium IV infusion therapy, longevity protocols, and concierge nursing — delivered directly to you, wherever you are.';
-const CLINIC_ADDRESS = '1950 SW 27 Ave, Miami, FL 33145';
 
 const NAV_ITEMS = [
   { icon: '🏠', label: 'Home', active: true, route: '/home' },
@@ -70,120 +47,12 @@ const NAV_ITEMS = [
   { icon: '👤', label: 'Account', active: false, route: '/account' },
 ];
 
-const CARD_WIDTH = width * 0.7;
+const CARD_WIDTH = width * 0.75;
 const CARD_SPACING = 16;
 
 export default function HomeScreen() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const scrollRef = useAnimatedRef<Animated.FlatList>();
-  
-  // Orb animations
-  const orb1Y = useSharedValue(0);
-  const orb1X = useSharedValue(0);
-  const orb2Y = useSharedValue(0);
-  const orb2X = useSharedValue(0);
-  const orb3Y = useSharedValue(0);
-  const orb3X = useSharedValue(0);
-  const gridOpacity = useSharedValue(0.3);
-  const lightBeamOpacity = useSharedValue(0);
-
-  useEffect(() => {
-    // Floating orbs animations
-    orb1Y.value = withRepeat(
-      withSequence(
-        withTiming(-40, { duration: 4000, easing: Easing.inOut(Easing.ease) }),
-        withTiming(40, { duration: 4000, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      true
-    );
-    orb1X.value = withRepeat(
-      withSequence(
-        withTiming(30, { duration: 5000, easing: Easing.inOut(Easing.ease) }),
-        withTiming(-30, { duration: 5000, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      true
-    );
-
-    orb2Y.value = withRepeat(
-      withSequence(
-        withTiming(35, { duration: 3500, easing: Easing.inOut(Easing.ease) }),
-        withTiming(-35, { duration: 3500, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      true
-    );
-    orb2X.value = withRepeat(
-      withSequence(
-        withTiming(-25, { duration: 4500, easing: Easing.inOut(Easing.ease) }),
-        withTiming(25, { duration: 4500, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      true
-    );
-
-    orb3Y.value = withRepeat(
-      withSequence(
-        withTiming(30, { duration: 5000, easing: Easing.inOut(Easing.ease) }),
-        withTiming(-30, { duration: 5000, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      true
-    );
-    orb3X.value = withRepeat(
-      withSequence(
-        withTiming(20, { duration: 6000, easing: Easing.inOut(Easing.ease) }),
-        withTiming(-20, { duration: 6000, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      true
-    );
-
-    gridOpacity.value = withRepeat(
-      withSequence(
-        withTiming(0.5, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0.2, { duration: 2000, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      true
-    );
-
-    lightBeamOpacity.value = withRepeat(
-      withSequence(
-        withTiming(0.4, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0, { duration: 3000, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      true
-    );
-  }, []);
-
-  const orb1Style = useAnimatedStyle(() => ({
-    transform: [{ translateY: orb1Y.value }, { translateX: orb1X.value }],
-  }));
-
-  const orb2Style = useAnimatedStyle(() => ({
-    transform: [{ translateY: orb2Y.value }, { translateX: orb2X.value }],
-  }));
-
-  const orb3Style = useAnimatedStyle(() => ({
-    transform: [{ translateY: orb3Y.value }, { translateX: orb3X.value }],
-  }));
-
-  const gridStyle = useAnimatedStyle(() => ({
-    opacity: gridOpacity.value,
-  }));
-
-  const lightBeamStyle = useAnimatedStyle(() => ({
-    opacity: lightBeamOpacity.value,
-  }));
-
-  const handleNavPress = (route: string) => {
-    if (route !== '/home') {
-      router.push(route);
-    }
-  };
+  const scrollRef = useRef<FlatList>(null);
 
   const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
     if (viewableItems.length > 0) {
@@ -200,96 +69,52 @@ export default function HomeScreen() {
     
     return (
       <TouchableOpacity
-        activeOpacity={0.7}
+        activeOpacity={0.8}
         onPress={() => {
           scrollRef.current?.scrollToIndex({ index });
         }}
       >
         <View style={[styles.dripCard, isActive && styles.dripCardActive]}>
-          <BlurView intensity={isActive ? 25 : 15} tint="dark" style={styles.dripCardBlur}>
-            <LinearGradient
-              colors={isActive ? [TEAL + '40', ELECTRIC_BLUE + '20'] : ['#1a1a1a', '#1a1a1a']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.dripGradient}
-            >
-              <View style={styles.dripHeader}>
-                <View style={[styles.dripBadge, isActive && styles.dripBadgeActive]}>
-                  <Text style={[styles.dripDuration, isActive && styles.dripDurationActive]}>
-                    {item.duration}
-                  </Text>
+          <View style={styles.dripCardContent}>
+            <View style={styles.dripHeader}>
+              <Text style={styles.dripDuration}>{item.duration}</Text>
+              {item.badge && (
+                <View style={styles.eliteBadge}>
+                  <Text style={styles.eliteBadgeText}>{item.badge}</Text>
                 </View>
-                {item.badge && (
-                  <View style={styles.eliteBadge}>
-                    <Text style={styles.eliteBadgeText}>{item.badge}</Text>
-                  </View>
-                )}
-              </View>
+              )}
+            </View>
 
-              <View style={styles.dripIconContainer}>
-                <Text style={styles.dripIcon}>💧</Text>
-              </View>
+            <View style={styles.dripIconContainer}>
+              <Text style={styles.dripIcon}>💧</Text>
+            </View>
 
-              <Text style={styles.dripName}>{item.name}</Text>
-              <Text style={styles.dripDesc}>{item.tagline}</Text>
-            </LinearGradient>
-          </BlurView>
-          {isActive && (
-            <View style={styles.activeGlow} />
-          )}
+            <Text style={styles.dripName}>{item.name}</Text>
+            <Text style={styles.dripTagline}>{item.tagline}</Text>
+          </View>
         </View>
       </TouchableOpacity>
     );
   };
 
+  const handleNavPress = (route: string) => {
+    if (route !== '/home') {
+      router.push(route);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      {/* Grid Background */}
-      <Animated.View style={[styles.gridContainer, { opacity: 0.3 }]}>
-        {[...Array(Math.ceil(width / 60) + 1)].map((_, i) => (
-          <View key={`v-${i}`} style={[styles.gridLineVertical, { left: i * 60 }]} />
-        ))}
-        {[...Array(Math.ceil(height / 60) + 1)].map((_, i) => (
-          <View key={`h-${i}`} style={[styles.gridLineHorizontal, { top: i * 60 }]} />
-        ))}
-      </Animated.View>
-
-      {/* Floating Orbs */}
-      <Animated.View style={[styles.orb, styles.orb1, orb1Style]}>
-        <LinearGradient colors={[TEAL + '50', ELECTRIC_BLUE + '30']} style={styles.orbGradient} />
-      </Animated.View>
-      <Animated.View style={[styles.orb, styles.orb2, orb2Style]}>
-        <LinearGradient colors={[ELECTRIC_BLUE + '40', TEAL + '33']} style={styles.orbGradient} />
-      </Animated.View>
-      <Animated.View style={[styles.orb, styles.orb3, orb3Style]}>
-        <LinearGradient colors={[TEAL + '40', ELECTRIC_BLUE + '20']} style={styles.orbGradient} />
-      </Animated.View>
-
-      {/* Light Beam */}
-      <Animated.View style={[styles.lightBeam, lightBeamStyle]}>
-        <LinearGradient
-          colors={['transparent', TEAL + '40', 'transparent']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={StyleSheet.absoluteFill}
-        />
-      </Animated.View>
-
-      {/* Hexagons */}
-      <View style={[styles.hexagon, { top: 100, left: 30 }]} />
-      <View style={[styles.hexagon, { top: 200, right: 40 }]} />
-      <View style={[styles.hexagon, { bottom: 300, left: 50 }]} />
-
       <ScrollView 
         style={styles.scrollView} 
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={styles.scrollContent}
       >
         {/* Header */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.welcomeText}>NEOVIV</Text>
-            <Text style={styles.taglineText}>{TAGLINE}</Text>
+            <Text style={styles.logo}>NEOVIV</Text>
+            <Text style={styles.tagline}>{TAGLINE}</Text>
           </View>
           <TouchableOpacity style={styles.profileButton}>
             <View style={styles.profileIcon}>
@@ -307,58 +132,27 @@ export default function HomeScreen() {
           <Text style={styles.socialProofText}>{WEBSITE_STATS.nurses}</Text>
         </View>
 
-        {/* Book a Visit Section */}
-        <View style={styles.bookSection}>
-          <Text style={styles.sectionTitle}>Book a Visit</Text>
-          
-          <View style={styles.bookOptions}>
-            {/* Now Option */}
-            <TouchableOpacity 
-              style={styles.bookOption}
-              onPress={() => router.push('/book')}
-            >
-              <BlurView intensity={20} tint="dark" style={styles.bookOptionBlur}>
-                <View style={styles.bookOptionContent}>
-                  <View style={styles.bookOptionIcon}>
-                    <Text style={styles.bookOptionEmoji}>🚨</Text>
-                  </View>
-                  <Text style={styles.bookOptionTitle}>Now</Text>
-                  <Text style={styles.bookOptionSubtitle}>Clinician arrives{'\n'}in 60-120 min</Text>
-                </View>
-                <View style={styles.tealGlow} />
-              </BlurView>
-            </TouchableOpacity>
-
-            {/* Schedule Option */}
-            <TouchableOpacity 
-              style={styles.bookOption}
-              onPress={() => router.push('/book')}
-            >
-              <BlurView intensity={20} tint="dark" style={styles.bookOptionBlur}>
-                <View style={styles.bookOptionContent}>
-                  <View style={styles.bookOptionIcon}>
-                    <Text style={styles.bookOptionEmoji}>📅</Text>
-                  </View>
-                  <Text style={styles.bookOptionTitle}>Schedule</Text>
-                  <Text style={styles.bookOptionSubtitle}>Pick your{'\n'}time slot</Text>
-                </View>
-                <View style={styles.tealGlow} />
-              </BlurView>
-            </TouchableOpacity>
-          </View>
-        </View>
-
         {/* Hero Copy */}
         <View style={styles.heroCopy}>
           <Text style={styles.heroCopyText}>{HERO_COPY}</Text>
         </View>
 
-        {/* Most Requested Section */}
-        <View style={styles.mostRequestedSection}>
+        {/* Book a Visit */}
+        <View style={styles.bookSection}>
+          <TouchableOpacity 
+            style={styles.bookButton}
+            onPress={() => router.push('/book')}
+          >
+            <Text style={styles.bookButtonText}>Book a Visit</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Choose Your Drip Section */}
+        <View style={styles.dripsSection}>
           <Text style={styles.sectionTitle}>Choose Your Drip</Text>
           
           <View style={styles.carouselContainer}>
-            <Animated.FlatList
+            <FlatList
               ref={scrollRef}
               data={DRIPS}
               renderItem={renderDripCard}
@@ -391,415 +185,317 @@ export default function HomeScreen() {
             ))}
           </View>
         </View>
+
+        {/* Membership CTA */}
+        <View style={styles.ctaSection}>
+          <Text style={styles.ctaTitle}>Membership</Text>
+          <Text style={styles.ctaSubtitle}>Join for exclusive benefits and Life Points</Text>
+          <TouchableOpacity 
+            style={styles.ctaButton}
+            onPress={() => router.push('/membership')}
+          >
+            <Text style={styles.ctaButtonText}>View Plans</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
-        <BlurView intensity={25} tint="dark" style={styles.bottomNavBlur}>
-          <View style={styles.navItems}>
-            {NAV_ITEMS.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.navItem}
-                onPress={() => handleNavPress(item.route)}
+        <View style={styles.navItems}>
+          {NAV_ITEMS.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.navItem}
+              onPress={() => handleNavPress(item.route)}
+            >
+              <View
+                style={[
+                  styles.navIconContainer,
+                  item.active && styles.navIconContainerActive,
+                ]}
               >
-                <View
-                  style={[
-                    styles.navIconContainer,
-                    item.active && styles.navIconContainerActive,
-                  ]}
-                >
-                  <Text style={styles.navIcon}>{item.icon}</Text>
-                  {item.active && <View style={styles.activeGlowDot} />}
-                </View>
-                <Text
-                  style={[
-                    styles.navLabel,
-                    item.active && styles.navLabelActive,
-                  ]}
-                >
-                  {item.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </BlurView>
+                <Text style={styles.navIcon}>{item.icon}</Text>
+              </View>
+              <Text
+                style={[
+                  styles.navLabel,
+                  item.active && styles.navLabelActive,
+                ]}
+              >
+                {item.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
     </View>
   );
 }
 
+const { width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BLACK,
-  },
-  gridContainer: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  gridLineVertical: {
-    position: 'absolute',
-    width: 1,
-    height: '100%',
-    backgroundColor: TEAL + '15',
-  },
-  gridLineHorizontal: {
-    position: 'absolute',
-    width: '100%',
-    height: 1,
-    backgroundColor: TEAL + '15',
-  },
-  orb: {
-    position: 'absolute',
-    borderRadius: 999,
-    overflow: 'hidden',
-  },
-  orbGradient: {
-    width: '100%',
-    height: '100%',
-  },
-  orb1: {
-    width: 280,
-    height: 280,
-    top: -100,
-    right: -80,
-  },
-  orb2: {
-    width: 220,
-    height: 220,
-    bottom: 250,
-    left: -70,
-  },
-  orb3: {
-    width: 200,
-    height: 200,
-    top: height * 0.4,
-    right: -50,
-  },
-  lightBeam: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: 80,
-    left: '30%',
-  },
-  hexagon: {
-    position: 'absolute',
-    width: 40,
-    height: 40,
-    borderWidth: 2,
-    borderColor: TEAL + '30',
-    borderRadius: 4,
-    transform: [{ rotate: '45deg' }],
+    backgroundColor: COLORS.background,
   },
   scrollView: {
     flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 100,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 60,
-    paddingBottom: 20,
+    paddingBottom: SPACING.md,
+    backgroundColor: COLORS.white,
   },
-  welcomeText: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#fff',
+  logo: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: COLORS.teal,
+    letterSpacing: 2,
   },
-  taglineText: {
-    fontSize: 14,
-    color: TEAL,
-    marginTop: 4,
+  tagline: {
+    fontSize: 12,
+    color: COLORS.muted,
+    marginTop: 2,
   },
   profileButton: {
     padding: 4,
   },
   profileIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: TEAL + '25',
-    borderWidth: 2,
-    borderColor: TEAL,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.tealLight,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.tealBorder,
   },
   profileIconText: {
-    fontSize: 22,
-  },
-  bookSection: {
-    paddingHorizontal: 24,
-    marginBottom: 32,
-  },
-  sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 16,
   },
   socialProof: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingBottom: 16,
-    gap: 8,
+    paddingVertical: SPACING.md,
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.tealBorder,
   },
   socialProofText: {
     fontSize: 12,
-    color: TEAL,
+    color: COLORS.teal,
+    fontWeight: '500',
   },
   socialDot: {
-    color: TEAL + '50',
-    fontSize: 12,
+    color: COLORS.muted,
+    marginHorizontal: 8,
   },
   heroCopy: {
-    paddingHorizontal: 24,
-    paddingBottom: 24,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.xl,
+    backgroundColor: COLORS.white,
   },
   heroCopyText: {
-    fontSize: 14,
-    color: '#fff',
-    lineHeight: 22,
-    textAlign: 'center',
-    opacity: 0.8,
-  },
-  eliteBadge: {
-    backgroundColor: TEAL + '40',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  eliteBadgeText: {
-    fontSize: 10,
-    color: TEAL,
-    fontWeight: 'bold',
-  },
-  bookOptions: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  bookOption: {
-    flex: 1,
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-  bookOptionBlur: {
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: TEAL + '33',
-    overflow: 'hidden',
-  },
-  bookOptionContent: {
-    padding: 20,
-    alignItems: 'center',
-  },
-  bookOptionIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: TEAL + '33',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  bookOptionEmoji: {
-    fontSize: 28,
-  },
-  bookOptionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 4,
-  },
-  bookOptionSubtitle: {
-    fontSize: 12,
-    color: '#B3B3B3',
+    fontSize: 16,
+    color: COLORS.body,
+    lineHeight: 24,
     textAlign: 'center',
   },
-  tealGlow: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 3,
-    backgroundColor: TEAL,
-    shadowColor: TEAL,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
+  bookSection: {
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.lg,
+    backgroundColor: COLORS.background,
   },
-  mostRequestedSection: {
-    paddingHorizontal: 24,
+  bookButton: {
+    backgroundColor: COLORS.teal,
+    paddingVertical: 16,
+    borderRadius: RADII.lg,
+    alignItems: 'center',
+    ...SHADOWS.button,
+  },
+  bookButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.white,
+  },
+  dripsSection: {
+    paddingTop: SPACING.xl,
+    backgroundColor: COLORS.background,
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: COLORS.heading,
+    marginBottom: SPACING.lg,
+    paddingHorizontal: SPACING.lg,
   },
   carouselContainer: {
-    marginHorizontal: -24,
+    overflow: 'visible',
   },
   carouselContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: SPACING.lg,
+    gap: CARD_SPACING,
   },
   dripCard: {
     width: CARD_WIDTH,
-    marginRight: CARD_SPACING,
-    borderRadius: 24,
-    overflow: 'visible',
+    backgroundColor: COLORS.white,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: COLORS.tealBorder,
+    overflow: 'hidden',
+    ...SHADOWS.card,
   },
   dripCardActive: {
-    transform: [{ scale: 1.05 }],
-  },
-  dripCardBlur: {
-    borderRadius: 24,
+    borderColor: COLORS.teal,
     borderWidth: 2,
-    borderColor: TEAL + '33',
-    overflow: 'hidden',
   },
-  dripGradient: {
-    padding: 24,
+  dripCardContent: {
+    padding: SPACING.lg,
     alignItems: 'center',
-    borderRadius: 24,
   },
   dripHeader: {
-    alignSelf: 'stretch',
-    alignItems: 'flex-end',
-    marginBottom: 16,
-  },
-  dripBadge: {
-    backgroundColor: '#1a1a1a',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 16,
-  },
-  dripBadgeActive: {
-    backgroundColor: TEAL + '30',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+    gap: 8,
   },
   dripDuration: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#B3B3B3',
+    fontSize: 12,
+    color: COLORS.muted,
+    fontWeight: '500',
   },
-  dripDurationActive: {
-    color: TEAL,
+  eliteBadge: {
+    backgroundColor: COLORS.teal,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: RADII.sm,
+  },
+  eliteBadgeText: {
+    fontSize: 10,
+    color: COLORS.white,
+    fontWeight: '700',
   },
   dripIconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: TEAL + '33',
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: COLORS.tealLight,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: SPACING.md,
   },
   dripIcon: {
-    fontSize: 36,
+    fontSize: 32,
   },
   dripName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.heading,
     marginBottom: 4,
-  },
-  dripDesc: {
-    fontSize: 13,
-    color: '#B3B3B3',
     textAlign: 'center',
   },
-  activeGlow: {
-    position: 'absolute',
-    bottom: -2,
-    left: 0,
-    right: 0,
-    height: 4,
-    backgroundColor: TEAL,
-    borderRadius: 2,
-    shadowColor: TEAL,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 10,
-    elevation: 10,
+  dripTagline: {
+    fontSize: 13,
+    color: COLORS.muted,
+    textAlign: 'center',
   },
   dotIndicators: {
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 20,
-    gap: 8,
+    marginTop: SPACING.lg,
   },
   dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: TEAL + '30',
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.tealBorder,
+    marginHorizontal: 3,
   },
   dotActive: {
-    backgroundColor: TEAL,
-    width: 24,
-    shadowColor: TEAL,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 6,
-    elevation: 6,
+    backgroundColor: COLORS.teal,
+    width: 20,
+  },
+  ctaSection: {
+    margin: SPACING.lg,
+    padding: SPACING.xl,
+    backgroundColor: COLORS.white,
+    borderRadius: RADII.xl,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.tealBorder,
+  },
+  ctaTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: COLORS.heading,
+    marginBottom: 4,
+  },
+  ctaSubtitle: {
+    fontSize: 14,
+    color: COLORS.muted,
+    marginBottom: SPACING.lg,
+  },
+  ctaButton: {
+    backgroundColor: COLORS.teal,
+    paddingVertical: 14,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: RADii.lg,
+    ...SHADOWS.button,
+  },
+  ctaButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.white,
   },
   bottomNav: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 16,
-    paddingBottom: 32,
-  },
-  bottomNavBlur: {
-    borderRadius: 28,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: TEAL + '33',
+    backgroundColor: COLORS.white,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.tealBorder,
+    paddingBottom: 24,
   },
   navItems: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: 12,
+    paddingTop: SPACING.md,
   },
   navItem: {
+    flex: 1,
     alignItems: 'center',
-    position: 'relative',
   },
   navIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 4,
   },
   navIconContainerActive: {
-    backgroundColor: TEAL + '30',
+    backgroundColor: COLORS.tealLight,
   },
   navIcon: {
-    fontSize: 24,
+    fontSize: 20,
   },
   navLabel: {
     fontSize: 11,
-    color: '#B3B3B3',
-    marginTop: 4,
+    color: COLORS.muted,
   },
   navLabelActive: {
-    color: TEAL,
-    fontWeight: 'bold',
-  },
-  activeGlowDot: {
-    position: 'absolute',
-    bottom: 0,
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: TEAL,
-    shadowColor: TEAL,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 6,
-    elevation: 6,
+    color: COLORS.teal,
+    fontWeight: '600',
   },
 });
 
+const RADii = RADII; // Fix for the typo reference

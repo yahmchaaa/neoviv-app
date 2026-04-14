@@ -11,11 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { BlurView } from 'expo-blur';
-
-const TEAL = '#00B09B';
-const ELECTRIC_BLUE = '#00D4FF';
-const BLACK = '#0A0A0A';
+import { COLORS, SHADOWS, RADII, SPACING } from '../theme';
 
 interface Message {
   id: string;
@@ -60,11 +56,10 @@ export default function DroppyChat() {
   const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
-    // Bounce animation for the floating button
     Animated.loop(
       Animated.sequence([
         Animated.timing(bounceAnim, {
-          toValue: -8,
+          toValue: -6,
           duration: 1000,
           useNativeDriver: true,
         }),
@@ -123,7 +118,6 @@ export default function DroppyChat() {
     const userText = message.trim();
     setMessage('');
 
-    // Simulate response
     setTimeout(() => {
       let responseText = INITIAL_RESPONSES[userText];
       
@@ -200,20 +194,18 @@ export default function DroppyChat() {
           ]}>
             {/* Chat Header */}
             <View style={styles.chatHeader}>
-              <BlurView intensity={25} tint='dark' style={styles.chatHeaderBlur}>
-                <View style={styles.chatHeaderContent}>
-                  <View style={styles.chatHeaderLeft}>
-                    <Text style={styles.chatHeaderEmoji}>💧</Text>
-                    <View>
-                      <Text style={styles.chatHeaderTitle}>Droppy</Text>
-                      <Text style={styles.chatHeaderSubtitle}>NEOVIV Assistant · Always here</Text>
-                    </View>
+              <View style={styles.chatHeaderContent}>
+                <View style={styles.chatHeaderLeft}>
+                  <Text style={styles.chatHeaderEmoji}>💧</Text>
+                  <View>
+                    <Text style={styles.chatHeaderTitle}>Droppy</Text>
+                    <Text style={styles.chatHeaderSubtitle}>NEOVIV Assistant · Always here</Text>
                   </View>
-                  <Pressable style={styles.closeButton} onPress={toggleChat}>
-                    <Text style={styles.closeButtonText}>✕</Text>
-                  </Pressable>
                 </View>
-              </BlurView>
+                <Pressable style={styles.closeButton} onPress={toggleChat}>
+                  <Text style={styles.closeButtonText}>✕</Text>
+                </Pressable>
+              </View>
             </View>
 
             {/* Messages */}
@@ -276,7 +268,7 @@ export default function DroppyChat() {
               <TextInput
                 style={styles.input}
                 placeholder='Type a message...'
-                placeholderTextColor='#666'
+                placeholderTextColor={COLORS.muted}
                 value={message}
                 onChangeText={setMessage}
                 onSubmitEditing={handleSend}
@@ -305,31 +297,27 @@ const styles = StyleSheet.create({
     zIndex: 50,
   },
   droppyButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: TEAL,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: COLORS.teal,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: TEAL,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 8,
+    ...SHADOWS.button,
   },
   droppyButtonText: {
-    fontSize: 28,
+    fontSize: 26,
   },
   onlineIndicator: {
     position: 'absolute',
-    top: 4,
-    right: 4,
+    top: 2,
+    right: 2,
     width: 14,
     height: 14,
     borderRadius: 7,
     backgroundColor: '#4CAF50',
     borderWidth: 2,
-    borderColor: BLACK,
+    borderColor: COLORS.white,
   },
   modalContainer: {
     flex: 1,
@@ -338,18 +326,18 @@ const styles = StyleSheet.create({
   },
   chatContainer: {
     height: '80%',
-    backgroundColor: BLACK,
+    backgroundColor: COLORS.background,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     overflow: 'hidden',
   },
-  chatHeader: {},
-  chatHeaderBlur: {
-    paddingTop: 60,
-    paddingBottom: 16,
-    paddingHorizontal: 20,
+  chatHeader: {
+    backgroundColor: COLORS.white,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: COLORS.tealBorder,
+    paddingTop: 60,
+    paddingBottom: SPACING.md,
+    paddingHorizontal: SPACING.lg,
   },
   chatHeaderContent: {
     flexDirection: 'row',
@@ -367,30 +355,30 @@ const styles = StyleSheet.create({
   chatHeaderTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: COLORS.heading,
   },
   chatHeaderSubtitle: {
     fontSize: 12,
-    color: TEAL,
+    color: COLORS.teal,
     marginTop: 2,
   },
   closeButton: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: COLORS.tealLight,
     justifyContent: 'center',
     alignItems: 'center',
   },
   closeButtonText: {
     fontSize: 16,
-    color: '#FFFFFF',
+    color: COLORS.teal,
   },
   messagesContainer: {
     flex: 1,
   },
   messagesContent: {
-    padding: 20,
+    padding: SPACING.lg,
     paddingBottom: 10,
   },
   messageBubble: {
@@ -401,33 +389,36 @@ const styles = StyleSheet.create({
   },
   userBubble: {
     alignSelf: 'flex-end',
-    backgroundColor: TEAL,
+    backgroundColor: COLORS.teal,
     borderBottomRightRadius: 4,
   },
   droppyBubble: {
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: COLORS.white,
     borderBottomLeftRadius: 4,
+    borderWidth: 1,
+    borderColor: COLORS.tealBorder,
   },
   messageText: {
     fontSize: 15,
     lineHeight: 22,
   },
   userMessageText: {
-    color: BLACK,
+    color: COLORS.white,
     fontWeight: '500',
   },
   droppyMessageText: {
-    color: '#FFFFFF',
+    color: COLORS.body,
   },
   suggestedContainer: {
-    padding: 16,
+    padding: SPACING.md,
+    backgroundColor: COLORS.white,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    borderTopColor: COLORS.tealBorder,
   },
   suggestedLabel: {
     fontSize: 12,
-    color: '#666',
+    color: COLORS.muted,
     marginBottom: 10,
   },
   suggestedRow: {
@@ -437,42 +428,44 @@ const styles = StyleSheet.create({
   },
   suggestedButton: {
     flex: 1,
-    backgroundColor: 'rgba(0, 176, 155, 0.15)',
+    backgroundColor: COLORS.tealLight,
     paddingVertical: 10,
     paddingHorizontal: 12,
-    borderRadius: 12,
+    borderRadius: RADII.md,
     borderWidth: 1,
-    borderColor: TEAL + '30',
+    borderColor: COLORS.tealBorder,
   },
   suggestedButtonText: {
     fontSize: 12,
-    color: TEAL,
+    color: COLORS.teal,
     textAlign: 'center',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    padding: 16,
+    padding: SPACING.md,
     paddingBottom: 40,
+    backgroundColor: COLORS.white,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    borderTopColor: COLORS.tealBorder,
     gap: 12,
   },
   input: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: COLORS.background,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 15,
-    color: '#FFFFFF',
+    color: COLORS.body,
     maxHeight: 100,
   },
   sendButton: {
-    backgroundColor: TEAL,
+    backgroundColor: COLORS.teal,
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 20,
+    ...SHADOWS.button,
   },
   sendButtonDisabled: {
     opacity: 0.4,
@@ -480,6 +473,6 @@ const styles = StyleSheet.create({
   sendButtonText: {
     fontSize: 15,
     fontWeight: '600',
-    color: BLACK,
+    color: COLORS.white,
   },
 });

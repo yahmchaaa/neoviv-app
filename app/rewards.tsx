@@ -8,31 +8,12 @@ import {
   Animated,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { BlurView } from 'expo-blur';
-
-const TEAL = '#00B09B';
-const ELECTRIC_BLUE = '#00D4FF';
-const BLACK = '#0A0A0A';
+import { COLORS, SHADOWS, RADII, SPACING } from '../src/theme';
 
 const REWARDS_TIERS = [
-  {
-    points: 1000,
-    reward: '$100 Off Your Next Order',
-    color: '#FFD700',
-    icon: '🎁',
-  },
-  {
-    points: 500,
-    reward: '$50 Off Your Next Order',
-    color: '#C0C0C0',
-    icon: '🎁',
-  },
-  {
-    points: 250,
-    reward: '$25 Off Your Next Order',
-    color: '#CD7F32',
-    icon: '🎁',
-  },
+  { points: 1000, reward: '$100 Off Your Next Order', icon: '🎁' },
+  { points: 500, reward: '$50 Off Your Next Order', icon: '🎁' },
+  { points: 250, reward: '$25 Off Your Next Order', icon: '🎁' },
 ];
 
 export default function RewardsScreen() {
@@ -46,28 +27,19 @@ export default function RewardsScreen() {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 400,
+        duration: 300,
         useNativeDriver: true,
       }),
       Animated.timing(slideAnim, {
         toValue: 0,
-        duration: 400,
+        duration: 300,
         useNativeDriver: true,
       }),
     ]).start();
   }, []);
 
-  const handleRedeem = (points: number) => {
-    // Navigate to redemption
-    router.push('/home');
-  };
-
   return (
     <View style={styles.container}>
-      {/* Background Elements */}
-      <View style={styles.orb1} />
-      <View style={styles.orb2} />
-
       <Animated.View style={[styles.content, { 
         opacity: fadeAnim,
         transform: [{ translateY: slideAnim }],
@@ -91,17 +63,15 @@ export default function RewardsScreen() {
 
         {/* Current Points Card */}
         <View style={styles.pointsCard}>
-          <BlurView intensity={20} tint='dark' style={styles.pointsCardBlur}>
-            <View style={styles.pointsCardContent}>
-              <View style={styles.pointsIconContainer}>
-                <Text style={styles.pointsIcon}>💎</Text>
-              </View>
-              <View style={styles.pointsInfo}>
-                <Text style={styles.pointsLabel}>Your Life Points</Text>
-                <Text style={styles.pointsValue}>{currentPoints}</Text>
-              </View>
+          <View style={styles.pointsCardContent}>
+            <View style={styles.pointsIconContainer}>
+              <Text style={styles.pointsIcon}>💎</Text>
             </View>
-          </BlurView>
+            <View style={styles.pointsInfo}>
+              <Text style={styles.pointsLabel}>Your Life Points</Text>
+              <Text style={styles.pointsValue}>{currentPoints}</Text>
+            </View>
+          </View>
         </View>
 
         <ScrollView 
@@ -141,13 +111,12 @@ export default function RewardsScreen() {
             <Text style={styles.sectionTitle}>Redeem for Credits</Text>
             
             {REWARDS_TIERS.map((tier) => (
-              <Pressable
+              <View
                 key={tier.points}
                 style={[
                   styles.rewardCard,
                   currentPoints >= tier.points && styles.rewardCardAvailable,
                 ]}
-                onPress={() => currentPoints >= tier.points && handleRedeem(tier.points)}
               >
                 <View style={styles.rewardContent}>
                   <View style={styles.rewardIconContainer}>
@@ -167,7 +136,7 @@ export default function RewardsScreen() {
                     <Text style={styles.lockedButtonText}>🔒 Locked</Text>
                   </View>
                 )}
-              </Pressable>
+              </View>
             ))}
           </View>
 
@@ -187,27 +156,7 @@ export default function RewardsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BLACK,
-  },
-  orb1: {
-    position: 'absolute',
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: TEAL,
-    opacity: 0.1,
-    top: -100,
-    right: -100,
-  },
-  orb2: {
-    position: 'absolute',
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: ELECTRIC_BLUE,
-    opacity: 0.08,
-    bottom: 200,
-    left: -80,
+    backgroundColor: COLORS.background,
   },
   content: {
     flex: 1,
@@ -216,55 +165,57 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 60,
-    paddingBottom: 20,
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.tealBorder,
   },
   backButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: COLORS.tealLight,
     justifyContent: 'center',
     alignItems: 'center',
   },
   backText: {
     fontSize: 24,
-    color: '#FFFFFF',
+    color: COLORS.teal,
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    fontWeight: '700',
+    color: COLORS.heading,
   },
   placeholder: {
     width: 44,
   },
   heroSection: {
-    paddingHorizontal: 24,
-    marginBottom: 24,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.xl,
+    backgroundColor: COLORS.white,
   },
   heroTitle: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: COLORS.heading,
     marginBottom: 8,
   },
   heroSubtitle: {
     fontSize: 14,
-    color: '#B3B3B3',
+    color: COLORS.muted,
     lineHeight: 20,
   },
   pointsCard: {
-    marginHorizontal: 24,
-    borderRadius: 20,
-    overflow: 'hidden',
-    marginBottom: 24,
+    margin: SPACING.lg,
+    backgroundColor: COLORS.white,
+    borderRadius: RADII.xl,
+    padding: SPACING.lg,
     borderWidth: 2,
-    borderColor: TEAL,
-  },
-  pointsCardBlur: {
-    padding: 24,
+    borderColor: COLORS.teal,
+    ...SHADOWS.card,
   },
   pointsCardContent: {
     flexDirection: 'row',
@@ -274,10 +225,10 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: 'rgba(0, 176, 155, 0.2)',
+    backgroundColor: COLORS.tealLight,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 20,
+    marginRight: SPACING.lg,
   },
   pointsIcon: {
     fontSize: 32,
@@ -287,35 +238,36 @@ const styles = StyleSheet.create({
   },
   pointsLabel: {
     fontSize: 14,
-    color: '#B3B3B3',
+    color: COLORS.muted,
     marginBottom: 4,
   },
   pointsValue: {
     fontSize: 40,
     fontWeight: '700',
-    color: TEAL,
+    color: COLORS.teal,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: SPACING.lg,
     paddingBottom: 40,
   },
   section: {
-    marginBottom: 28,
+    marginBottom: SPACING.xl,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginBottom: 16,
+    fontWeight: '700',
+    color: COLORS.heading,
+    marginBottom: SPACING.md,
   },
   earnCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 12,
+    backgroundColor: COLORS.white,
+    borderRadius: RADII.lg,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+    ...SHADOWS.card,
   },
   earnRow: {
     flexDirection: 'row',
@@ -323,7 +275,7 @@ const styles = StyleSheet.create({
   },
   earnIcon: {
     fontSize: 28,
-    marginRight: 16,
+    marginRight: SPACING.md,
   },
   earnContent: {
     flex: 1,
@@ -331,32 +283,32 @@ const styles = StyleSheet.create({
   earnTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: COLORS.heading,
     marginBottom: 4,
   },
   earnDescription: {
     fontSize: 13,
-    color: '#B3B3B3',
+    color: COLORS.muted,
   },
   earnPoints: {
     fontSize: 16,
     fontWeight: '700',
-    color: TEAL,
+    color: COLORS.teal,
   },
   rewardCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 12,
+    backgroundColor: COLORS.white,
+    borderRadius: RADII.lg,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: COLORS.tealBorder,
+    ...SHADOWS.card,
   },
   rewardCardAvailable: {
-    borderColor: TEAL,
-    backgroundColor: 'rgba(0, 176, 155, 0.08)',
+    borderColor: COLORS.teal,
   },
   rewardContent: {
     flexDirection: 'row',
@@ -367,10 +319,10 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(255, 215, 0, 0.2)',
+    backgroundColor: '#FFF8E6',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: SPACING.md,
   },
   rewardIcon: {
     fontSize: 24,
@@ -380,41 +332,42 @@ const styles = StyleSheet.create({
   },
   rewardPoints: {
     fontSize: 12,
-    color: '#B3B3B3',
+    color: COLORS.muted,
     marginBottom: 2,
   },
   rewardValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: COLORS.heading,
   },
   redeemButton: {
-    backgroundColor: TEAL,
+    backgroundColor: COLORS.teal,
     paddingHorizontal: 20,
     paddingVertical: 10,
-    borderRadius: 12,
+    borderRadius: RADII.md,
+    ...SHADOWS.button,
   },
   redeemButtonText: {
     fontSize: 14,
     fontWeight: '700',
-    color: BLACK,
+    color: COLORS.white,
   },
   lockedButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: COLORS.tealLight,
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 12,
+    borderRadius: RADII.md,
   },
   lockedButtonText: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.muted,
   },
   infoBox: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(0, 212, 255, 0.1)',
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 8,
+    backgroundColor: COLORS.tealLight,
+    borderRadius: RADII.md,
+    padding: SPACING.md,
+    marginTop: SPACING.sm,
   },
   infoIcon: {
     fontSize: 20,
@@ -423,7 +376,7 @@ const styles = StyleSheet.create({
   infoText: {
     flex: 1,
     fontSize: 13,
-    color: '#B3B3B3',
+    color: COLORS.body,
     lineHeight: 18,
   },
 });

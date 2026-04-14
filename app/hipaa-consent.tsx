@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -8,11 +8,7 @@ import {
   Animated,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { BlurView } from 'expo-blur';
-
-const TEAL = '#00B09B';
-const ELECTRIC_BLUE = '#00D4FF';
-const BLACK = '#0A0A0A';
+import { COLORS, SHADOWS, RADII, SPACING } from '../src/theme';
 
 export default function HIPAAConsentScreen() {
   const router = useRouter();
@@ -24,13 +20,10 @@ export default function HIPAAConsentScreen() {
   const [agreedToMedical, setAgreedToMedical] = useState(false);
   const [agreedToLiability, setAgreedToLiability] = useState(false);
 
-  const fadeAnim = useState(new Animated.Value(0))[0];
-
   const handleContinue = () => {
     if (step === 1) {
       setStep(2);
     } else {
-      // Submit and go to confirmation
       router.replace({
         pathname: '/confirmation',
         params: {
@@ -48,10 +41,6 @@ export default function HIPAAConsentScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Background Elements */}
-      <View style={styles.orb1} />
-      <View style={styles.orb2} />
-
       {/* Header */}
       <View style={styles.header}>
         <Pressable style={styles.backButton} onPress={() => router.back()}>
@@ -169,7 +158,7 @@ export default function HIPAAConsentScreen() {
               </View>
             </Pressable>
 
-            {/* Additional Info */}
+            {/* Info Box */}
             <View style={styles.infoBox}>
               <Text style={styles.infoIcon}>ℹ️</Text>
               <Text style={styles.infoText}>
@@ -203,52 +192,35 @@ export default function HIPAAConsentScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BLACK,
-  },
-  orb1: {
-    position: 'absolute',
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: TEAL,
-    opacity: 0.1,
-    top: -100,
-    right: -100,
-  },
-  orb2: {
-    position: 'absolute',
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: ELECTRIC_BLUE,
-    opacity: 0.08,
-    bottom: 200,
-    left: -80,
+    backgroundColor: COLORS.background,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 60,
-    paddingBottom: 20,
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.tealBorder,
   },
   backButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: COLORS.tealLight,
     justifyContent: 'center',
     alignItems: 'center',
   },
   backText: {
     fontSize: 24,
-    color: '#FFFFFF',
+    color: COLORS.teal,
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    fontWeight: '700',
+    color: COLORS.heading,
   },
   placeholder: {
     width: 44,
@@ -258,77 +230,81 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 60,
-    marginBottom: 20,
+    marginBottom: SPACING.lg,
+    paddingTop: SPACING.lg,
+    backgroundColor: COLORS.white,
   },
   progressStep: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: COLORS.tealLight,
     justifyContent: 'center',
     alignItems: 'center',
   },
   progressStepActive: {
-    backgroundColor: TEAL,
+    backgroundColor: COLORS.teal,
   },
   progressStepText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: COLORS.teal,
   },
   progressLine: {
     flex: 1,
     height: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: COLORS.tealBorder,
     marginHorizontal: 12,
   },
   stepHeader: {
-    paddingHorizontal: 24,
-    marginBottom: 24,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.xl,
+    backgroundColor: COLORS.background,
   },
   stepTitle: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: COLORS.heading,
     marginBottom: 8,
   },
   stepSubtitle: {
     fontSize: 14,
-    color: '#B3B3B3',
+    color: COLORS.muted,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: SPACING.lg,
     paddingBottom: 120,
   },
   consentItem: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
+    backgroundColor: COLORS.white,
+    borderRadius: RADII.lg,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: COLORS.tealBorder,
+    ...SHADOWS.card,
   },
   checkbox: {
     width: 28,
     height: 28,
-    borderRadius: 8,
+    borderRadius: RADII.sm,
     borderWidth: 2,
-    borderColor: '#666',
-    marginRight: 16,
+    borderColor: COLORS.muted,
+    marginRight: SPACING.md,
     marginTop: 4,
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkboxChecked: {
-    borderColor: TEAL,
-    backgroundColor: TEAL,
+    borderColor: COLORS.teal,
+    backgroundColor: COLORS.teal,
   },
   checkmark: {
-    color: BLACK,
+    color: COLORS.white,
     fontSize: 16,
     fontWeight: '700',
   },
@@ -338,20 +314,20 @@ const styles = StyleSheet.create({
   consentTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: COLORS.heading,
     marginBottom: 8,
   },
   consentDescription: {
     fontSize: 13,
-    color: '#B3B3B3',
+    color: COLORS.muted,
     lineHeight: 20,
   },
   infoBox: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(0, 212, 255, 0.1)',
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 8,
+    backgroundColor: COLORS.tealLight,
+    borderRadius: RADII.md,
+    padding: SPACING.md,
+    marginTop: SPACING.sm,
   },
   infoIcon: {
     fontSize: 20,
@@ -360,7 +336,7 @@ const styles = StyleSheet.create({
   infoText: {
     flex: 1,
     fontSize: 13,
-    color: '#B3B3B3',
+    color: COLORS.body,
     lineHeight: 18,
   },
   buttonContainer: {
@@ -368,20 +344,21 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 24,
+    paddingHorizontal: SPACING.lg,
     paddingBottom: 40,
-    paddingTop: 20,
-    backgroundColor: 'rgba(10, 10, 10, 0.95)',
+    paddingTop: SPACING.md,
+    backgroundColor: COLORS.white,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    borderTopColor: COLORS.tealBorder,
   },
   continueButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: TEAL,
-    borderRadius: 16,
+    backgroundColor: COLORS.teal,
+    borderRadius: RADII.lg,
     paddingVertical: 18,
+    ...SHADOWS.button,
   },
   continueButtonDisabled: {
     opacity: 0.4,
@@ -389,12 +366,12 @@ const styles = StyleSheet.create({
   continueButtonText: {
     fontSize: 18,
     fontWeight: '700',
-    color: BLACK,
+    color: COLORS.white,
   },
   continueArrow: {
     fontSize: 18,
     fontWeight: '700',
-    color: BLACK,
+    color: COLORS.white,
     marginLeft: 8,
   },
 });

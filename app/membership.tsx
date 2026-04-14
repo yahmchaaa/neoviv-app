@@ -6,16 +6,9 @@ import {
   ScrollView,
   Pressable,
   Animated,
-  Dimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { BlurView } from 'expo-blur';
-import { LinearGradient } from 'expo-linear-gradient';
-
-const { width } = Dimensions.get('window');
-const TEAL = '#00B09B';
-const ELECTRIC_BLUE = '#00D4FF';
-const BLACK = '#0A0A0A';
+import { COLORS, SHADOWS, RADII, SPACING } from '../src/theme';
 
 const MEMBERSHIP_TIERS = [
   {
@@ -24,7 +17,6 @@ const MEMBERSHIP_TIERS = [
     price: 399,
     tagline: 'Start your wellness journey',
     points: '100 pts/month',
-    color: ELECTRIC_BLUE,
     benefits: [
       '10% off all IV services',
       'Dedicated licensed nurse',
@@ -40,7 +32,6 @@ const MEMBERSHIP_TIERS = [
     price: 799,
     tagline: 'The concierge wellness standard',
     points: '500 pts + 3× multiplier',
-    color: TEAL,
     badge: 'MOST POPULAR',
     benefits: [
       '3 IV sessions included/month',
@@ -59,18 +50,18 @@ export default function MembershipScreen() {
   const [selectedTier, setSelectedTier] = useState<string | null>(null);
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(50)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
 
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 400,
+        duration: 300,
         useNativeDriver: true,
       }),
       Animated.timing(slideAnim, {
         toValue: 0,
-        duration: 400,
+        duration: 300,
         useNativeDriver: true,
       }),
     ]).start();
@@ -85,10 +76,6 @@ export default function MembershipScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Background Elements */}
-      <View style={styles.orb1} />
-      <View style={styles.orb2} />
-
       <Animated.View style={[styles.content, { 
         opacity: fadeAnim,
         transform: [{ translateY: slideAnim }],
@@ -117,14 +104,12 @@ export default function MembershipScreen() {
         >
           {/* Membership Tiers */}
           {MEMBERSHIP_TIERS.map((tier) => (
-            <Pressable
+            <View
               key={tier.id}
               style={[
                 styles.tierCard,
                 tier.id === 'elite' && styles.tierCardElite,
-                selectedTier === tier.id && styles.tierCardSelected,
               ]}
-              onPress={() => setSelectedTier(tier.id)}
             >
               {tier.badge && (
                 <View style={styles.popularBadge}>
@@ -150,12 +135,7 @@ export default function MembershipScreen() {
               </View>
 
               <View style={styles.tierPoints}>
-                <Text style={[
-                  styles.tierPointsText,
-                  tier.id === 'elite' && styles.tierPointsTextElite,
-                ]}>
-                  💎 {tier.points}
-                </Text>
+                <Text style={styles.tierPointsText}>💎 {tier.points}</Text>
               </View>
 
               <View style={styles.divider} />
@@ -178,25 +158,14 @@ export default function MembershipScreen() {
                 ]}
                 onPress={() => handleJoin(tier.id)}
               >
-                <LinearGradient
-                  colors={
-                    tier.id === 'elite'
-                      ? [TEAL + 'CC', TEAL]
-                      : ['rgba(0, 212, 255, 0.3)', 'rgba(0, 212, 255, 0.2)']
-                  }
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.joinButtonGradient}
-                >
-                  <Text style={[
-                    styles.joinButtonText,
-                    tier.id === 'elite' && styles.joinButtonTextElite,
-                  ]}>
-                    Get Started — {tier.name}
-                  </Text>
-                </LinearGradient>
+                <Text style={[
+                  styles.joinButtonText,
+                  tier.id === 'elite' && styles.joinButtonTextElite,
+                ]}>
+                  Get Started — {tier.name}
+                </Text>
               </Pressable>
-            </Pressable>
+            </View>
           ))}
 
           {/* Referral Info */}
@@ -225,27 +194,7 @@ export default function MembershipScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BLACK,
-  },
-  orb1: {
-    position: 'absolute',
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: TEAL,
-    opacity: 0.1,
-    top: -100,
-    right: -100,
-  },
-  orb2: {
-    position: 'absolute',
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: ELECTRIC_BLUE,
-    opacity: 0.08,
-    bottom: 200,
-    left: -80,
+    backgroundColor: COLORS.background,
   },
   content: {
     flex: 1,
@@ -254,73 +203,75 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 60,
-    paddingBottom: 20,
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.tealBorder,
   },
   backButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: COLORS.tealLight,
     justifyContent: 'center',
     alignItems: 'center',
   },
   backText: {
     fontSize: 24,
-    color: '#FFFFFF',
+    color: COLORS.teal,
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    fontWeight: '700',
+    color: COLORS.heading,
   },
   placeholder: {
     width: 44,
   },
   heroSection: {
-    paddingHorizontal: 24,
-    marginBottom: 24,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.xl,
+    backgroundColor: COLORS.white,
   },
   heroTitle: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: COLORS.heading,
     marginBottom: 8,
   },
   heroSubtitle: {
     fontSize: 14,
-    color: '#B3B3B3',
+    color: COLORS.muted,
     lineHeight: 20,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
     paddingBottom: 40,
   },
   tierCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 24,
-    padding: 24,
-    marginBottom: 20,
+    backgroundColor: COLORS.white,
+    borderRadius: RADII.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.lg,
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: COLORS.tealBorder,
+    ...SHADOWS.card,
   },
   tierCardElite: {
-    borderColor: TEAL,
-    backgroundColor: 'rgba(0, 176, 155, 0.08)',
-  },
-  tierCardSelected: {
-    borderColor: ELECTRIC_BLUE,
+    borderColor: COLORS.teal,
   },
   popularBadge: {
     position: 'absolute',
     top: -12,
     left: '50%',
     marginLeft: -60,
-    backgroundColor: TEAL,
+    backgroundColor: COLORS.teal,
     paddingHorizontal: 16,
     paddingVertical: 6,
     borderRadius: 20,
@@ -328,13 +279,13 @@ const styles = StyleSheet.create({
   popularBadgeText: {
     fontSize: 11,
     fontWeight: '700',
-    color: BLACK,
+    color: COLORS.white,
   },
   tierHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 12,
+    marginBottom: SPACING.md,
   },
   tierInfo: {
     flex: 1,
@@ -342,15 +293,15 @@ const styles = StyleSheet.create({
   tierName: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: COLORS.heading,
     marginBottom: 4,
   },
   tierNameElite: {
-    color: TEAL,
+    color: COLORS.teal,
   },
   tierTagline: {
     fontSize: 14,
-    color: '#B3B3B3',
+    color: COLORS.muted,
   },
   tierPriceContainer: {
     alignItems: 'flex-end',
@@ -358,30 +309,27 @@ const styles = StyleSheet.create({
   tierPrice: {
     fontSize: 32,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: COLORS.heading,
   },
   tierPricePer: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.muted,
   },
   tierPoints: {
-    marginBottom: 16,
+    marginBottom: SPACING.md,
   },
   tierPointsText: {
     fontSize: 14,
-    color: ELECTRIC_BLUE,
+    color: COLORS.teal,
     fontWeight: '600',
-  },
-  tierPointsTextElite: {
-    color: TEAL,
   },
   divider: {
     height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    marginBottom: 20,
+    backgroundColor: COLORS.tealBorder,
+    marginBottom: SPACING.lg,
   },
   benefitsList: {
-    marginBottom: 20,
+    marginBottom: SPACING.lg,
   },
   benefitItem: {
     flexDirection: 'row',
@@ -390,73 +338,75 @@ const styles = StyleSheet.create({
   },
   benefitCheck: {
     fontSize: 14,
-    color: TEAL,
+    color: COLORS.teal,
     marginRight: 12,
     fontWeight: '700',
   },
   benefitText: {
     fontSize: 14,
-    color: '#FFFFFF',
+    color: COLORS.body,
     flex: 1,
   },
   joinButton: {
-    borderRadius: 16,
-    overflow: 'hidden',
-    marginTop: 8,
-  },
-  joinButtonElite: {},
-  joinButtonGradient: {
+    backgroundColor: COLORS.tealLight,
+    borderRadius: RADII.lg,
     paddingVertical: 18,
     alignItems: 'center',
-    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: COLORS.tealBorder,
+  },
+  joinButtonElite: {
+    backgroundColor: COLORS.teal,
+    borderColor: COLORS.teal,
   },
   joinButtonText: {
     fontSize: 16,
     fontWeight: '700',
-    color: ELECTRIC_BLUE,
+    color: COLORS.teal,
   },
   joinButtonTextElite: {
-    color: BLACK,
+    color: COLORS.white,
   },
   referralSection: {
-    backgroundColor: 'rgba(0, 176, 155, 0.1)',
-    borderRadius: 20,
-    padding: 24,
-    marginTop: 10,
-    marginBottom: 20,
+    backgroundColor: COLORS.white,
+    borderRadius: RADII.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.lg,
     borderWidth: 1,
-    borderColor: TEAL + '30',
+    borderColor: COLORS.tealBorder,
+    ...SHADOWS.card,
   },
   referralTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: COLORS.heading,
     marginBottom: 8,
   },
   referralText: {
     fontSize: 13,
-    color: '#B3B3B3',
+    color: COLORS.muted,
     lineHeight: 20,
-    marginBottom: 16,
+    marginBottom: SPACING.md,
   },
   referralButton: {
-    backgroundColor: TEAL,
-    borderRadius: 12,
+    backgroundColor: COLORS.teal,
+    borderRadius: RADII.md,
     paddingVertical: 14,
     alignItems: 'center',
+    ...SHADOWS.button,
   },
   referralButtonText: {
     fontSize: 16,
     fontWeight: '700',
-    color: BLACK,
+    color: COLORS.white,
   },
   bottomNotice: {
     alignItems: 'center',
-    marginTop: 10,
+    paddingVertical: SPACING.lg,
   },
   bottomNoticeText: {
     fontSize: 12,
-    color: '#666',
+    color: COLORS.muted,
     textAlign: 'center',
   },
 });
