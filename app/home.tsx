@@ -28,12 +28,39 @@ const TEAL = '#00B09B';
 const ELECTRIC_BLUE = '#00D4FF';
 const BLACK = '#0A0A0A';
 
+// All 12 drips from neoviv.life (as of April 2026)
 const DRIPS = [
-  { id: '1', name: 'Restore', price: 199, desc: 'Essential hydration & wellness reset' },
-  { id: '2', name: 'Reset', price: 249, desc: 'Recharge with B-vitamins & amino acids' },
-  { id: '3', name: 'Recover+', price: 299, desc: 'Advanced recovery with NAD+ & glutathione' },
-  { id: '4', name: 'NAD+ Restore', price: 399, desc: 'Cellular repair & anti-aging powerhouse' },
+  { id: '1', name: "Myers' Cocktail", price: 0, duration: '45–60 min', tagline: 'The classic revival', badge: null },
+  { id: '2', name: 'Immunity Boost', price: 0, duration: '45 min', tagline: 'Fortress mode', badge: null },
+  { id: '3', name: 'Hydration', price: 0, duration: '30–45 min', tagline: 'Pure cellular refresh', badge: null },
+  { id: '4', name: 'Energy & Vitality', price: 0, duration: '45 min', tagline: 'Power up', badge: null },
+  { id: '5', name: 'NAD+', price: 0, duration: '2–4 hrs', tagline: 'Cellular longevity', badge: 'Elite+' },
+  { id: '6', name: 'Glutathione', price: 0, duration: '30 min', tagline: 'Master antioxidant', badge: null },
+  { id: '7', name: 'Beauty Glow', price: 0, duration: '45 min', tagline: 'Radiance from within', badge: null },
+  { id: '8', name: 'Recovery', price: 0, duration: '45–60 min', tagline: 'Bounce back faster', badge: null },
+  { id: '9', name: 'Hangover Relief', price: 0, duration: '45 min', tagline: 'Back to life — fast', badge: null },
+  { id: '10', name: 'Weight Loss', price: 0, duration: '45 min', tagline: 'Ignite your metabolism', badge: null },
+  { id: '11', name: 'Anti-Aging', price: 0, duration: '60–90 min', tagline: 'Turn back the clock', badge: 'Elite+' },
+  { id: '12', name: 'Migraine Relief', price: 0, duration: '30–45 min', tagline: 'Relief in 20 minutes', badge: null },
 ];
+
+// Website stats for display
+const WEBSITE_STATS = {
+  members: '500+',
+  sameDay: 'Same-Day Service',
+  nurses: 'Licensed Nurses',
+};
+
+// Membership tiers
+const MEMBERSHIP_TIERS = {
+  essential: { name: 'Essential', price: 399, points: 100, benefits: ['10% off all IV services', 'Dedicated licensed nurse', 'Secure in-app messaging', 'Monthly wellness check-in', 'Member-only add-on pricing'] },
+  elite: { name: 'Elite', price: 799, points: 500, benefits: ['3 IV sessions included/month', '20% off all services', '50% off NAD+ once/month', 'Priority same-day booking', 'Personal health consultant', 'VIP concierge line'] },
+};
+
+// Core messaging
+const TAGLINE = 'Heal Smarter. LiveElevated.';
+const HERO_COPY = 'Premium IV infusion therapy, longevity protocols, and concierge nursing — delivered directly to you, wherever you are.';
+const CLINIC_ADDRESS = '1950 SW 27 Ave, Miami, FL 33145';
 
 const NAV_ITEMS = [
   { icon: '🏠', label: 'Home', active: true, route: '/home' },
@@ -188,10 +215,15 @@ export default function HomeScreen() {
             >
               <View style={styles.dripHeader}>
                 <View style={[styles.dripBadge, isActive && styles.dripBadgeActive]}>
-                  <Text style={[styles.dripPrice, isActive && styles.dripPriceActive]}>
-                    ${item.price}
+                  <Text style={[styles.dripDuration, isActive && styles.dripDurationActive]}>
+                    {item.duration}
                   </Text>
                 </View>
+                {item.badge && (
+                  <View style={styles.eliteBadge}>
+                    <Text style={styles.eliteBadgeText}>{item.badge}</Text>
+                  </View>
+                )}
               </View>
 
               <View style={styles.dripIconContainer}>
@@ -199,7 +231,7 @@ export default function HomeScreen() {
               </View>
 
               <Text style={styles.dripName}>{item.name}</Text>
-              <Text style={styles.dripDesc}>{item.desc}</Text>
+              <Text style={styles.dripDesc}>{item.tagline}</Text>
             </LinearGradient>
           </BlurView>
           {isActive && (
@@ -255,12 +287,24 @@ export default function HomeScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.welcomeText}>Welcome</Text>
+          <View>
+            <Text style={styles.welcomeText}>NEOVIV</Text>
+            <Text style={styles.taglineText}>{TAGLINE}</Text>
+          </View>
           <TouchableOpacity style={styles.profileButton}>
             <View style={styles.profileIcon}>
               <Text style={styles.profileIconText}>👤</Text>
             </View>
           </TouchableOpacity>
+        </View>
+
+        {/* Social Proof */}
+        <View style={styles.socialProof}>
+          <Text style={styles.socialProofText}>{WEBSITE_STATS.members} Members</Text>
+          <Text style={styles.socialDot}>·</Text>
+          <Text style={styles.socialProofText}>{WEBSITE_STATS.sameDay}</Text>
+          <Text style={styles.socialDot}>·</Text>
+          <Text style={styles.socialProofText}>{WEBSITE_STATS.nurses}</Text>
         </View>
 
         {/* Book a Visit Section */}
@@ -304,9 +348,14 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        {/* Hero Copy */}
+        <View style={styles.heroCopy}>
+          <Text style={styles.heroCopyText}>{HERO_COPY}</Text>
+        </View>
+
         {/* Most Requested Section */}
         <View style={styles.mostRequestedSection}>
-          <Text style={styles.sectionTitle}>Most Requested</Text>
+          <Text style={styles.sectionTitle}>Choose Your Drip</Text>
           
           <View style={styles.carouselContainer}>
             <Animated.FlatList
@@ -459,6 +508,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
   },
+  taglineText: {
+    fontSize: 14,
+    color: TEAL,
+    marginTop: 4,
+  },
   profileButton: {
     padding: 4,
   },
@@ -484,6 +538,44 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
     marginBottom: 16,
+  },
+  socialProof: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingBottom: 16,
+    gap: 8,
+  },
+  socialProofText: {
+    fontSize: 12,
+    color: TEAL,
+  },
+  socialDot: {
+    color: TEAL + '50',
+    fontSize: 12,
+  },
+  heroCopy: {
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+  },
+  heroCopyText: {
+    fontSize: 14,
+    color: '#fff',
+    lineHeight: 22,
+    textAlign: 'center',
+    opacity: 0.8,
+  },
+  eliteBadge: {
+    backgroundColor: TEAL + '40',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  eliteBadgeText: {
+    fontSize: 10,
+    color: TEAL,
+    fontWeight: 'bold',
   },
   bookOptions: {
     flexDirection: 'row',
@@ -583,12 +675,12 @@ const styles = StyleSheet.create({
   dripBadgeActive: {
     backgroundColor: TEAL + '30',
   },
-  dripPrice: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  dripDuration: {
+    fontSize: 14,
+    fontWeight: '600',
     color: '#B3B3B3',
   },
-  dripPriceActive: {
+  dripDurationActive: {
     color: TEAL,
   },
   dripIconContainer: {
