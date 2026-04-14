@@ -6,199 +6,84 @@ import {
   TextInput,
   Pressable,
   Animated,
-  Easing,
   ScrollView,
   Platform,
   KeyboardAvoidingView,
   Modal,
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { BlurView } from 'expo-blur';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import LoadingAnimation from '../src/components/LoadingAnimation';
 
-const LOCATION_TYPES = [
-  { id: 'home', label: 'Home', icon: '🏠' },
-  { id: 'hotel', label: 'Hotel', icon: '🏨' },
-  { id: 'office', label: 'Office', icon: '🏢' },
-  { id: 'event', label: 'Event', icon: '🎉' },
-];
+const TEAL = '#00B09B';
+const ELECTRIC_BLUE = '#00D4FF';
+const BLACK = '#0A0A0A';
+const CLINIC_ADDRESS = '1950 SW 27 Ave, Miami, FL 33145';
 
 const BOOKING_OPTIONS = [
   {
-    id: 'now',
-    title: 'Now',
-    subtitle: 'Clinician arrives in 60-120 min',
-    icon: '⚡',
+    id: 'clinic',
+    title: 'Visit Our Clinic',
+    subtitle: '1950 SW 27 Ave, Miami, FL 33145',
+    icon: '🏥',
+    description: 'Come to our Miami office',
   },
   {
-    id: 'schedule',
-    title: 'Schedule',
-    subtitle: 'Pick your time slot',
-    icon: '📅',
+    id: 'concierge',
+    title: 'Concierge',
+    subtitle: 'We come to you',
+    icon: '🚐',
+    description: 'We deliver to your location',
   },
 ];
 
 export default function BookScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams();
   
-  const [selectedOption, setSelectedOption] = useState<'now' | 'schedule'>('now');
-  const [location, setLocation] = useState('');
-  const [locationType, setLocationType] = useState('home');
-  const [consentChecked, setConsentChecked] = useState(false);
+  // Form state
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [specialNotes, setSpecialNotes] = useState('');
+  const [medicalInfo, setMedicalInfo] = useState('');
+  const [selectedOption, setSelectedOption] = useState<'clinic' | 'concierge'>('concierge');
+  const [conciergeAddress, setConciergeAddress] = useState('');
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [showConfirmAnimation, setShowConfirmAnimation] = useState(false);
+  const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Get drop data from params
-  const dripId = params.id as string || 'energy-boost';
-  const dripName = params.name as string || 'Reset';
-  const dripPrice = parseInt(params.price as string) || 249;
-  const dripDescription = params.description as string || 'Recharge with B-vitamins & amino acids';
-
-  // Animation values
-  const headerSlide = useRef(new Animated.Value(-100)).current;
-  const headerOpacity = useRef(new Animated.Value(0)).current;
-  const cardSlide = useRef(new Animated.Value(80)).current;
-  const cardOpacity = useRef(new Animated.Value(0)).current;
-  const optionsSlide = useRef(new Animated.Value(80)).current;
-  const optionsOpacity = useRef(new Animated.Value(0)).current;
-  const confirmSlide = useRef(new Animated.Value(100)).current;
-  const confirmOpacity = useRef(new Animated.Value(0)).current;
-
-  // Logo animations
-  const logoScale = useRef(new Animated.Value(0)).current;
-  const logoRotate = useRef(new Animated.Value(0)).current;
-  const logoPulse = useRef(new Animated.Value(1)).current;
+  // Animations
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Stagger animations
-    Animated.sequence([
-      Animated.parallel([
-        Animated.timing(headerSlide, {
-          toValue: 0,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(headerOpacity, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-      ]),
-      Animated.parallel([
-        Animated.timing(cardSlide, {
-          toValue: 0,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(cardOpacity, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-      ]),
-      Animated.parallel([
-        Animated.timing(optionsSlide, {
-          toValue: 0,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(optionsOpacity, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-      ]),
-      Animated.parallel([
-        Animated.timing(confirmSlide, {
-          toValue: 0,
-          duration: 500,
-          delay: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(confirmOpacity, {
-          toValue: 1,
-          duration: 500,
-          delay: 200,
-          useNativeDriver: true,
-        }),
-      ]),
-    ]).start();
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 400,
+      useNativeDriver: true,
+    }).start();
   }, []);
 
-  const triggerLogoAnimation = () => {
-    setShowConfirmAnimation(true);
-    setIsSubmitting(true);
-    
-    // Start with pulse animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(logoPulse, {
-          toValue: 1.2,
-          duration: 500,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-        Animated.timing(logoPulse, {
-          toValue: 1,
-          duration: 500,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-      ]),
-      { iterations: 3 }
-    ).start();
-
-    // After pulse, do the main animation
-    setTimeout(() => {
-      Animated.parallel([
-        Animated.spring(logoScale, {
-          toValue: 1.5,
-          tension: 50,
-          friction: 3,
-          useNativeDriver: true,
-        }),
-        Animated.timing(logoRotate, {
-          toValue: 1,
-          duration: 500,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        Animated.timing(logoScale, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }).start(() => {
-          setShowConfirmAnimation(false);
-          setIsSubmitting(false);
-          router.push({
-            pathname: '/confirmation',
-            params: {
-              type: selectedOption,
-              location: location,
-              eta: selectedOption === 'now' ? '60-90' : '',
-              date: selectedOption === 'schedule' ? selectedDate.toLocaleDateString() : '',
-              time: selectedOption === 'schedule' ? selectedDate.toLocaleTimeString() : '',
-            },
-          });
-        });
+  const handleContinue = () => {
+    if (step === 1) {
+      setStep(2);
+    } else {
+      // Navigate to HIPAA consent
+      router.push({
+        pathname: '/hipaa-consent',
+        params: {
+          fullName,
+          phone,
+          email,
+          visitType: selectedOption,
+          address: selectedOption === 'concierge' ? conciergeAddress : CLINIC_ADDRESS,
+          date: selectedDate.toISOString(),
+          notes: specialNotes,
+          medicalInfo,
+        },
       });
-    }, 3000); // 3 seconds of pulse animation before main animation
-  };
-
-  const handleConfirm = () => {
-    if (!location.trim()) {
-      return;
     }
-    if (!consentChecked) {
-      return;
-    }
-    triggerLogoAnimation();
   };
 
   const onDateChange = (event: any, date?: Date) => {
@@ -212,20 +97,19 @@ export default function BookScreen() {
   const onTimeChange = (event: any, time?: Date) => {
     setShowTimePicker(false);
     if (time) {
-      setSelectedDate((prev) => {
-        const newDate = new Date(prev);
-        newDate.setHours(time.getHours());
-        newDate.setMinutes(time.getMinutes());
-        return newDate;
-      });
+      const newDate = new Date(selectedDate);
+      newDate.setHours(time.getHours());
+      newDate.setMinutes(time.getMinutes());
+      setSelectedDate(newDate);
     }
   };
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
+      weekday: 'long',
+      month: 'long',
       day: 'numeric',
+      year: 'numeric',
     });
   };
 
@@ -237,304 +121,269 @@ export default function BookScreen() {
     });
   };
 
+  const isStep1Valid = fullName.trim() && phone.trim() && email.trim();
+  const isStep2Valid = selectedOption === 'clinic' || (selectedOption === 'concierge' && conciergeAddress.trim());
+
   return (
     <View style={styles.container}>
-      {/* Animated Background */}
-      <View style={styles.background}>
-        <View style={[styles.orb, styles.orb1]} />
-        <View style={[styles.orb, styles.orb2]} />
-        <View style={[styles.orb, styles.orb3]} />
-      </View>
-
-      {/* Logo Animation Overlay (Pulse + Pop) */}
-      {showConfirmAnimation && (
-        <View style={styles.animationOverlay}>
-          <Animated.View
-            style={[
-              styles.logoPop,
-              {
-                transform: [
-                  { scale: Animated.multiply(logoScale, logoPulse) },
-                  {
-                    rotate: logoRotate.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: ['0deg', '360deg'],
-                    }),
-                  },
-                ],
-              },
-            ]}
-          >
-            <LoadingAnimation />
-          </Animated.View>
-        </View>
-      )}
+      {/* Background Elements */}
+      <View style={styles.orb1} />
+      <View style={styles.orb2} />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
+        <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
           {/* Header */}
-          <Animated.View
-            style={[
-              styles.header,
-              {
-                transform: [{ translateX: headerSlide }],
-                opacity: headerOpacity,
-              },
-            ]}
-          >
+          <View style={styles.header}>
             <Pressable style={styles.backButton} onPress={() => router.back()}>
               <Text style={styles.backText}>←</Text>
             </Pressable>
-            <Text style={styles.headerTitle}>Book a Visit</Text>
+            <View>
+              <Text style={styles.headerTitle}>Book Your Drip</Text>
+              <Text style={styles.headerSubtitle}>No membership required</Text>
+            </View>
             <View style={styles.placeholder} />
-          </Animated.View>
+          </View>
 
-          {/* Selected Drop Card */}
-          <Animated.View
-            style={[
-              styles.selectedDripCard,
-              {
-                transform: [{ translateY: cardSlide }],
-                opacity: cardOpacity,
-              },
-            ]}
+          {/* Progress Indicator */}
+          <View style={styles.progressContainer}>
+            <View style={[styles.progressStep, step >= 1 && styles.progressStepActive]}>
+              <Text style={styles.progressStepText}>1</Text>
+            </View>
+            <View style={styles.progressLine} />
+            <View style={[styles.progressStep, step >= 2 && styles.progressStepActive]}>
+              <Text style={styles.progressStepText}>2</Text>
+            </View>
+          </View>
+
+          <ScrollView 
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps='handled'
+            contentContainerStyle={styles.scrollContent}
           >
-            <BlurView intensity={20} tint="dark" style={styles.dripCardBlur}>
-              <View style={styles.dripCardContent}>
-                <View style={styles.dripInfo}>
-                  <Text style={styles.dripName}>{dripName}</Text>
-                  <Text style={styles.dripDescription}>{dripDescription}</Text>
+            {step === 1 ? (
+              <>
+                {/* Contact Information */}
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Contact Information</Text>
+                  
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.inputLabel}>Full Name *</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder='Enter your full name'
+                      placeholderTextColor='#666'
+                      value={fullName}
+                      onChangeText={setFullName}
+                      autoCapitalize='words'
+                    />
+                  </View>
+
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.inputLabel}>Phone Number *</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder='(555) 555-5555'
+                      placeholderTextColor='#666'
+                      value={phone}
+                      onChangeText={setPhone}
+                      keyboardType='phone-pad'
+                    />
+                  </View>
+
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.inputLabel}>Email Address *</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder='you@example.com'
+                      placeholderTextColor='#666'
+                      value={email}
+                      onChangeText={setEmail}
+                      keyboardType='email-address'
+                      autoCapitalize='none'
+                    />
+                  </View>
                 </View>
-                <View style={styles.dripPriceContainer}>
-                  <Text style={styles.dripPrice}>${dripPrice}</Text>
+
+                {/* Preferred Date & Time */}
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Preferred Date & Time</Text>
+                  
+                  <Pressable 
+                    style={styles.dateTimeButton}
+                    onPress={() => setShowDatePicker(true)}
+                  >
+                    <View style={styles.dateTimeIcon}>
+                      <Text style={styles.dateTimeEmoji}>📅</Text>
+                    </View>
+                    <View style={styles.dateTimeContent}>
+                      <Text style={styles.dateTimeLabel}>Date & Time</Text>
+                      <Text style={styles.dateTimeValue}>
+                        {formatDate(selectedDate)} at {formatTime(selectedDate)}
+                      </Text>
+                    </View>
+                    <Text style={styles.editText}>Edit</Text>
+                  </Pressable>
                 </View>
-              </View>
-            </BlurView>
-          </Animated.View>
 
-          {/* Visit Location */}
-          <Animated.View
-            style={[
-              styles.locationSection,
-              {
-                transform: [{ translateY: optionsSlide }],
-                opacity: optionsOpacity,
-              },
-            ]}
-          >
-            <Text style={styles.sectionLabel}>Visit Location</Text>
-            
-            {/* Location Type Selector */}
-            <View style={styles.locationTypeRow}>
-              {LOCATION_TYPES.map((type) => (
-                <Pressable
-                  key={type.id}
-                  style={[
-                    styles.locationTypeButton,
-                    locationType === type.id && styles.locationTypeButtonActive,
-                  ]}
-                  onPress={() => setLocationType(type.id)}
-                >
-                  <Text style={styles.locationTypeIcon}>{type.icon}</Text>
-                  <Text
-                    style={[
-                      styles.locationTypeLabel,
-                      locationType === type.id && styles.locationTypeLabelActive,
-                    ]}
-                  >
-                    {type.label}
+                {/* SMS Confirmation Notice */}
+                <View style={styles.smsNotice}>
+                  <Text style={styles.smsIcon}>💬</Text>
+                  <Text style={styles.smsText}>
+                    You'll receive an SMS confirmation with your appointment details and nurse assignment.
                   </Text>
-                </Pressable>
-              ))}
-            </View>
+                </View>
+              </>
+            ) : (
+              <>
+                {/* Visit Type Selection */}
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>How would you like to visit?</Text>
+                  
+                  <View style={styles.visitOptions}>
+                    {BOOKING_OPTIONS.map((option) => (
+                      <Pressable
+                        key={option.id}
+                        style={[
+                          styles.visitOption,
+                          selectedOption === option.id && styles.visitOptionSelected,
+                        ]}
+                        onPress={() => setSelectedOption(option.id as 'clinic' | 'concierge')}
+                      >
+                        <Text style={styles.visitOptionIcon}>{option.icon}</Text>
+                        <View style={styles.visitOptionContent}>
+                          <Text style={styles.visitOptionTitle}>{option.title}</Text>
+                          <Text style={styles.visitOptionSubtitle}>{option.subtitle}</Text>
+                        </View>
+                        {selectedOption === option.id && (
+                          <View style={styles.selectedBadge}>
+                            <Text style={styles.selectedBadgeText}>✓</Text>
+                          </View>
+                        )}
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
 
-            {/* Address Input */}
-            <View style={styles.locationInputContainer}>
-              <View style={styles.locationIcon}>
-                <Text style={styles.locationPin}>📍</Text>
-              </View>
-              <TextInput
-                style={styles.locationInput}
-                placeholder={`Enter your ${locationType} address`}
-                placeholderTextColor="#666"
-                value={location}
-                onChangeText={setLocation}
-              />
-            </View>
-          </Animated.View>
+                {/* Address Input (for Concierge) */}
+                {selectedOption === 'concierge' && (
+                  <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Your Location</Text>
+                    <View style={styles.inputGroup}>
+                      <TextInput
+                        style={styles.input}
+                        placeholder='Enter your address'
+                        placeholderTextColor='#666'
+                        value={conciergeAddress}
+                        onChangeText={setConciergeAddress}
+                      />
+                    </View>
+                    <Text style={styles.fieldHint}>
+                      Our nurses travel to you anywhere in Florida
+                    </Text>
+                  </View>
+                )}
 
-          {/* Booking Options */}
-          <Animated.View
-            style={[
-              styles.optionsSection,
-              {
-                transform: [{ translateY: optionsSlide }],
-                opacity: optionsOpacity,
-              },
-            ]}
-          >
-            <Text style={styles.sectionLabel}>When do you need it?</Text>
-            <View style={styles.optionsRow}>
-              {BOOKING_OPTIONS.map((option) => (
-                <Pressable
-                  key={option.id}
-                  style={[
-                    styles.optionCard,
-                    selectedOption === option.id && styles.optionCardSelected,
-                  ]}
-                  onPress={() => setSelectedOption(option.id as 'now' | 'schedule')}
-                >
-                  <Text style={styles.optionIcon}>{option.icon}</Text>
-                  <Text
-                    style={[
-                      styles.optionTitle,
-                      selectedOption === option.id && styles.optionTitleSelected,
-                    ]}
-                  >
-                    {option.title}
+                {/* Clinic Address Display (for Clinic) */}
+                {selectedOption === 'clinic' && (
+                  <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Our Miami Clinic</Text>
+                    <Pressable style={styles.clinicCard}>
+                      <Text style={styles.clinicIcon}>🏥</Text>
+                      <View style={styles.clinicContent}>
+                        <Text style={styles.clinicName}>NEOVIV Miami</Text>
+                        <Text style={styles.clinicAddress}>{CLINIC_ADDRESS}</Text>
+                      </View>
+                    </Pressable>
+                    <Text style={styles.fieldHint}>
+                      Walk-in or we can arrange concierge pickup
+                    </Text>
+                  </View>
+                )}
+
+                {/* Special Notes */}
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Special Notes (Optional)</Text>
+                  <View style={styles.inputGroup}>
+                    <TextInput
+                      style={[styles.input, styles.textArea]}
+                      placeholder='Any allergies, preferences, or special requests...'
+                      placeholderTextColor='#666'
+                      value={specialNotes}
+                      onChangeText={setSpecialNotes}
+                      multiline
+                      numberOfLines={3}
+                    />
+                  </View>
+                </View>
+
+                {/* Medical Information */}
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Medical Information (Optional)</Text>
+                  <View style={styles.inputGroup}>
+                    <TextInput
+                      style={[styles.input, styles.textArea]}
+                      placeholder='Current medications, medical conditions, or concerns...'
+                      placeholderTextColor='#666'
+                      value={medicalInfo}
+                      onChangeText={setMedicalInfo}
+                      multiline
+                      numberOfLines={3}
+                    />
+                  </View>
+                  <Text style={styles.fieldHint}>
+                    This information helps your nurse provide better care
                   </Text>
-                  <Text style={styles.optionSubtitle}>{option.subtitle}</Text>
-                  {selectedOption === 'now' && option.id === 'now' && (
-                    <View style={styles.etaBadge}>
-                      <Text style={styles.etaBadgeText}>60-120 min</Text>
-                    </View>
-                  )}
-                  {selectedOption === option.id && (
-                    <View style={styles.selectedIndicator}>
-                      <Text style={styles.checkmark}>✓</Text>
-                    </View>
-                  )}
-                </Pressable>
-              ))}
-            </View>
-          </Animated.View>
+                </View>
+              </>
+            )}
+          </ScrollView>
 
-          {/* Schedule Date/Time Display */}
-          {selectedOption === 'schedule' && (
+          {/* Continue Button */}
+          <View style={styles.buttonContainer}>
             <Pressable
-              style={styles.dateTimeDisplay}
-              onPress={() => setShowDatePicker(true)}
+              style={[
+                styles.continueButton,
+                (step === 1 ? !isStep1Valid : !isStep2Valid) && styles.continueButtonDisabled,
+              ]}
+              onPress={handleContinue}
+              disabled={step === 1 ? !isStep1Valid : !isStep2Valid}
             >
-              <View style={styles.dateTimeContent}>
-                <Text style={styles.dateTimeLabel}>Selected Time</Text>
-                <Text style={styles.dateTimeValue}>
-                  {formatDate(selectedDate)} at {formatTime(selectedDate)}
-                </Text>
-              </View>
-              <Text style={styles.editText}>Edit</Text>
-            </Pressable>
-          )}
-
-          {/* Consent Checkbox */}
-          <Animated.View
-            style={[
-              styles.consentSection,
-              {
-                transform: [{ translateY: confirmSlide }],
-                opacity: confirmOpacity,
-              },
-            ]}
-          >
-            <Pressable
-              style={styles.checkboxRow}
-              onPress={() => setConsentChecked(!consentChecked)}
-            >
-              <View
-                style={[
-                  styles.checkbox,
-                  consentChecked && styles.checkboxChecked,
-                ]}
-              >
-                {consentChecked && <Text style={styles.checkmarkSmall}>✓</Text>}
-              </View>
-              <Text style={styles.consentText}>
-                I agree to the{' '}
-                <Text style={styles.consentLink}>terms and informed consent</Text>
+              <Text style={styles.continueButtonText}>
+                {step === 1 ? 'Continue' : 'Continue to HIPAA Consent'}
               </Text>
+              <Text style={styles.continueArrow}>→</Text>
             </Pressable>
-          </Animated.View>
-        </ScrollView>
-
-        {/* Confirm Button (Fixed at bottom) */}
-        <Animated.View
-          style={[
-            styles.confirmContainer,
-            {
-              opacity: confirmOpacity,
-              transform: [{ translateY: confirmSlide }],
-            },
-          ]}
-        >
-          <Pressable
-            style={[
-              styles.confirmButton,
-              (!location.trim() || !consentChecked || isSubmitting) && styles.confirmButtonDisabled,
-            ]}
-            onPress={handleConfirm}
-            disabled={!location.trim() || !consentChecked || isSubmitting}
-          >
-            <View style={styles.confirmButtonGradient}>
-              <Text style={styles.confirmButtonText}>
-                {isSubmitting ? 'Submitting...' : 'Confirm Visit'}
-              </Text>
-            </View>
-          </Pressable>
+          </View>
         </Animated.View>
       </KeyboardAvoidingView>
 
       {/* Date Picker Modal */}
-      <Modal visible={showDatePicker} transparent animationType="slide">
+      <Modal visible={showDatePicker} transparent animationType='slide'>
         <View style={styles.modalOverlay}>
           <View style={styles.pickerContainer}>
             <View style={styles.pickerHeader}>
               <Pressable onPress={() => setShowDatePicker(false)}>
                 <Text style={styles.pickerCancel}>Cancel</Text>
               </Pressable>
-              <Text style={styles.pickerTitle}>Select Date</Text>
+              <Text style={styles.pickerTitle}>Select Date & Time</Text>
               <Pressable onPress={() => setShowDatePicker(false)}>
                 <Text style={styles.pickerDone}>Done</Text>
               </Pressable>
             </View>
             <DateTimePicker
               value={selectedDate}
-              mode="date"
-              display="spinner"
-              onChange={onDateChange}
+              mode='datetime'
+              display='spinner'
+              onChange={(event, date) => {
+                setShowDatePicker(false);
+                if (date) setSelectedDate(date);
+              }}
               minimumDate={new Date()}
-              textColor="#FFFFFF"
-              themeVariant="dark"
-            />
-          </View>
-        </View>
-      </Modal>
-
-      {/* Time Picker Modal */}
-      <Modal visible={showTimePicker} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.pickerContainer}>
-            <View style={styles.pickerHeader}>
-              <Pressable onPress={() => setShowTimePicker(false)}>
-                <Text style={styles.pickerCancel}>Cancel</Text>
-              </Pressable>
-              <Text style={styles.pickerTitle}>Select Time</Text>
-              <Pressable onPress={() => setShowTimePicker(false)}>
-                <Text style={styles.pickerDone}>Done</Text>
-              </Pressable>
-            </View>
-            <DateTimePicker
-              value={selectedDate}
-              mode="time"
-              display="spinner"
-              onChange={onTimeChange}
-              textColor="#FFFFFF"
-              themeVariant="dark"
+              textColor='#FFFFFF'
+              themeVariant='dark'
             />
           </View>
         </View>
@@ -546,79 +395,45 @@ export default function BookScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
-  },
-  background: {
-    ...StyleSheet.absoluteFillObject,
-    overflow: 'hidden',
-  },
-  orb: {
-    position: 'absolute',
-    borderRadius: 999,
-    opacity: 0.15,
+    backgroundColor: BLACK,
   },
   orb1: {
+    position: 'absolute',
     width: 300,
     height: 300,
-    backgroundColor: '#00B09B',
+    borderRadius: 150,
+    backgroundColor: TEAL,
+    opacity: 0.1,
     top: -100,
     right: -100,
   },
   orb2: {
+    position: 'absolute',
     width: 200,
     height: 200,
-    backgroundColor: '#00D4FF',
-    bottom: 300,
+    borderRadius: 100,
+    backgroundColor: ELECTRIC_BLUE,
+    opacity: 0.08,
+    bottom: 200,
     left: -80,
-  },
-  orb3: {
-    width: 150,
-    height: 150,
-    backgroundColor: '#00B09B',
-    bottom: -50,
-    right: 100,
-  },
-  animationOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 100,
-  },
-  logoPop: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#00B09B',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#00B09B',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 30,
-  },
-  logoPopText: {
-    fontSize: 60,
-  },
-  submittingText: {
-    marginTop: 24,
-    fontSize: 16,
-    color: '#B3B3B3',
-    fontWeight: '500',
   },
   keyboardView: {
     flex: 1,
   },
+  content: {
+    flex: 1,
+  },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 140,
+    paddingHorizontal: 24,
+    paddingBottom: 120,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 30,
+    paddingHorizontal: 24,
+    paddingTop: 60,
+    paddingBottom: 20,
   },
   backButton: {
     width: 44,
@@ -637,273 +452,241 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
   },
+  headerSubtitle: {
+    fontSize: 12,
+    color: TEAL,
+    marginTop: 2,
+  },
   placeholder: {
     width: 44,
   },
-  selectedDripCard: {
-    borderRadius: 20,
-    overflow: 'hidden',
-    marginBottom: 30,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 176, 155, 0.2)',
-  },
-  dripCardBlur: {
-    padding: 20,
-  },
-  dripCardContent: {
+  progressContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  dripInfo: {
-    flex: 1,
-  },
-  dripName: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginBottom: 4,
-  },
-  dripDescription: {
-    fontSize: 14,
-    color: '#B3B3B3',
-  },
-  dripPriceContainer: {
-    backgroundColor: 'rgba(0, 212, 255, 0.2)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 12,
-  },
-  dripPrice: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#00D4FF',
-  },
-  locationSection: {
+    justifyContent: 'center',
+    paddingHorizontal: 60,
     marginBottom: 30,
   },
-  sectionLabel: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginBottom: 12,
-  },
-  locationTypeRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 16,
-  },
-  locationTypeButton: {
-    flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  locationTypeButtonActive: {
-    borderColor: '#00B09B',
-    backgroundColor: 'rgba(0, 176, 155, 0.15)',
-  },
-  locationTypeIcon: {
-    fontSize: 20,
-    marginBottom: 4,
-  },
-  locationTypeLabel: {
-    fontSize: 11,
-    color: '#B3B3B3',
-    fontWeight: '500',
-  },
-  locationTypeLabelActive: {
-    color: '#00B09B',
-    fontWeight: '600',
-  },
-  locationInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  progressStep: {
+    width: 32,
+    height: 32,
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 176, 155, 0.2)',
-    paddingHorizontal: 16,
-  },
-  locationIcon: {
-    marginRight: 12,
-  },
-  locationPin: {
-    fontSize: 20,
-  },
-  locationInput: {
-    flex: 1,
-    height: 56,
-    fontSize: 16,
-    color: '#FFFFFF',
-  },
-  optionsSection: {
-    marginBottom: 30,
-  },
-  optionsRow: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  optionCard: {
-    flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 20,
-    padding: 20,
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    alignItems: 'center',
-  },
-  optionCardSelected: {
-    borderColor: '#00B09B',
-    backgroundColor: 'rgba(0, 176, 155, 0.1)',
-  },
-  optionIcon: {
-    fontSize: 32,
-    marginBottom: 8,
-  },
-  optionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginBottom: 4,
-  },
-  optionTitleSelected: {
-    color: '#00B09B',
-  },
-  optionSubtitle: {
-    fontSize: 11,
-    color: '#B3B3B3',
-    textAlign: 'center',
-    lineHeight: 14,
-  },
-  etaBadge: {
-    backgroundColor: 'rgba(0, 212, 255, 0.2)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-    marginTop: 8,
-  },
-  etaBadgeText: {
-    fontSize: 11,
-    color: '#00D4FF',
-    fontWeight: '600',
-  },
-  selectedIndicator: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#00B09B',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  checkmark: {
-    color: '#0A0A0A',
-    fontSize: 14,
-    fontWeight: '700',
+  progressStepActive: {
+    backgroundColor: TEAL,
   },
-  dateTimeDisplay: {
+  progressStepText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  progressLine: {
+    flex: 1,
+    height: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginHorizontal: 12,
+  },
+  section: {
+    marginBottom: 28,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginBottom: 16,
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 14,
+    color: '#B3B3B3',
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 176, 155, 0.2)',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    fontSize: 16,
+    color: '#FFFFFF',
+  },
+  textArea: {
+    height: 80,
+    textAlignVertical: 'top',
+  },
+  dateTimeButton: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 176, 155, 0.1)',
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#00B09B',
-    marginBottom: 30,
+    borderColor: TEAL,
+  },
+  dateTimeIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(0, 176, 155, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  dateTimeEmoji: {
+    fontSize: 24,
   },
   dateTimeContent: {
     flex: 1,
   },
   dateTimeLabel: {
     fontSize: 12,
-    color: '#00B09B',
+    color: TEAL,
     marginBottom: 4,
   },
   dateTimeValue: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '500',
     color: '#FFFFFF',
   },
   editText: {
     fontSize: 14,
-    color: '#00B09B',
+    color: TEAL,
     fontWeight: '600',
   },
-  consentSection: {
-    marginBottom: 20,
-  },
-  checkboxRow: {
+  smsNotice: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: 'rgba(0, 212, 255, 0.1)',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 28,
   },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: '#666',
+  smsIcon: {
+    fontSize: 20,
     marginRight: 12,
+  },
+  smsText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#B3B3B3',
+    lineHeight: 18,
+  },
+  visitOptions: {
+    gap: 12,
+  },
+  visitOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  visitOptionSelected: {
+    borderColor: TEAL,
+    backgroundColor: 'rgba(0, 176, 155, 0.1)',
+  },
+  visitOptionIcon: {
+    fontSize: 32,
+    marginRight: 16,
+  },
+  visitOptionContent: {
+    flex: 1,
+  },
+  visitOptionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  visitOptionSubtitle: {
+    fontSize: 13,
+    color: '#B3B3B3',
+  },
+  selectedBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: TEAL,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  checkboxChecked: {
-    borderColor: '#00B09B',
-    backgroundColor: '#00B09B',
-  },
-  checkmarkSmall: {
-    color: '#0A0A0A',
-    fontSize: 14,
+  selectedBadgeText: {
+    color: BLACK,
+    fontSize: 16,
     fontWeight: '700',
   },
-  consentText: {
-    fontSize: 14,
-    color: '#B3B3B3',
+  clinicCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 176, 155, 0.2)',
+  },
+  clinicIcon: {
+    fontSize: 32,
+    marginRight: 16,
+  },
+  clinicContent: {
     flex: 1,
   },
-  consentLink: {
-    color: '#00B09B',
+  clinicName: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginBottom: 4,
   },
-  confirmContainer: {
+  clinicAddress: {
+    fontSize: 14,
+    color: '#B3B3B3',
+  },
+  fieldHint: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 8,
+  },
+  buttonContainer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingBottom: 40,
     paddingTop: 20,
     backgroundColor: 'rgba(10, 10, 10, 0.95)',
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.1)',
   },
-  confirmButton: {
-    borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: '#00B09B',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  confirmButtonDisabled: {
-    opacity: 0.5,
-  },
-  confirmButtonGradient: {
-    backgroundColor: '#00B09B',
-    paddingVertical: 18,
+  continueButton: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: TEAL,
+    borderRadius: 16,
+    paddingVertical: 18,
   },
-  confirmButtonText: {
+  continueButtonDisabled: {
+    opacity: 0.4,
+  },
+  continueButtonText: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#0A0A0A',
+    color: BLACK,
+  },
+  continueArrow: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: BLACK,
+    marginLeft: 8,
   },
   modalOverlay: {
     flex: 1,
@@ -937,7 +720,6 @@ const styles = StyleSheet.create({
   pickerDone: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#00B09B',
+    color: TEAL,
   },
 });
-

@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View, StyleSheet } from 'react-native';
+import DroppyChat from '../src/components/DroppyChat';
 
 export default function RootLayout() {
   return (
@@ -13,6 +14,7 @@ export default function RootLayout() {
           animation: 'fade',
         }}
       />
+      <DroppyChat />
     </View>
   );
 }
