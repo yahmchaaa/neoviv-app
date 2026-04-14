@@ -9,22 +9,19 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withRepeat,
   withTiming,
-  withSequence,
-  Easing,
 } from 'react-native-reanimated';
 import { router } from 'expo-router';
 import { signUp } from '../src/services/auth';
 
-const TEAL = '#00B09B';
-const ELECTRIC_BLUE = '#00D4FF';
+const TEAL = '#2D8A7D';
+const NAVY = '#131B2A';
 const LIGHT_MINT = '#F5F9F9';
+const TEXT_SECONDARY = '#54837F';
+const WHITE = '#FFFFFF';
 
 export default function CreateAccountScreen() {
   const [email, setEmail] = useState('');
@@ -33,88 +30,11 @@ export default function CreateAccountScreen() {
   const [loading, setLoading] = useState(false);
   const buttonScale = useSharedValue(1);
 
-  // Animation values for floating orbs
-  const orb1Y = useSharedValue(0);
-  const orb1X = useSharedValue(0);
-  const orb2Y = useSharedValue(0);
-  const orb2X = useSharedValue(0);
-  const orb3Y = useSharedValue(0);
-  const orb3X = useSharedValue(0);
-
-  React.useEffect(() => {
-    orb1Y.value = withRepeat(
-      withSequence(
-        withTiming(-30, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
-        withTiming(30, { duration: 3000, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      true
-    );
-
-    orb1X.value = withRepeat(
-      withSequence(
-        withTiming(20, { duration: 4000, easing: Easing.inOut(Easing.ease) }),
-        withTiming(-20, { duration: 4000, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      true
-    );
-
-    orb2Y.value = withRepeat(
-      withSequence(
-        withTiming(25, { duration: 3500, easing: Easing.inOut(Easing.ease) }),
-        withTiming(-25, { duration: 3500, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      true
-    );
-
-    orb2X.value = withRepeat(
-      withSequence(
-        withTiming(-25, { duration: 4500, easing: Easing.inOut(Easing.ease) }),
-        withTiming(25, { duration: 4500, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      true
-    );
-
-    orb3Y.value = withRepeat(
-      withSequence(
-        withTiming(20, { duration: 2500, easing: Easing.inOut(Easing.ease) }),
-        withTiming(-20, { duration: 2500, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      true
-    );
-
-    orb3X.value = withRepeat(
-      withSequence(
-        withTiming(30, { duration: 5000, easing: Easing.inOut(Easing.ease) }),
-        withTiming(-30, { duration: 5000, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      true
-    );
-  }, []);
-
-  const orb1Style = useAnimatedStyle(() => ({
-    transform: [{ translateY: orb1Y.value }, { translateX: orb1X.value }],
-  }));
-
-  const orb2Style = useAnimatedStyle(() => ({
-    transform: [{ translateY: orb2Y.value }, { translateX: orb2X.value }],
-  }));
-
-  const orb3Style = useAnimatedStyle(() => ({
-    transform: [{ translateY: orb3Y.value }, { translateX: orb3X.value }],
-  }));
-
   const buttonStyle = useAnimatedStyle(() => ({
     transform: [{ scale: buttonScale.value }],
   }));
 
   const handleSignUp = async () => {
-    // Validation
     if (!email || !password || !confirmPassword) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
@@ -130,14 +50,9 @@ export default function CreateAccountScreen() {
       return;
     }
 
-    buttonScale.value = withRepeat(
-      withSequence(
-        withTiming(0.95, { duration: 300, useNativeDriver: true }),
-        withTiming(1, { duration: 300, useNativeDriver: true })
-      ),
-      3,
-      false
-    );
+    buttonScale.value = withTiming(0.95, { duration: 100 }, () => {
+      buttonScale.value = withTiming(1, { duration: 100 });
+    });
 
     setLoading(true);
 
@@ -147,30 +62,17 @@ export default function CreateAccountScreen() {
       if (error) {
         Alert.alert('Sign Up Failed', error);
       } else {
-        // Navigate to email verification (Step 2)
         router.replace('/onboarding/verify-email');
       }
     } catch (err) {
       Alert.alert('Error', 'An unexpected error occurred');
     } finally {
       setLoading(false);
-      buttonScale.value = 1;
     }
   };
 
   return (
     <View style={styles.container}>
-      {/* Animated Background Orbs */}
-      <Animated.View style={[styles.orb, styles.orb1, orb1Style]}>
-        <LinearGradient colors={[TEAL + '40', ELECTRIC_BLUE + '20']} style={styles.orbGradient} />
-      </Animated.View>
-      <Animated.View style={[styles.orb, styles.orb2, orb2Style]}>
-        <LinearGradient colors={[ELECTRIC_BLUE + '30', TEAL + '20']} style={styles.orbGradient} />
-      </Animated.View>
-      <Animated.View style={[styles.orb, styles.orb3, orb3Style]}>
-        <LinearGradient colors={[TEAL + '30', ELECTRIC_BLUE + '20']} style={styles.orbGradient} />
-      </Animated.View>
-
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardView}>
         <View style={styles.content}>
           {/* Logo and Tagline */}
@@ -179,8 +81,8 @@ export default function CreateAccountScreen() {
             <Text style={styles.tagline}>drops of life</Text>
           </View>
 
-          {/* Frosted Glass Card */}
-          <BlurView intensity={20} tint="light" style={styles.glassCard}>
+          {/* Card */}
+          <View style={styles.card}>
             <View style={styles.cardContent}>
               <Text style={styles.cardTitle}>Create Account</Text>
 
@@ -189,7 +91,7 @@ export default function CreateAccountScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Enter your email"
-                  placeholderTextColor="#666"
+                  placeholderTextColor="#999"
                   value={email}
                   onChangeText={setEmail}
                   keyboardType="email-address"
@@ -203,7 +105,7 @@ export default function CreateAccountScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Create a password"
-                  placeholderTextColor="#666"
+                  placeholderTextColor="#999"
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry
@@ -215,7 +117,7 @@ export default function CreateAccountScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Confirm your password"
-                  placeholderTextColor="#666"
+                  placeholderTextColor="#999"
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
                   secureTextEntry
@@ -224,24 +126,17 @@ export default function CreateAccountScreen() {
 
               <Animated.View style={buttonStyle}>
                 <TouchableOpacity style={styles.submitButton} onPress={handleSignUp} disabled={loading}>
-                  <LinearGradient
-                    colors={[TEAL, ELECTRIC_BLUE]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.gradientButton}
-                  >
-                    <Text style={styles.submitButtonText}>
-                      {loading ? 'Creating Account...' : 'Sign Up'}
-                    </Text>
-                  </LinearGradient>
+                  <Text style={styles.submitButtonText}>
+                    {loading ? 'Creating Account...' : 'Sign Up'}
+                  </Text>
                 </TouchableOpacity>
               </Animated.View>
 
               <TouchableOpacity style={styles.logInButton} onPress={() => router.push('/signin')}>
-                <Text style={styles.logInButtonText}>Log In</Text>
+                <Text style={styles.logInButtonText}>Already have an account? Log In</Text>
               </TouchableOpacity>
             </View>
-          </BlurView>
+          </View>
         </View>
       </KeyboardAvoidingView>
     </View>
@@ -274,25 +169,28 @@ const styles = StyleSheet.create({
   },
   tagline: {
     fontSize: 16,
-    color: ELECTRIC_BLUE,
+    color: TEXT_SECONDARY,
     letterSpacing: 4,
     marginTop: 8,
     fontStyle: 'italic',
   },
-  glassCard: {
+  card: {
     width: '100%',
     borderRadius: 24,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: TEAL + '20',
+    backgroundColor: WHITE,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
   },
   cardContent: {
     padding: 32,
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#131B2A',
+    color: NAVY,
     textAlign: 'center',
     marginBottom: 32,
   },
@@ -301,71 +199,38 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 14,
-    color: TEAL,
+    color: NAVY,
     marginBottom: 8,
     fontWeight: '600',
   },
   input: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F5F9F9',
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
-    color: '#131B2A',
+    color: NAVY,
     borderWidth: 1,
-    borderColor: TEAL + '20',
+    borderColor: 'rgba(45, 138, 125, 0.2)',
   },
   submitButton: {
     marginTop: 16,
+    backgroundColor: TEAL,
     borderRadius: 12,
-    overflow: 'hidden',
-  },
-  gradientButton: {
     paddingVertical: 18,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   submitButtonText: {
-    color: '#131B2A',
+    color: WHITE,
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
   logInButton: {
     marginTop: 24,
     alignItems: 'center',
   },
   logInButtonText: {
-    color: ELECTRIC_BLUE,
+    color: TEAL,
     fontSize: 14,
     fontWeight: '600',
-  },
-  orb: {
-    position: 'absolute',
-    borderRadius: 999,
-    overflow: 'hidden',
-  },
-  orbGradient: {
-    width: '100%',
-    height: '100%',
-  },
-  orb1: {
-    width: 300,
-    height: 300,
-    top: -100,
-    right: -100,
-    opacity: 0.6,
-  },
-  orb2: {
-    width: 250,
-    height: 250,
-    bottom: 100,
-    left: -80,
-    opacity: 0.5,
-  },
-  orb3: {
-    width: 200,
-    height: 200,
-    top: 200,
-    right: -50,
-    opacity: 0.4,
   },
 });

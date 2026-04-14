@@ -10,11 +10,15 @@ import {
   ScrollView,
   Platform,
   KeyboardAvoidingView,
-  Modal,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { BlurView } from 'expo-blur';
-import DateTimePicker from '@react-native-community/datetimepicker';
+
+const LIGHT_MINT = '#F5F9F9';
+const TEAL = '#2D8A7D';
+const NAVY = '#131B2A';
+const TEXT_SECONDARY = '#54837F';
+const WHITE = '#FFFFFF';
 
 const LOCATION_TYPES = [
   { id: 'home', label: 'Home', icon: '🏠' },
@@ -46,236 +50,60 @@ export default function BookScreen() {
   const [location, setLocation] = useState('');
   const [locationType, setLocationType] = useState('home');
   const [consentChecked, setConsentChecked] = useState(false);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [showConfirmAnimation, setShowConfirmAnimation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Get drip data from params
-  const dripId = params.id as string || 'energy-boost';
-  const dripName = params.name as string || 'Energy Boost';
+  const dripId = params.id as string || '1';
+  const dripName = params.name as string || "Myers' Cocktail";
   const dripPrice = parseInt(params.price as string) || 249;
-  const dripDescription = params.description as string || 'B-Complex, B12 & amino acids';
+  const dripDescription = params.description as string || 'The classic revival';
 
   // Animation values
-  const headerSlide = useRef(new Animated.Value(-100)).current;
   const headerOpacity = useRef(new Animated.Value(0)).current;
-  const cardSlide = useRef(new Animated.Value(80)).current;
   const cardOpacity = useRef(new Animated.Value(0)).current;
-  const optionsSlide = useRef(new Animated.Value(80)).current;
   const optionsOpacity = useRef(new Animated.Value(0)).current;
-  const confirmSlide = useRef(new Animated.Value(100)).current;
-  const confirmOpacity = useRef(new Animated.Value(0)).current;
-
-  // Logo animations
-  const logoScale = useRef(new Animated.Value(0)).current;
-  const logoRotate = useRef(new Animated.Value(0)).current;
-  const logoPulse = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    // Stagger animations
     Animated.sequence([
-      Animated.parallel([
-        Animated.timing(headerSlide, {
-          toValue: 0,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(headerOpacity, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-      ]),
-      Animated.parallel([
-        Animated.timing(cardSlide, {
-          toValue: 0,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(cardOpacity, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-      ]),
-      Animated.parallel([
-        Animated.timing(optionsSlide, {
-          toValue: 0,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(optionsOpacity, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-      ]),
-      Animated.parallel([
-        Animated.timing(confirmSlide, {
-          toValue: 0,
-          duration: 500,
-          delay: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(confirmOpacity, {
-          toValue: 1,
-          duration: 500,
-          delay: 200,
-          useNativeDriver: true,
-        }),
-      ]),
+      Animated.timing(headerOpacity, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(cardOpacity, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(optionsOpacity, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
     ]).start();
   }, []);
 
-  const triggerLogoAnimation = () => {
-    setShowConfirmAnimation(true);
+  const handleConfirm = () => {
+    if (!location.trim() || !consentChecked) {
+      return;
+    }
     setIsSubmitting(true);
     
-    // Start with pulse animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(logoPulse, {
-          toValue: 1.2,
-          duration: 500,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-        Animated.timing(logoPulse, {
-          toValue: 1,
-          duration: 500,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-      ]),
-      { iterations: 3 }
-    ).start();
-
-    // After pulse, do the main animation
     setTimeout(() => {
-      Animated.parallel([
-        Animated.spring(logoScale, {
-          toValue: 1.5,
-          tension: 50,
-          friction: 3,
-          useNativeDriver: true,
-        }),
-        Animated.timing(logoRotate, {
-          toValue: 1,
-          duration: 500,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        Animated.timing(logoScale, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }).start(() => {
-          setShowConfirmAnimation(false);
-          setIsSubmitting(false);
-          router.push({
-            pathname: '/confirmation',
-            params: {
-              type: selectedOption,
-              location: location,
-              eta: selectedOption === 'now' ? '60-90' : '',
-              date: selectedOption === 'schedule' ? selectedDate.toLocaleDateString() : '',
-              time: selectedOption === 'schedule' ? selectedDate.toLocaleTimeString() : '',
-            },
-          });
-        });
+      setIsSubmitting(false);
+      router.push({
+        pathname: '/confirmation',
+        params: {
+          type: selectedOption,
+          location: location,
+          dripName: dripName,
+        },
       });
-    }, 3000); // 3 seconds of pulse animation before main animation
-  };
-
-  const handleConfirm = () => {
-    if (!location.trim()) {
-      return;
-    }
-    if (!consentChecked) {
-      return;
-    }
-    triggerLogoAnimation();
-  };
-
-  const onDateChange = (event: any, date?: Date) => {
-    setShowDatePicker(false);
-    if (date) {
-      setSelectedDate(date);
-      setShowTimePicker(true);
-    }
-  };
-
-  const onTimeChange = (event: any, time?: Date) => {
-    setShowTimePicker(false);
-    if (time) {
-      setSelectedDate((prev) => {
-        const newDate = new Date(prev);
-        newDate.setHours(time.getHours());
-        newDate.setMinutes(time.getMinutes());
-        return newDate;
-      });
-    }
-  };
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    });
+    }, 1500);
   };
 
   return (
     <View style={styles.container}>
-      {/* Animated Background */}
-      <View style={styles.background}>
-        <View style={[styles.orb, styles.orb1]} />
-        <View style={[styles.orb, styles.orb2]} />
-        <View style={[styles.orb, styles.orb3]} />
-      </View>
-
-      {/* Logo Animation Overlay (Pulse + Pop) */}
-      {showConfirmAnimation && (
-        <View style={styles.animationOverlay}>
-          <Animated.View
-            style={[
-              styles.logoPop,
-              {
-                transform: [
-                  { scale: Animated.multiply(logoScale, logoPulse) },
-                  {
-                    rotate: logoRotate.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: ['0deg', '360deg'],
-                    }),
-                  },
-                ],
-              },
-            ]}
-          >
-            {isSubmitting ? (
-              <Text style={styles.logoPopText}>⏳</Text>
-            ) : (
-              <Text style={styles.logoPopText}>💧</Text>
-            )}
-          </Animated.View>
-          {isSubmitting && (
-            <Text style={styles.submittingText}>Submitting your booking...</Text>
-          )}
-        </View>
-      )}
-
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
@@ -286,15 +114,7 @@ export default function BookScreen() {
           keyboardShouldPersistTaps="handled"
         >
           {/* Header */}
-          <Animated.View
-            style={[
-              styles.header,
-              {
-                transform: [{ translateX: headerSlide }],
-                opacity: headerOpacity,
-              },
-            ]}
-          >
+          <Animated.View style={[styles.header, { opacity: headerOpacity }]}>
             <Pressable style={styles.backButton} onPress={() => router.back()}>
               <Text style={styles.backText}>←</Text>
             </Pressable>
@@ -303,15 +123,7 @@ export default function BookScreen() {
           </Animated.View>
 
           {/* Selected Drip Card */}
-          <Animated.View
-            style={[
-              styles.selectedDripCard,
-              {
-                transform: [{ translateY: cardSlide }],
-                opacity: cardOpacity,
-              },
-            ]}
-          >
+          <Animated.View style={[styles.selectedDripCard, { opacity: cardOpacity }]}>
             <BlurView intensity={20} tint="light" style={styles.dripCardBlur}>
               <View style={styles.dripCardContent}>
                 <View style={styles.dripInfo}>
@@ -326,15 +138,7 @@ export default function BookScreen() {
           </Animated.View>
 
           {/* Visit Location */}
-          <Animated.View
-            style={[
-              styles.locationSection,
-              {
-                transform: [{ translateY: optionsSlide }],
-                opacity: optionsOpacity,
-              },
-            ]}
-          >
+          <Animated.View style={[styles.locationSection, { opacity: optionsOpacity }]}>
             <Text style={styles.sectionLabel}>Visit Location</Text>
             
             {/* Location Type Selector */}
@@ -369,7 +173,7 @@ export default function BookScreen() {
               <TextInput
                 style={styles.locationInput}
                 placeholder={`Enter your ${locationType} address`}
-                placeholderTextColor="#666"
+                placeholderTextColor="#999"
                 value={location}
                 onChangeText={setLocation}
               />
@@ -377,15 +181,7 @@ export default function BookScreen() {
           </Animated.View>
 
           {/* Booking Options */}
-          <Animated.View
-            style={[
-              styles.optionsSection,
-              {
-                transform: [{ translateY: optionsSlide }],
-                opacity: optionsOpacity,
-              },
-            ]}
-          >
+          <Animated.View style={[styles.optionsSection, { opacity: optionsOpacity }]}>
             <Text style={styles.sectionLabel}>When do you need it?</Text>
             <View style={styles.optionsRow}>
               {BOOKING_OPTIONS.map((option) => (
@@ -407,11 +203,6 @@ export default function BookScreen() {
                     {option.title}
                   </Text>
                   <Text style={styles.optionSubtitle}>{option.subtitle}</Text>
-                  {selectedOption === 'now' && option.id === 'now' && (
-                    <View style={styles.etaBadge}>
-                      <Text style={styles.etaBadgeText}>60-120 min</Text>
-                    </View>
-                  )}
                   {selectedOption === option.id && (
                     <View style={styles.selectedIndicator}>
                       <Text style={styles.checkmark}>✓</Text>
@@ -422,32 +213,8 @@ export default function BookScreen() {
             </View>
           </Animated.View>
 
-          {/* Schedule Date/Time Display */}
-          {selectedOption === 'schedule' && (
-            <Pressable
-              style={styles.dateTimeDisplay}
-              onPress={() => setShowDatePicker(true)}
-            >
-              <View style={styles.dateTimeContent}>
-                <Text style={styles.dateTimeLabel}>Selected Time</Text>
-                <Text style={styles.dateTimeValue}>
-                  {formatDate(selectedDate)} at {formatTime(selectedDate)}
-                </Text>
-              </View>
-              <Text style={styles.editText}>Edit</Text>
-            </Pressable>
-          )}
-
           {/* Consent Checkbox */}
-          <Animated.View
-            style={[
-              styles.consentSection,
-              {
-                transform: [{ translateY: confirmSlide }],
-                opacity: confirmOpacity,
-              },
-            ]}
-          >
+          <Animated.View style={[styles.consentSection, { opacity: optionsOpacity }]}>
             <Pressable
               style={styles.checkboxRow}
               onPress={() => setConsentChecked(!consentChecked)}
@@ -468,16 +235,8 @@ export default function BookScreen() {
           </Animated.View>
         </ScrollView>
 
-        {/* Confirm Button (Fixed at bottom) */}
-        <Animated.View
-          style={[
-            styles.confirmContainer,
-            {
-              opacity: confirmOpacity,
-              transform: [{ translateY: confirmSlide }],
-            },
-          ]}
-        >
+        {/* Confirm Button */}
+        <Animated.View style={[styles.confirmContainer, { opacity: optionsOpacity }]}>
           <Pressable
             style={[
               styles.confirmButton,
@@ -486,65 +245,12 @@ export default function BookScreen() {
             onPress={handleConfirm}
             disabled={!location.trim() || !consentChecked || isSubmitting}
           >
-            <View style={styles.confirmButtonGradient}>
-              <Text style={styles.confirmButtonText}>
-                {isSubmitting ? 'Submitting...' : 'Confirm Visit'}
-              </Text>
-            </View>
+            <Text style={styles.confirmButtonText}>
+              {isSubmitting ? 'Submitting...' : 'Confirm Visit'}
+            </Text>
           </Pressable>
         </Animated.View>
       </KeyboardAvoidingView>
-
-      {/* Date Picker Modal */}
-      <Modal visible={showDatePicker} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.pickerContainer}>
-            <View style={styles.pickerHeader}>
-              <Pressable onPress={() => setShowDatePicker(false)}>
-                <Text style={styles.pickerCancel}>Cancel</Text>
-              </Pressable>
-              <Text style={styles.pickerTitle}>Select Date</Text>
-              <Pressable onPress={() => setShowDatePicker(false)}>
-                <Text style={styles.pickerDone}>Done</Text>
-              </Pressable>
-            </View>
-            <DateTimePicker
-              value={selectedDate}
-              mode="date"
-              display="spinner"
-              onChange={onDateChange}
-              minimumDate={new Date()}
-              textColor="#FFFFFF"
-              themeVariant="dark"
-            />
-          </View>
-        </View>
-      </Modal>
-
-      {/* Time Picker Modal */}
-      <Modal visible={showTimePicker} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.pickerContainer}>
-            <View style={styles.pickerHeader}>
-              <Pressable onPress={() => setShowTimePicker(false)}>
-                <Text style={styles.pickerCancel}>Cancel</Text>
-              </Pressable>
-              <Text style={styles.pickerTitle}>Select Time</Text>
-              <Pressable onPress={() => setShowTimePicker(false)}>
-                <Text style={styles.pickerDone}>Done</Text>
-              </Pressable>
-            </View>
-            <DateTimePicker
-              value={selectedDate}
-              mode="time"
-              display="spinner"
-              onChange={onTimeChange}
-              textColor="#FFFFFF"
-              themeVariant="dark"
-            />
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }
@@ -552,106 +258,49 @@ export default function BookScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F9F9',
-  },
-  background: {
-    ...StyleSheet.absoluteFillObject,
-    overflow: 'hidden',
-  },
-  orb: {
-    position: 'absolute',
-    borderRadius: 999,
-    opacity: 0.15,
-  },
-  orb1: {
-    width: 300,
-    height: 300,
-    backgroundColor: '#00B09B',
-    top: -100,
-    right: -100,
-  },
-  orb2: {
-    width: 200,
-    height: 200,
-    backgroundColor: '#00D4FF',
-    bottom: 300,
-    left: -80,
-  },
-  orb3: {
-    width: 150,
-    height: 150,
-    backgroundColor: '#00B09B',
-    bottom: -50,
-    right: 100,
-  },
-  animationOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 100,
-  },
-  logoPop: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#00B09B',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#00B09B',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 30,
-  },
-  logoPopText: {
-    fontSize: 60,
-  },
-  submittingText: {
-    marginTop: 24,
-    fontSize: 16,
-    color: '#B3B3B3',
-    fontWeight: '500',
+    backgroundColor: LIGHT_MINT,
   },
   keyboardView: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 140,
+    padding: 24,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 30,
+    justifyContent: 'space-between',
+    marginBottom: 24,
   },
   backButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    width: 40,
+    height: 40,
     justifyContent: 'center',
     alignItems: 'center',
   },
   backText: {
     fontSize: 24,
-    color: '#131B2A',
+    color: NAVY,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#131B2A',
+    color: NAVY,
   },
   placeholder: {
-    width: 44,
+    width: 40,
   },
   selectedDripCard: {
-    borderRadius: 20,
+    marginBottom: 24,
+    borderRadius: 16,
     overflow: 'hidden',
-    marginBottom: 30,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 176, 155, 0.2)',
+    backgroundColor: WHITE,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   dripCardBlur: {
     padding: 20,
@@ -665,74 +314,73 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   dripName: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#131B2A',
+    fontSize: 18,
+    fontWeight: '700',
+    color: NAVY,
     marginBottom: 4,
   },
   dripDescription: {
     fontSize: 14,
-    color: '#B3B3B3',
+    color: TEXT_SECONDARY,
   },
   dripPriceContainer: {
-    backgroundColor: 'rgba(0, 212, 255, 0.2)',
+    backgroundColor: 'rgba(45, 138, 125, 0.1)',
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 12,
+    borderRadius: 20,
   },
   dripPrice: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: '700',
-    color: '#00D4FF',
+    color: TEAL,
   },
   locationSection: {
-    marginBottom: 30,
+    marginBottom: 24,
   },
   sectionLabel: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: '600',
-    color: '#131B2A',
+    color: NAVY,
     marginBottom: 12,
   },
   locationTypeRow: {
     flexDirection: 'row',
-    gap: 12,
+    justifyContent: 'space-between',
     marginBottom: 16,
   },
   locationTypeButton: {
-    flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
     alignItems: 'center',
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: WHITE,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(45, 138, 125, 0.2)',
+    flex: 1,
+    marginHorizontal: 4,
   },
   locationTypeButtonActive: {
-    borderColor: '#00B09B',
-    backgroundColor: 'rgba(0, 176, 155, 0.15)',
+    borderColor: TEAL,
+    backgroundColor: 'rgba(45, 138, 125, 0.05)',
   },
   locationTypeIcon: {
-    fontSize: 20,
+    fontSize: 24,
     marginBottom: 4,
   },
   locationTypeLabel: {
-    fontSize: 11,
-    color: '#B3B3B3',
-    fontWeight: '500',
+    fontSize: 12,
+    color: TEXT_SECONDARY,
   },
   locationTypeLabelActive: {
-    color: '#00B09B',
+    color: TEAL,
     fontWeight: '600',
   },
   locationInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 16,
+    backgroundColor: WHITE,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(0, 176, 155, 0.2)',
+    borderColor: 'rgba(45, 138, 125, 0.2)',
     paddingHorizontal: 16,
   },
   locationIcon: {
@@ -743,108 +391,67 @@ const styles = StyleSheet.create({
   },
   locationInput: {
     flex: 1,
-    height: 56,
+    paddingVertical: 16,
     fontSize: 16,
-    color: '#131B2A',
+    color: NAVY,
   },
   optionsSection: {
-    marginBottom: 30,
+    marginBottom: 24,
   },
   optionsRow: {
     flexDirection: 'row',
-    gap: 16,
+    justifyContent: 'space-between',
   },
   optionCard: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 20,
+    backgroundColor: WHITE,
+    borderRadius: 16,
     padding: 20,
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    marginHorizontal: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(45, 138, 125, 0.2)',
     alignItems: 'center',
   },
   optionCardSelected: {
-    borderColor: '#00B09B',
-    backgroundColor: 'rgba(0, 176, 155, 0.1)',
+    borderColor: TEAL,
+    backgroundColor: 'rgba(45, 138, 125, 0.05)',
   },
   optionIcon: {
     fontSize: 32,
     marginBottom: 8,
   },
   optionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
-    color: '#131B2A',
+    color: NAVY,
     marginBottom: 4,
   },
   optionTitleSelected: {
-    color: '#00B09B',
+    color: TEAL,
   },
   optionSubtitle: {
-    fontSize: 11,
-    color: '#B3B3B3',
+    fontSize: 12,
+    color: TEXT_SECONDARY,
     textAlign: 'center',
-    lineHeight: 14,
-  },
-  etaBadge: {
-    backgroundColor: 'rgba(0, 212, 255, 0.2)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-    marginTop: 8,
-  },
-  etaBadgeText: {
-    fontSize: 11,
-    color: '#00D4FF',
-    fontWeight: '600',
   },
   selectedIndicator: {
     position: 'absolute',
-    top: 12,
-    right: 12,
+    top: 8,
+    right: 8,
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#00B09B',
+    backgroundColor: TEAL,
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkmark: {
-    color: '#F5F9F9',
+    color: WHITE,
     fontSize: 14,
-    fontWeight: '700',
-  },
-  dateTimeDisplay: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 176, 155, 0.1)',
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#00B09B',
-    marginBottom: 30,
-  },
-  dateTimeContent: {
-    flex: 1,
-  },
-  dateTimeLabel: {
-    fontSize: 12,
-    color: '#00B09B',
-    marginBottom: 4,
-  },
-  dateTimeValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#131B2A',
-  },
-  editText: {
-    fontSize: 14,
-    color: '#00B09B',
-    fontWeight: '600',
+    fontWeight: 'bold',
   },
   consentSection: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   checkboxRow: {
     flexDirection: 'row',
@@ -855,94 +462,47 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: '#666',
+    borderColor: 'rgba(45, 138, 125, 0.3)',
     marginRight: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkboxChecked: {
-    borderColor: '#00B09B',
-    backgroundColor: '#00B09B',
+    backgroundColor: TEAL,
+    borderColor: TEAL,
   },
   checkmarkSmall: {
-    color: '#F5F9F9',
+    color: WHITE,
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: 'bold',
   },
   consentText: {
     fontSize: 14,
-    color: '#B3B3B3',
+    color: TEXT_SECONDARY,
     flex: 1,
   },
   consentLink: {
-    color: '#00B09B',
+    color: TEAL,
+    fontWeight: '600',
   },
   confirmContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-    paddingTop: 20,
-    backgroundColor: 'rgba(10, 10, 10, 0.95)',
+    padding: 24,
+    backgroundColor: WHITE,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    borderTopColor: 'rgba(45, 138, 125, 0.1)',
   },
   confirmButton: {
-    borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: '#00B09B',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  confirmButtonDisabled: {
-    opacity: 0.5,
-  },
-  confirmButtonGradient: {
-    backgroundColor: '#00B09B',
+    backgroundColor: TEAL,
+    borderRadius: 12,
     paddingVertical: 18,
     alignItems: 'center',
   },
+  confirmButtonDisabled: {
+    backgroundColor: 'rgba(45, 138, 125, 0.3)',
+  },
   confirmButtonText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#F5F9F9',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'flex-end',
-  },
-  pickerContainer: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingBottom: 40,
-  },
-  pickerHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  pickerTitle: {
+    color: WHITE,
     fontSize: 18,
     fontWeight: '600',
-    color: '#131B2A',
-  },
-  pickerCancel: {
-    fontSize: 16,
-    color: '#B3B3B3',
-  },
-  pickerDone: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#00B09B',
   },
 });
