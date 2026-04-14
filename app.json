@@ -2,16 +2,18 @@
   "expo": {
     "name": "NEOVIV",
     "slug": "neoviv-app",
-    "version": "1.0.0",
+    "version": "2.0.0",
+    "buildNumber": "2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#F5F9F9",
     "scheme": "neoviv",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0A0A0A"
+      "backgroundColor": "#F5F9F9"
     },
     "ios": {
       "supportsTablet": true,
@@ -23,7 +25,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0A0A0A"
+        "backgroundColor": "#F5F9F9"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false

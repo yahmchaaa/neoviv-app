@@ -5,11 +5,11 @@ import { View, StyleSheet } from 'react-native';
 export default function RootLayout() {
   return (
     <View style={styles.container}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: '#0A0A0A' },
+          contentStyle: { backgroundColor: '#F5F9F9' },
           animation: 'fade',
         }}
       />
@@ -20,6 +20,6 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: '#F5F9F9',
   },
 });
