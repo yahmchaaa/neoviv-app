@@ -88,7 +88,7 @@ function ActiveOrderCard({ order }: { order: typeof MOCK_ORDERS[0] }) {
 
   return (
     <View style={styles.activeOrderCard}>
-      <BlurView intensity={20} tint="dark" style={styles.activeOrderBlur}>
+      <BlurView intensity={20} tint="light" style={styles.activeOrderBlur}>
         <View style={styles.activeOrderHeader}>
           <View style={styles.liveIndicator}>
             <Animated.View style={[styles.liveDot, { transform: [{ scale: pulseAnim }] }]} />
@@ -255,7 +255,7 @@ export default function OrdersScreen() {
       </ScrollView>
 
       {/* Bottom Navigation */}
-      <BlurView intensity={20} tint="dark" style={styles.bottomNav}>
+      <BlurView intensity={20} tint="light" style={styles.bottomNav}>
         <View style={styles.navContent}>
           <Pressable style={styles.navItem} onPress={() => router.push('/home')}>
             <View style={styles.navIcon} />
@@ -286,7 +286,7 @@ export default function OrdersScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: '#F5F9F9',
   },
   background: {
     ...StyleSheet.absoluteFillObject,
@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#131B2A',
   },
   profileButton: {
     width: 44,
@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#131B2A',
     marginBottom: 16,
   },
   activeOrderCard: {
@@ -477,7 +477,7 @@ const styles = StyleSheet.create({
   dripName: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#131B2A',
     marginBottom: 4,
   },
   dripPrice: {
@@ -531,7 +531,7 @@ const styles = StyleSheet.create({
   clinicianName: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#131B2A',
   },
   clinicianSubtext: {
     fontSize: 12,
@@ -574,7 +574,7 @@ const styles = StyleSheet.create({
   pastOrderName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#131B2A',
     marginBottom: 4,
   },
   pastOrderDate: {

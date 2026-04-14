@@ -27,7 +27,7 @@ import { router } from 'expo-router';
 const { width, height } = Dimensions.get('window');
 const TEAL = '#00B09B';
 const ELECTRIC_BLUE = '#00D4FF';
-const BLACK = '#0A0A0A';
+const LIGHT_MINT = '#F5F9F9';
 
 const DRIPS = [
   { id: '1', name: 'Hydration Basics', price: 199, desc: 'Essential fluids & electrolytes' },
@@ -180,9 +180,9 @@ export default function HomeScreen() {
         }}
       >
         <View style={[styles.dripCard, isActive && styles.dripCardActive]}>
-          <BlurView intensity={isActive ? 25 : 15} tint="dark" style={styles.dripCardBlur}>
+          <BlurView intensity={isActive ? 25 : 15} tint="light" style={styles.dripCardBlur}>
             <LinearGradient
-              colors={isActive ? [TEAL + '40', ELECTRIC_BLUE + '20'] : ['#1a1a1a', '#1a1a1a']}
+              colors={isActive ? [TEAL + '40', ELECTRIC_BLUE + '20'] : ['#FFFFFF', '#FFFFFF']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.dripGradient}
@@ -274,7 +274,7 @@ export default function HomeScreen() {
               style={styles.bookOption}
               onPress={() => router.push('/book')}
             >
-              <BlurView intensity={20} tint="dark" style={styles.bookOptionBlur}>
+              <BlurView intensity={20} tint="light" style={styles.bookOptionBlur}>
                 <View style={styles.bookOptionContent}>
                   <View style={styles.bookOptionIcon}>
                     <Text style={styles.bookOptionEmoji}>🚨</Text>
@@ -291,7 +291,7 @@ export default function HomeScreen() {
               style={styles.bookOption}
               onPress={() => router.push('/book')}
             >
-              <BlurView intensity={20} tint="dark" style={styles.bookOptionBlur}>
+              <BlurView intensity={20} tint="light" style={styles.bookOptionBlur}>
                 <View style={styles.bookOptionContent}>
                   <View style={styles.bookOptionIcon}>
                     <Text style={styles.bookOptionEmoji}>📅</Text>
@@ -347,7 +347,7 @@ export default function HomeScreen() {
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
-        <BlurView intensity={25} tint="dark" style={styles.bottomNavBlur}>
+        <BlurView intensity={25} tint="light" style={styles.bottomNavBlur}>
           <View style={styles.navItems}>
             {NAV_ITEMS.map((item, index) => (
               <TouchableOpacity
@@ -384,7 +384,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BLACK,
+    backgroundColor: LIGHT_MINT,
   },
   gridContainer: {
     ...StyleSheet.absoluteFillObject,
@@ -458,7 +458,7 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#131B2A',
   },
   profileButton: {
     padding: 4,
@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#131B2A',
     marginBottom: 16,
   },
   bookOptions: {
@@ -520,7 +520,7 @@ const styles = StyleSheet.create({
   bookOptionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#131B2A',
     marginBottom: 4,
   },
   bookOptionSubtitle: {
@@ -576,7 +576,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   dripBadge: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 16,
@@ -607,7 +607,7 @@ const styles = StyleSheet.create({
   dripName: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#131B2A',
     marginBottom: 4,
   },
   dripDesc: {

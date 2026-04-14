@@ -13,7 +13,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 
 const TEAL = '#00B09B';
 const ELECTRIC_BLUE = '#00D4FF';
-const BLACK = '#0A0A0A';
+const LIGHT_MINT = '#F5F9F9';
 
 export default function ConfirmationScreen() {
   const params = useLocalSearchParams();
@@ -85,7 +85,7 @@ export default function ConfirmationScreen() {
 
       {/* Live Tracking Banner */}
       <View style={styles.trackingBanner}>
-        <BlurView intensity={20} tint="dark" style={styles.trackingCard}>
+        <BlurView intensity={20} tint="light" style={styles.trackingCard}>
           <View style={styles.trackingContent}>
             <View style={styles.liveIndicator}>
               <Animated.View style={[styles.liveDot, pulseStyle]} />
@@ -140,7 +140,7 @@ export default function ConfirmationScreen() {
 
       {/* ETA Display */}
       <View style={styles.etaSection}>
-        <BlurView intensity={15} tint="dark" style={styles.etaCard}>
+        <BlurView intensity={15} tint="light" style={styles.etaCard}>
           <LinearGradient
             colors={[TEAL + '30', ELECTRIC_BLUE + '20']}
             start={{ x: 0, y: 0 }}
@@ -164,7 +164,7 @@ export default function ConfirmationScreen() {
 
       {/* Clinician Card */}
       <View style={styles.clinicianSection}>
-        <BlurView intensity={15} tint="dark" style={styles.clinicianCard}>
+        <BlurView intensity={15} tint="light" style={styles.clinicianCard}>
           <View style={styles.clinicianContent}>
             <View style={styles.clinicianAvatar}>
               <Text style={styles.clinicianAvatarText}>👨‍⚕️</Text>
@@ -187,7 +187,7 @@ export default function ConfirmationScreen() {
       {/* Action Buttons */}
       <View style={styles.actionButtons}>
         <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
-          <BlurView intensity={10} tint="dark" style={styles.cancelButtonBlur}>
+          <BlurView intensity={10} tint="light" style={styles.cancelButtonBlur}>
             <Text style={styles.cancelButtonText}>Cancel Visit</Text>
           </BlurView>
         </TouchableOpacity>
@@ -210,7 +210,7 @@ export default function ConfirmationScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BLACK,
+    backgroundColor: LIGHT_MINT,
   },
   header: {
     flexDirection: 'row',
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#131B2A',
   },
   placeholder: {
     width: 44,
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
   trackingTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#131B2A',
     marginBottom: 4,
   },
   trackingSubtitle: {
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   routeContainer: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 20,
   },
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
   pointAddress: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#fff',
+    color: '#131B2A',
     marginTop: 2,
   },
   routeLineContainer: {
@@ -421,7 +421,7 @@ const styles = StyleSheet.create({
   clinicianName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#131B2A',
   },
   clinicianLicense: {
     fontSize: 12,
@@ -490,7 +490,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   doneButtonText: {
-    color: '#fff',
+    color: '#131B2A',
     fontSize: 16,
     fontWeight: 'bold',
   },

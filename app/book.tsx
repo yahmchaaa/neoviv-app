@@ -312,7 +312,7 @@ export default function BookScreen() {
               },
             ]}
           >
-            <BlurView intensity={20} tint="dark" style={styles.dripCardBlur}>
+            <BlurView intensity={20} tint="light" style={styles.dripCardBlur}>
               <View style={styles.dripCardContent}>
                 <View style={styles.dripInfo}>
                   <Text style={styles.dripName}>{dripName}</Text>
@@ -552,7 +552,7 @@ export default function BookScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: '#F5F9F9',
   },
   background: {
     ...StyleSheet.absoluteFillObject,
@@ -636,12 +636,12 @@ const styles = StyleSheet.create({
   },
   backText: {
     fontSize: 24,
-    color: '#FFFFFF',
+    color: '#131B2A',
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#131B2A',
   },
   placeholder: {
     width: 44,
@@ -667,7 +667,7 @@ const styles = StyleSheet.create({
   dripName: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#131B2A',
     marginBottom: 4,
   },
   dripDescription: {
@@ -691,7 +691,7 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#131B2A',
     marginBottom: 12,
   },
   locationTypeRow: {
@@ -745,7 +745,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 56,
     fontSize: 16,
-    color: '#FFFFFF',
+    color: '#131B2A',
   },
   optionsSection: {
     marginBottom: 30,
@@ -774,7 +774,7 @@ const styles = StyleSheet.create({
   optionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#131B2A',
     marginBottom: 4,
   },
   optionTitleSelected: {
@@ -810,7 +810,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   checkmark: {
-    color: '#0A0A0A',
+    color: '#F5F9F9',
     fontSize: 14,
     fontWeight: '700',
   },
@@ -836,7 +836,7 @@ const styles = StyleSheet.create({
   dateTimeValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#131B2A',
   },
   editText: {
     fontSize: 14,
@@ -865,7 +865,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#00B09B',
   },
   checkmarkSmall: {
-    color: '#0A0A0A',
+    color: '#F5F9F9',
     fontSize: 14,
     fontWeight: '700',
   },
@@ -909,7 +909,7 @@ const styles = StyleSheet.create({
   confirmButtonText: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#0A0A0A',
+    color: '#F5F9F9',
   },
   modalOverlay: {
     flex: 1,
@@ -917,7 +917,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   pickerContainer: {
-    backgroundColor: '#1A1A1A',
+    backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingBottom: 40,
@@ -934,7 +934,7 @@ const styles = StyleSheet.create({
   pickerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#131B2A',
   },
   pickerCancel: {
     fontSize: 16,

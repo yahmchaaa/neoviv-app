@@ -24,7 +24,7 @@ import { saveConsents } from '../../src/services/onboarding';
 
 const TEAL = '#00B09B';
 const ELECTRIC_BLUE = '#00D4FF';
-const BLACK = '#0A0A0A';
+const LIGHT_MINT = '#F5F9F9';
 
 // Exact legal wording for HIPAA consent
 const CONSENT_ITEMS = [
@@ -245,7 +245,7 @@ export default function HIPAAConsentScreen() {
             </View>
 
             {/* HIPAA Consent Card */}
-            <BlurView intensity={20} tint="dark" style={styles.glassCard}>
+            <BlurView intensity={20} tint="light" style={styles.glassCard}>
               <View style={styles.cardContent}>
                 <Text style={styles.cardTitle}>HIPAA & Consent</Text>
                 <Text style={styles.subtitle}>
@@ -284,7 +284,7 @@ export default function HIPAAConsentScreen() {
                     activeOpacity={0.8}
                   >
                     <LinearGradient
-                      colors={[TEAL + '20', BLACK]}
+                      colors={[TEAL + '20', LIGHT_MINT]}
                       style={styles.signaturePadGradient}
                     >
                       {hasSignature ? (
@@ -384,7 +384,7 @@ export default function HIPAAConsentScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BLACK,
+    backgroundColor: LIGHT_MINT,
   },
   progressContainer: {
     paddingHorizontal: 24,
@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 4,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFFFFF',
     borderRadius: 2,
     overflow: 'hidden',
   },
@@ -448,7 +448,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#131B2A',
     textAlign: 'center',
     marginBottom: 8,
   },
@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
     borderColor: TEAL,
   },
   checkmark: {
-    color: '#fff',
+    color: '#131B2A',
     fontSize: 14,
     fontWeight: 'bold',
   },
@@ -491,7 +491,7 @@ const styles = StyleSheet.create({
   consentTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#fff',
+    color: '#131B2A',
     marginBottom: 4,
   },
   consentDesc: {
@@ -592,7 +592,7 @@ const styles = StyleSheet.create({
   timestampContainer: {
     marginTop: 16,
     padding: 12,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFFFFF',
     borderRadius: 8,
     alignItems: 'center',
   },
@@ -614,7 +614,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   submitButtonText: {
-    color: '#fff',
+    color: '#131B2A',
     fontSize: 18,
     fontWeight: 'bold',
   },

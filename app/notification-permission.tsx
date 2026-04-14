@@ -16,7 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TEAL = '#00B09B';
 const ELECTRIC_BLUE = '#00D4FF';
-const BLACK = '#0A0A0A';
+const LIGHT_MINT = '#F5F9F9';
 
 const NOTIFICATION_TYPES = [
   { icon: '✅', title: 'Booking Confirmed', desc: 'Get notified when your booking is confirmed' },
@@ -102,7 +102,7 @@ export default function NotificationPermissionScreen() {
         {/* Notification Types */}
         <View style={styles.notificationList}>
           {NOTIFICATION_TYPES.map((item, index) => (
-            <BlurView key={index} intensity={15} tint="dark" style={styles.notificationItem}>
+            <BlurView key={index} intensity={15} tint="light" style={styles.notificationItem}>
               <View style={styles.notificationContent}>
                 <Text style={styles.notificationIcon}>{item.icon}</Text>
                 <View style={styles.notificationText}>
@@ -139,7 +139,7 @@ export default function NotificationPermissionScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BLACK,
+    backgroundColor: LIGHT_MINT,
   },
   orbContainer: {
     ...StyleSheet.absoluteFillObject,
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#131B2A',
     marginBottom: 12,
     textAlign: 'center',
   },
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
   notificationTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#fff',
+    color: '#131B2A',
   },
   notificationDesc: {
     fontSize: 12,
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   enableButtonText: {
-    color: '#fff',
+    color: '#131B2A',
     fontSize: 18,
     fontWeight: 'bold',
   },

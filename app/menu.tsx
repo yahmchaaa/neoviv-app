@@ -273,7 +273,7 @@ export default function MenuScreen() {
       </View>
 
       {/* Bottom Navigation */}
-      <BlurView intensity={20} tint="dark" style={styles.bottomNav}>
+      <BlurView intensity={20} tint="light" style={styles.bottomNav}>
         <View style={styles.navContent}>
           <Pressable style={styles.navItem} onPress={() => router.push('/home')}>
             <View style={styles.navIcon} />
@@ -304,7 +304,7 @@ export default function MenuScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: '#F5F9F9',
   },
   background: {
     ...StyleSheet.absoluteFillObject,
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#131B2A',
   },
   profileButton: {
     width: 44,
@@ -370,7 +370,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#131B2A',
     paddingHorizontal: 20,
   },
   sectionSubtitle: {
@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
   popularText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#0A0A0A',
+    color: '#F5F9F9',
     letterSpacing: 1,
   },
   cardPrice: {
@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
   cardName: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#131B2A',
     marginBottom: 8,
   },
   cardDescription: {
@@ -443,7 +443,7 @@ const styles = StyleSheet.create({
   bookButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#0A0A0A',
+    color: '#F5F9F9',
   },
   dotContainer: {
     flexDirection: 'row',
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
   menuCardName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#131B2A',
     marginBottom: 4,
   },
   menuCardDescription: {

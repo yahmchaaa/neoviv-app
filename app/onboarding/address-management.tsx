@@ -25,7 +25,7 @@ import { saveAddress, getUserAddresses, deleteAddress } from '../../src/services
 
 const TEAL = '#00B09B';
 const ELECTRIC_BLUE = '#00D4FF';
-const BLACK = '#0A0A0A';
+const LIGHT_MINT = '#F5F9F9';
 
 const LOCATION_TYPES = [
   { value: 'home', label: 'Home', icon: '🏠' },
@@ -263,7 +263,7 @@ export default function AddressManagementScreen() {
             </View>
 
             {/* Address List */}
-            <BlurView intensity={20} tint="dark" style={styles.glassCard}>
+            <BlurView intensity={20} tint="light" style={styles.glassCard}>
               <View style={styles.cardContent}>
                 <Text style={styles.cardTitle}>Service Address</Text>
                 <Text style={styles.subtitle}>
@@ -274,7 +274,7 @@ export default function AddressManagementScreen() {
                 {addresses.length > 0 && (
                   <View style={styles.addressList}>
                     {addresses.map((addr) => (
-                      <BlurView key={addr.id} intensity={15} tint="dark" style={styles.addressItem}>
+                      <BlurView key={addr.id} intensity={15} tint="light" style={styles.addressItem}>
                         <TouchableOpacity style={styles.addressContent} onPress={() => handleDeleteAddress(addr.id)}>
                           <Text style={styles.addressIcon}>{getLocationIcon(addr.location_type)}</Text>
                           <View style={styles.addressText}>
@@ -443,7 +443,7 @@ export default function AddressManagementScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BLACK,
+    backgroundColor: LIGHT_MINT,
   },
   progressContainer: {
     paddingHorizontal: 24,
@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 4,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFFFFF',
     borderRadius: 2,
     overflow: 'hidden',
   },
@@ -507,7 +507,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#131B2A',
     textAlign: 'center',
     marginBottom: 8,
   },
@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
   addressType: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#fff',
+    color: '#131B2A',
   },
   addressLine: {
     fontSize: 13,
@@ -572,7 +572,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   addForm: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
     marginBottom: 20,
@@ -580,7 +580,7 @@ const styles = StyleSheet.create({
   formTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#fff',
+    color: '#131B2A',
     marginBottom: 16,
     textAlign: 'center',
   },
@@ -631,7 +631,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     fontSize: 15,
-    color: '#fff',
+    color: '#131B2A',
     borderWidth: 1,
     borderColor: TEAL + '20',
   },
@@ -645,7 +645,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 8,
     borderRadius: 10,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFFFFF',
   },
   cancelButtonText: {
     color: '#888',
@@ -662,7 +662,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   saveButtonText: {
-    color: '#fff',
+    color: '#131B2A',
     fontSize: 15,
     fontWeight: 'bold',
   },
@@ -676,7 +676,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   submitButtonText: {
-    color: '#fff',
+    color: '#131B2A',
     fontSize: 18,
     fontWeight: 'bold',
   },

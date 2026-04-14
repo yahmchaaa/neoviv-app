@@ -7,7 +7,7 @@ import { signOut } from '../src/services/auth';
 
 const TEAL = '#00B09B';
 const ELECTRIC_BLUE = '#00D4FF';
-const BLACK = '#0A0A0A';
+const LIGHT_MINT = '#F5F9F9';
 
 const NAV_ITEMS = [
   { icon: '🏠', label: 'Home', route: '/home' },
@@ -36,7 +36,7 @@ export default function AccountScreen() {
         </View>
 
         <View style={styles.profileSection}>
-          <BlurView intensity={15} tint="dark" style={styles.profileCard}>
+          <BlurView intensity={15} tint="light" style={styles.profileCard}>
             <View style={styles.profileContent}>
               <View style={styles.avatar}>
                 <Text style={styles.avatarText}>👤</Text>
@@ -51,7 +51,7 @@ export default function AccountScreen() {
 
         <View style={styles.menuSection}>
           <TouchableOpacity style={styles.menuItem}>
-            <BlurView intensity={10} tint="dark" style={styles.menuItemBlur}>
+            <BlurView intensity={10} tint="light" style={styles.menuItemBlur}>
               <View style={styles.menuItemContent}>
                 <Text style={styles.menuItemIcon}>⚙️</Text>
                 <Text style={styles.menuItemText}>Settings</Text>
@@ -60,7 +60,7 @@ export default function AccountScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.menuItem}>
-            <BlurView intensity={10} tint="dark" style={styles.menuItemBlur}>
+            <BlurView intensity={10} tint="light" style={styles.menuItemBlur}>
               <View style={styles.menuItemContent}>
                 <Text style={styles.menuItemIcon}>📍</Text>
                 <Text style={styles.menuItemText}>Addresses</Text>
@@ -69,7 +69,7 @@ export default function AccountScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.menuItem}>
-            <BlurView intensity={10} tint="dark" style={styles.menuItemBlur}>
+            <BlurView intensity={10} tint="light" style={styles.menuItemBlur}>
               <View style={styles.menuItemContent}>
                 <Text style={styles.menuItemIcon}>💳</Text>
                 <Text style={styles.menuItemText}>Payment Methods</Text>
@@ -78,7 +78,7 @@ export default function AccountScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.menuItem}>
-            <BlurView intensity={10} tint="dark" style={styles.menuItemBlur}>
+            <BlurView intensity={10} tint="light" style={styles.menuItemBlur}>
               <View style={styles.menuItemContent}>
                 <Text style={styles.menuItemIcon}>🔔</Text>
                 <Text style={styles.menuItemText}>Notifications</Text>
@@ -87,7 +87,7 @@ export default function AccountScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.menuItem}>
-            <BlurView intensity={10} tint="dark" style={styles.menuItemBlur}>
+            <BlurView intensity={10} tint="light" style={styles.menuItemBlur}>
               <View style={styles.menuItemContent}>
                 <Text style={styles.menuItemIcon}>❓</Text>
                 <Text style={styles.menuItemText}>Help & Support</Text>
@@ -96,7 +96,7 @@ export default function AccountScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.menuItem} onPress={handleSignOut}>
-            <BlurView intensity={10} tint="dark" style={styles.menuItemBlur}>
+            <BlurView intensity={10} tint="light" style={styles.menuItemBlur}>
               <View style={styles.menuItemContent}>
                 <Text style={[styles.menuItemIcon, { color: '#FF6B6B' }]}>🚪</Text>
                 <Text style={[styles.menuItemText, { color: '#FF6B6B' }]}>Sign Out</Text>
@@ -109,7 +109,7 @@ export default function AccountScreen() {
       </ScrollView>
 
       <View style={styles.bottomNav}>
-        <BlurView intensity={20} tint="dark" style={styles.bottomNavBlur}>
+        <BlurView intensity={20} tint="light" style={styles.bottomNavBlur}>
           <View style={styles.navItems}>
             {NAV_ITEMS.map((item, index) => (
               <TouchableOpacity
@@ -140,7 +140,7 @@ export default function AccountScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BLACK,
+    backgroundColor: LIGHT_MINT,
   },
   scrollView: {
     flex: 1,
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#131B2A',
   },
   subtitle: {
     fontSize: 14,
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#131B2A',
   },
   profileEmail: {
     fontSize: 14,
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     fontSize: 16,
-    color: '#fff',
+    color: '#131B2A',
   },
   bottomNav: {
     position: 'absolute',

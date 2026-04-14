@@ -26,7 +26,7 @@ import { updatePersonalInfo } from '../../src/services/onboarding';
 
 const TEAL = '#00B09B';
 const ELECTRIC_BLUE = '#00D4FF';
-const BLACK = '#0A0A0A';
+const LIGHT_MINT = '#F5F9F9';
 
 export default function PersonalInfoScreen() {
   const [fullName, setFullName] = useState('');
@@ -207,7 +207,7 @@ export default function PersonalInfoScreen() {
             </View>
 
             {/* Frosted Glass Card */}
-            <BlurView intensity={20} tint="dark" style={styles.glassCard}>
+            <BlurView intensity={20} tint="light" style={styles.glassCard}>
               <View style={styles.cardContent}>
                 <Text style={styles.cardTitle}>Personal Information</Text>
                 <Text style={styles.subtitle}>
@@ -402,7 +402,7 @@ export default function PersonalInfoScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BLACK,
+    backgroundColor: LIGHT_MINT,
   },
   progressContainer: {
     paddingHorizontal: 24,
@@ -411,7 +411,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 4,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFFFFF',
     borderRadius: 2,
     overflow: 'hidden',
   },
@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#131B2A',
     textAlign: 'center',
     marginBottom: 8,
   },
@@ -488,16 +488,16 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   input: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 14,
     fontSize: 16,
-    color: '#fff',
+    color: '#131B2A',
     borderWidth: 1,
     borderColor: TEAL + '20',
   },
   dateInput: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 14,
     borderWidth: 1,
@@ -505,7 +505,7 @@ const styles = StyleSheet.create({
   },
   dateInputText: {
     fontSize: 16,
-    color: '#fff',
+    color: '#131B2A',
   },
   dateInputPlaceholder: {
     color: '#666',
@@ -521,7 +521,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   submitButtonText: {
-    color: '#fff',
+    color: '#131B2A',
     fontSize: 18,
     fontWeight: 'bold',
   },
@@ -562,7 +562,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
@@ -571,7 +571,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#131B2A',
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -640,7 +640,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalConfirmButtonText: {
-    color: '#fff',
+    color: '#131B2A',
     fontSize: 16,
     fontWeight: 'bold',
   },

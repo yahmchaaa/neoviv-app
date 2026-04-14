@@ -195,7 +195,7 @@ export default function WellnessScreen() {
       >
         {/* Hero Section */}
         <View style={styles.heroSection}>
-          <BlurView intensity={20} tint="dark" style={styles.heroCard}>
+          <BlurView intensity={20} tint="light" style={styles.heroCard}>
             <View style={styles.heroContent}>
               <Text style={styles.heroTitle}>Optimize Your Wellness</Text>
               <Text style={styles.heroSubtitle}>
@@ -225,7 +225,7 @@ export default function WellnessScreen() {
       </ScrollView>
 
       {/* Bottom Navigation */}
-      <BlurView intensity={20} tint="dark" style={styles.bottomNav}>
+      <BlurView intensity={20} tint="light" style={styles.bottomNav}>
         <View style={styles.navContent}>
           <Pressable style={styles.navItem} onPress={() => router.push('/home')}>
             <View style={styles.navIcon} />
@@ -256,7 +256,7 @@ export default function WellnessScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: '#F5F9F9',
   },
   background: {
     ...StyleSheet.absoluteFillObject,
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#131B2A',
   },
   profileButton: {
     width: 44,
@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#131B2A',
     marginBottom: 8,
   },
   heroSubtitle: {
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#131B2A',
     marginBottom: 4,
   },
   sectionSubtitle: {
@@ -422,7 +422,7 @@ const styles = StyleSheet.create({
   popularText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#0A0A0A',
+    color: '#F5F9F9',
     letterSpacing: 0.5,
   },
   wellnessCardContent: {
@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
   wellnessName: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#131B2A',
     marginBottom: 4,
   },
   wellnessDescription: {

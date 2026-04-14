@@ -24,7 +24,7 @@ import { signUp } from '../src/services/auth';
 
 const TEAL = '#00B09B';
 const ELECTRIC_BLUE = '#00D4FF';
-const BLACK = '#0A0A0A';
+const LIGHT_MINT = '#F5F9F9';
 
 export default function CreateAccountScreen() {
   const [email, setEmail] = useState('');
@@ -180,7 +180,7 @@ export default function CreateAccountScreen() {
           </View>
 
           {/* Frosted Glass Card */}
-          <BlurView intensity={20} tint="dark" style={styles.glassCard}>
+          <BlurView intensity={20} tint="light" style={styles.glassCard}>
             <View style={styles.cardContent}>
               <Text style={styles.cardTitle}>Create Account</Text>
 
@@ -251,7 +251,7 @@ export default function CreateAccountScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BLACK,
+    backgroundColor: LIGHT_MINT,
   },
   keyboardView: {
     flex: 1,
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#131B2A',
     textAlign: 'center',
     marginBottom: 32,
   },
@@ -306,11 +306,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   input: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
-    color: '#fff',
+    color: '#131B2A',
     borderWidth: 1,
     borderColor: TEAL + '20',
   },
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   submitButtonText: {
-    color: '#fff',
+    color: '#131B2A',
     fontSize: 18,
     fontWeight: 'bold',
   },

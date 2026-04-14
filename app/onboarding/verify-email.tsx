@@ -24,7 +24,7 @@ import { verifyOTP, resendOTP } from '../../src/services/auth';
 
 const TEAL = '#00B09B';
 const ELECTRIC_BLUE = '#00D4FF';
-const BLACK = '#0A0A0A';
+const LIGHT_MINT = '#F5F9F9';
 
 export default function VerifyEmailScreen() {
   const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
@@ -222,7 +222,7 @@ export default function VerifyEmailScreen() {
           </View>
 
           {/* Frosted Glass Card */}
-          <BlurView intensity={20} tint="dark" style={styles.glassCard}>
+          <BlurView intensity={20} tint="light" style={styles.glassCard}>
             <View style={styles.cardContent}>
               <Text style={styles.cardTitle}>Email Verification</Text>
               <Text style={styles.subtitle}>
@@ -282,7 +282,7 @@ export default function VerifyEmailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BLACK,
+    backgroundColor: LIGHT_MINT,
   },
   progressContainer: {
     paddingHorizontal: 24,
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 4,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFFFFF',
     borderRadius: 2,
     overflow: 'hidden',
   },
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#131B2A',
     textAlign: 'center',
     marginBottom: 12,
   },
@@ -364,13 +364,13 @@ const styles = StyleSheet.create({
   otpInput: {
     width: 48,
     height: 56,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: 2,
     borderColor: TEAL + '30',
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#131B2A',
   },
   otpInputFilled: {
     borderColor: TEAL,
@@ -386,7 +386,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   submitButtonText: {
-    color: '#fff',
+    color: '#131B2A',
     fontSize: 18,
     fontWeight: 'bold',
   },

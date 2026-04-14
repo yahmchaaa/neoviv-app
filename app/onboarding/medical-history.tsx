@@ -25,7 +25,7 @@ import { saveMedicalHistory } from '../../src/services/onboarding';
 
 const TEAL = '#00B09B';
 const ELECTRIC_BLUE = '#00D4FF';
-const BLACK = '#0A0A0A';
+const LIGHT_MINT = '#F5F9F9';
 
 // 14 screening items from NEOVIV RN intake form
 const SCREENING_ITEMS = [
@@ -250,7 +250,7 @@ export default function MedicalHistoryScreen() {
             </View>
 
             {/* Medical History Card */}
-            <BlurView intensity={20} tint="dark" style={styles.glassCard}>
+            <BlurView intensity={20} tint="light" style={styles.glassCard}>
               <View style={styles.cardContent}>
                 <Text style={styles.cardTitle}>Health Screening</Text>
                 <Text style={styles.subtitle}>
@@ -380,7 +380,7 @@ export default function MedicalHistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BLACK,
+    backgroundColor: LIGHT_MINT,
   },
   progressContainer: {
     paddingHorizontal: 24,
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 4,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFFFFF',
     borderRadius: 2,
     overflow: 'hidden',
   },
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#131B2A',
     textAlign: 'center',
     marginBottom: 8,
   },
@@ -474,7 +474,7 @@ const styles = StyleSheet.create({
   screeningLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#fff',
+    color: '#131B2A',
   },
   warningBadge: {
     fontSize: 10,
@@ -498,11 +498,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   toggleNo: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFFFFF',
     borderColor: '#333',
   },
   toggleYes: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFFFFF',
     borderColor: '#333',
   },
   toggleActive: {
@@ -521,7 +521,7 @@ const styles = StyleSheet.create({
   toggleTextNo: {},
   toggleTextYes: {},
   toggleTextActive: {
-    color: '#fff',
+    color: '#131B2A',
   },
   textInputItem: {
     paddingVertical: 14,
@@ -532,7 +532,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   textArea: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFFFFF',
     borderRadius: 10,
     padding: 12,
     borderWidth: 1,
@@ -554,7 +554,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   submitButtonText: {
-    color: '#fff',
+    color: '#131B2A',
     fontSize: 18,
     fontWeight: 'bold',
   },
@@ -597,7 +597,7 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   modalContent: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFFFFF',
     borderRadius: 24,
     padding: 32,
     width: '100%',
@@ -624,7 +624,7 @@ const styles = StyleSheet.create({
   warningTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#131B2A',
     marginBottom: 16,
     textAlign: 'center',
   },
@@ -645,7 +645,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   warningButtonText: {
-    color: '#fff',
+    color: '#131B2A',
     fontSize: 16,
     fontWeight: 'bold',
   },
