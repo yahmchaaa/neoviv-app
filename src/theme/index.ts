@@ -12,10 +12,11 @@ export const COLORS = {
   muted: '#6B7280',            // Muted gray for secondary text
   
   // Brand colors
-  teal: '#2D8A7D',            // Solid teal - primary accent (matching website exactly)
+  teal: '#00B09B',            // Solid teal - primary accent (matching website exactly)
   tealLight: '#E8F4F2',       // Light teal for subtle backgrounds
   tealBorder: '#C8E0DA',      // Light teal for borders
-  
+  electricBlue: '#00D4FF',    // Electric blue accent
+
   // No more dark/electric colors
   white: '#FFFFFF',
   black: '#131B2A',
@@ -37,11 +38,11 @@ export const SHADOWS = {
     elevation: 3,
   },
   button: {
-    shadowColor: '#2D8A7D',
+    shadowColor: '#00B09B',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
 };
 

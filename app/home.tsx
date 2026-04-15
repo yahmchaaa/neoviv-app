@@ -5,10 +5,12 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Pressable,
   Dimensions,
   FlatList,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { COLORS, SHADOWS, RADII, SPACING } from '../src/theme';
 
@@ -123,6 +125,25 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Hero Section */}
+        <View style={styles.heroSection}>
+          <Text style={styles.heroHeadline}>Drops of Life</Text>
+          <Text style={styles.heroSubline}>Premium IV therapy. Delivered to you.</Text>
+          <Pressable
+            style={styles.heroButton}
+            onPress={() => router.push('/book')}
+          >
+            <LinearGradient
+              colors={[COLORS.teal, COLORS.electricBlue]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.heroButtonGradient}
+            >
+              <Text style={styles.heroButtonText}>Book Your Drop</Text>
+            </LinearGradient>
+          </Pressable>
+        </View>
+
         {/* Social Proof */}
         <View style={styles.socialProof}>
           <Text style={styles.socialProofText}>{WEBSITE_STATS.members} Members</Text>
@@ -130,21 +151,6 @@ export default function HomeScreen() {
           <Text style={styles.socialProofText}>{WEBSITE_STATS.sameDay}</Text>
           <Text style={styles.socialDot}>·</Text>
           <Text style={styles.socialProofText}>{WEBSITE_STATS.nurses}</Text>
-        </View>
-
-        {/* Hero Copy */}
-        <View style={styles.heroCopy}>
-          <Text style={styles.heroCopyText}>{HERO_COPY}</Text>
-        </View>
-
-        {/* Book a Visit */}
-        <View style={styles.bookSection}>
-          <TouchableOpacity 
-            style={styles.bookButton}
-            onPress={() => router.push('/book')}
-          >
-            <Text style={styles.bookButtonText}>Book a Visit</Text>
-          </TouchableOpacity>
         </View>
 
         {/* Choose Your Drip Section */}
@@ -244,6 +250,42 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 100,
+  },
+  heroSection: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.xl,
+    paddingBottom: SPACING.xl,
+    backgroundColor: COLORS.white,
+    alignItems: 'center',
+  },
+  heroHeadline: {
+    fontSize: 44,
+    fontWeight: 'bold',
+    color: COLORS.heading,
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  heroSubline: {
+    fontSize: 18,
+    color: COLORS.muted,
+    textAlign: 'center',
+    marginBottom: 32,
+  },
+  heroButton: {
+    borderRadius: RADII.xl,
+    overflow: 'hidden',
+    ...SHADOWS.button,
+  },
+  heroButtonGradient: {
+    paddingVertical: 20,
+    paddingHorizontal: 48,
+    alignItems: 'center',
+    borderRadius: RADII.xl,
+  },
+  heroButtonText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: COLORS.white,
   },
   header: {
     flexDirection: 'row',
