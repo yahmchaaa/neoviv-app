@@ -1,5 +1,4 @@
 import { supabase } from '../lib/supabase';
-import { router } from 'expo-router';
 
 // Types for onboarding
 export interface PersonalInfo {
@@ -422,31 +421,4 @@ async function createAuditLog(
   }
 }
 
-// Navigate to next onboarding step
-export function navigateToNextStep(currentStep: number) {
-  switch (currentStep) {
-    case 1:
-      router.replace('/onboarding/verify-email');
-      break;
-    case 2:
-      router.replace('/onboarding/personal-info');
-      break;
-    case 3:
-      router.replace('/onboarding/address-management');
-      break;
-    case 4:
-      router.replace('/onboarding/medical-history');
-      break;
-    case 5:
-      router.replace('/onboarding/hipaa-consent');
-      break;
-    case 6:
-      router.replace('/onboarding/notification-permission');
-      break;
-    case 7:
-      router.replace('/home');
-      break;
-    default:
-      router.replace('/home');
-  }
-}
+
