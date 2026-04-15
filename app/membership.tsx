@@ -69,7 +69,7 @@ export default function MembershipScreen() {
 
   const handleJoin = (tierId: string) => {
     router.push({
-      pathname: '/register',
+      pathname: '/login',
       params: { tier: tierId },
     });
   };
