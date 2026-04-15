@@ -10,9 +10,11 @@ import {
   ScrollView,
   Platform,
   KeyboardAvoidingView,
+  Alert,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { BlurView } from 'expo-blur';
+import { StripePayment } from '../src/components/StripePayment';
 
 const LIGHT_MINT = '#F5F9F9';
 const TEAL = '#2D8A7D';
@@ -51,6 +53,7 @@ export default function BookScreen() {
   const [locationType, setLocationType] = useState('home');
   const [consentChecked, setConsentChecked] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
 
   // Get drip data from params
   const dripId = params.id as string || '1';
@@ -89,17 +92,40 @@ export default function BookScreen() {
     }
     setIsSubmitting(true);
     
+    // Simulate validation before showing payment
     setTimeout(() => {
       setIsSubmitting(false);
-      router.push({
-        pathname: '/confirmation',
-        params: {
-          type: selectedOption,
-          location: location,
-          dripName: dripName,
-        },
-      });
-    }, 1500);
+      setShowPayment(true);
+    }, 500);
+  };
+
+  const handlePaymentSuccess = (paymentIntentId: string) => {
+    console.log('Payment successful:', paymentIntentId);
+    // Prepare parameters for confirmation screen
+    const eta = selectedOption === 'now' ? 60 : undefined;
+    const date = selectedOption === 'schedule' ? new Date().toLocaleDateString() : undefined;
+    const time = selectedOption === 'schedule' ? '2:00 PM' : undefined;
+    // Navigate to confirmation screen with booking details
+    router.push({
+      pathname: '/confirmation',
+      params: {
+        type: selectedOption,
+        location: location,
+        dripName: dripName,
+        ...(eta && { eta: eta.toString() }),
+        ...(date && { date }),
+        ...(time && { time }),
+      },
+    });
+  };
+
+  const handlePaymentError = (error: string) => {
+    Alert.alert('Payment Error', error);
+    // Optionally allow retry or go back
+  };
+
+  const cancelPayment = () => {
+    setShowPayment(false);
   };
 
   return (
@@ -176,6 +202,7 @@ export default function BookScreen() {
                 placeholderTextColor="#999"
                 value={location}
                 onChangeText={setLocation}
+                editable={!showPayment}
               />
             </View>
           </Animated.View>
@@ -191,7 +218,8 @@ export default function BookScreen() {
                     styles.optionCard,
                     selectedOption === option.id && styles.optionCardSelected,
                   ]}
-                  onPress={() => setSelectedOption(option.id as 'now' | 'schedule')}
+                  onPress={() => !showPayment && setSelectedOption(option.id as 'now' | 'schedule')}
+                  disabled={showPayment}
                 >
                   <Text style={styles.optionIcon}>{option.icon}</Text>
                   <Text
@@ -217,7 +245,8 @@ export default function BookScreen() {
           <Animated.View style={[styles.consentSection, { opacity: optionsOpacity }]}>
             <Pressable
               style={styles.checkboxRow}
-              onPress={() => setConsentChecked(!consentChecked)}
+              onPress={() => !showPayment && setConsentChecked(!consentChecked)}
+              disabled={showPayment}
             >
               <View
                 style={[
@@ -233,23 +262,44 @@ export default function BookScreen() {
               </Text>
             </Pressable>
           </Animated.View>
+
+          {/* Payment Section */}
+          {showPayment && (
+            <Animated.View style={[styles.paymentSection, { opacity: optionsOpacity }]}>
+              <Text style={styles.sectionLabel}>Secure Payment</Text>
+              <View style={styles.paymentContainer}>
+                <StripePayment
+                  amount={dripPrice}
+                  currency="usd"
+                  buttonText={`Pay $${dripPrice}`}
+                  onSuccess={handlePaymentSuccess}
+                  onError={handlePaymentError}
+                />
+                <Pressable style={styles.cancelPaymentButton} onPress={cancelPayment}>
+                  <Text style={styles.cancelPaymentText}>Cancel Payment</Text>
+                </Pressable>
+              </View>
+            </Animated.View>
+          )}
         </ScrollView>
 
-        {/* Confirm Button */}
-        <Animated.View style={[styles.confirmContainer, { opacity: optionsOpacity }]}>
-          <Pressable
-            style={[
-              styles.confirmButton,
-              (!location.trim() || !consentChecked || isSubmitting) && styles.confirmButtonDisabled,
-            ]}
-            onPress={handleConfirm}
-            disabled={!location.trim() || !consentChecked || isSubmitting}
-          >
-            <Text style={styles.confirmButtonText}>
-              {isSubmitting ? 'Submitting...' : 'Confirm Visit'}
-            </Text>
-          </Pressable>
-        </Animated.View>
+        {/* Confirm Button (only when not showing payment) */}
+        {!showPayment && (
+          <Animated.View style={[styles.confirmContainer, { opacity: optionsOpacity }]}>
+            <Pressable
+              style={[
+                styles.confirmButton,
+                (!location.trim() || !consentChecked || isSubmitting) && styles.confirmButtonDisabled,
+              ]}
+              onPress={handleConfirm}
+              disabled={!location.trim() || !consentChecked || isSubmitting}
+            >
+              <Text style={styles.confirmButtonText}>
+                {isSubmitting ? 'Submitting...' : 'Confirm Visit'}
+              </Text>
+            </Pressable>
+          </Animated.View>
+        )}
       </KeyboardAvoidingView>
     </View>
   );
@@ -483,6 +533,29 @@ const styles = StyleSheet.create({
   },
   consentLink: {
     color: TEAL,
+    fontWeight: '600',
+  },
+  paymentSection: {
+    marginBottom: 24,
+  },
+  paymentContainer: {
+    backgroundColor: WHITE,
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(45, 138, 125, 0.2)',
+  },
+  cancelPaymentButton: {
+    marginTop: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+  },
+  cancelPaymentText: {
+    color: '#FF6B6B',
+    fontSize: 16,
     fontWeight: '600',
   },
   confirmContainer: {

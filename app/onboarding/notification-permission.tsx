@@ -81,9 +81,9 @@ export default function NotificationPermissionScreen() {
         projectId: 'your-project-id', // Replace with actual project ID
       });
 
-      if (tokenData?.token) {
+      if (tokenData) {
         // Save push token to Supabase
-        await savePushToken(tokenData.token, Platform.OS);
+        await savePushToken(tokenData, Platform.OS);
       }
 
       // Mark notification permission as shown and complete onboarding

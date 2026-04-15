@@ -53,7 +53,7 @@ export const verifyOTP = async (code: string): Promise<{ success: boolean; error
   // Supabase Auth uses email OTP - the user receives a code via email
   const { data, error } = await supabase.auth.verifyOtp({
     email: (await getCurrentUser())?.email || '',
-    code,
+    token: code,
     type: 'email',
   });
 
